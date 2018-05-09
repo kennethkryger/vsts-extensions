@@ -2,11 +2,11 @@ import { WorkItemTemplateActionsHub } from "Library/Flux/Actions/ActionsHub";
 import { BaseStore } from "Library/Flux/Stores/BaseStore";
 import { WorkItemTemplateReference } from "TFS/WorkItemTracking/Contracts";
 
-export class WorkItemTemplateStore extends BaseStore<IDictionaryStringTo<WorkItemTemplateReference[]>, WorkItemTemplateReference[], string> {
+export class WorkItemTemplateStore extends BaseStore<IDictionaryStringTo<WorkItemTemplateReference[]>, WorkItemTemplateReference[], string, WorkItemTemplateActionsHub> {
     private _itemsIdMap: IDictionaryStringTo<WorkItemTemplateReference>;
 
-    constructor() {
-        super();
+    constructor(actionsHub: WorkItemTemplateActionsHub) {
+        super(actionsHub);
         this.items = {};
         this._itemsIdMap = {};
     }
@@ -26,7 +26,7 @@ export class WorkItemTemplateStore extends BaseStore<IDictionaryStringTo<WorkIte
     }
 
     protected initializeActionListeners() {
-        WorkItemTemplateActionsHub.InitializeWorkItemTemplates.addListener((data: {teamId: string, templates: WorkItemTemplateReference[]}) => {
+        this.actionsHub.InitializeWorkItemTemplates.addListener((data: {teamId: string, templates: WorkItemTemplateReference[]}) => {
             if (data && data.teamId && data.templates) {
                 this.items[data.teamId.toLowerCase()] = data.templates;
 

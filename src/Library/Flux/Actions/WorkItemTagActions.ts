@@ -1,33 +1,32 @@
 import { WorkItemTagActionsHub } from "Library/Flux/Actions/ActionsHub";
-import { StoreFactory } from "Library/Flux/Stores/BaseStore";
 import { WorkItemTagStore } from "Library/Flux/Stores/WorkItemTagStore";
 import { localeIgnoreCaseComparer } from "Library/Utilities/String";
 import { WebApiTagDefinition } from "TFS/Core/Contracts";
 import * as Auth from "VSS/Authentication/Services";
 
-export namespace WorkItemTagActions {
-    const tagsStore: WorkItemTagStore = StoreFactory.getInstance<WorkItemTagStore>(WorkItemTagStore);
+export class WorkItemTagActions {
+    constructor(private _actionsHub: WorkItemTagActionsHub, private _tagsStore: WorkItemTagStore) {}
 
-    export async function initializeTags() {
-        if (tagsStore.isLoaded()) {
-            WorkItemTagActionsHub.InitializeTags.invoke(null);
+    public async initializeTags() {
+        if (this._tagsStore.isLoaded()) {
+            this._actionsHub.InitializeTags.invoke(null);
         }
-        else if (!tagsStore.isLoading()) {
-            tagsStore.setLoading(true);
+        else if (!this._tagsStore.isLoading()) {
+            this._tagsStore.setLoading(true);
             try {
-                const tags = await getTags();
+                const tags = await this._getTags();
                 tags.sort((a: WebApiTagDefinition, b: WebApiTagDefinition) => localeIgnoreCaseComparer(a.name, b.name));
-                WorkItemTagActionsHub.InitializeTags.invoke(tags);
-                tagsStore.setLoading(false);
+                this._actionsHub.InitializeTags.invoke(tags);
+                this._tagsStore.setLoading(false);
             }
             catch (e) {
-                WorkItemTagActionsHub.InitializeTags.invoke([]);
-                tagsStore.setLoading(false);
+                this._actionsHub.InitializeTags.invoke([]);
+                this._tagsStore.setLoading(false);
             }
         }
     }
 
-    async function getTags(): Promise<WebApiTagDefinition[]> {
+    private async _getTags(): Promise<WebApiTagDefinition[]> {
         const webContext = VSS.getWebContext();
         const accessToken = await VSS.getAccessToken();
         const authHeader = Auth.authTokenManager.getAuthorizationHeader(accessToken);

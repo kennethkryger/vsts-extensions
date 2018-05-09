@@ -2,12 +2,12 @@ import { WorkItemRelationTypeActionsHub } from "Library/Flux/Actions/ActionsHub"
 import { BaseStore } from "Library/Flux/Stores/BaseStore";
 import { WorkItemRelationType } from "TFS/WorkItemTracking/Contracts";
 
-export class WorkItemRelationTypeStore extends BaseStore<WorkItemRelationType[], WorkItemRelationType, string> {
+export class WorkItemRelationTypeStore extends BaseStore<WorkItemRelationType[], WorkItemRelationType, string, WorkItemRelationTypeActionsHub> {
     private _itemsRefNameMap: IDictionaryStringTo<WorkItemRelationType>;
     private _itemsNameMap: IDictionaryStringTo<WorkItemRelationType>;
 
-    constructor() {
-        super();
+    constructor(actionsHub: WorkItemRelationTypeActionsHub) {
+        super(actionsHub);
         this._itemsRefNameMap = {};
         this._itemsNameMap = {};
     }
@@ -22,7 +22,7 @@ export class WorkItemRelationTypeStore extends BaseStore<WorkItemRelationType[],
     }
 
     protected initializeActionListeners() {
-        WorkItemRelationTypeActionsHub.InitializeWorkItemRelationTypes.addListener((workItemRelationTypes: WorkItemRelationType[]) => {
+        this.actionsHub.InitializeWorkItemRelationTypes.addListener((workItemRelationTypes: WorkItemRelationType[]) => {
             if (workItemRelationTypes) {
                 this.items = workItemRelationTypes;
                 this._itemsRefNameMap = {};

@@ -2,9 +2,9 @@ import { WorkItemActionsHub } from "Library/Flux/Actions/ActionsHub";
 import { BaseStore } from "Library/Flux/Stores/BaseStore";
 import { WorkItem } from "TFS/WorkItemTracking/Contracts";
 
-export class WorkItemStore extends BaseStore<IDictionaryNumberTo<WorkItem>, WorkItem, number> {
-    constructor() {
-        super();
+export class WorkItemStore extends BaseStore<IDictionaryNumberTo<WorkItem>, WorkItem, number, WorkItemActionsHub> {
+    constructor(actionsHub: WorkItemActionsHub) {
+        super(actionsHub);
         this.items = {};
     }
 
@@ -32,7 +32,7 @@ export class WorkItemStore extends BaseStore<IDictionaryNumberTo<WorkItem>, Work
     }
 
     protected initializeActionListeners() {
-        WorkItemActionsHub.AddOrUpdateWorkItems.addListener((workItems: WorkItem[]) => {
+        this.actionsHub.AddOrUpdateWorkItems.addListener((workItems: WorkItem[]) => {
             if (workItems) {
                 for (const workItem of workItems) {
                     this._addWorkItem(workItem);
@@ -42,7 +42,7 @@ export class WorkItemStore extends BaseStore<IDictionaryNumberTo<WorkItem>, Work
             this.emitChanged();
         });
 
-        WorkItemActionsHub.DeleteWorkItems.addListener((workItemIds: number[]) => {
+        this.actionsHub.DeleteWorkItems.addListener((workItemIds: number[]) => {
             if (workItemIds) {
                 for (const id of workItemIds) {
                     this._removeWorkItem(id);
@@ -52,7 +52,7 @@ export class WorkItemStore extends BaseStore<IDictionaryNumberTo<WorkItem>, Work
             this.emitChanged();
         });
 
-        WorkItemActionsHub.ClearWorkItems.addListener(() => {
+        this.actionsHub.ClearWorkItems.addListener(() => {
             this.clearStore();
             this.emitChanged();
         });

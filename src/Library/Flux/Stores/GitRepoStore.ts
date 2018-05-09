@@ -2,12 +2,12 @@ import { GitRepoActionsHub } from "Library/Flux/Actions/ActionsHub";
 import { BaseStore } from "Library/Flux/Stores/BaseStore";
 import { GitRepository } from "TFS/VersionControl/Contracts";
 
-export class GitRepoStore extends BaseStore<GitRepository[], GitRepository, string> {
+export class GitRepoStore extends BaseStore<GitRepository[], GitRepository, string, GitRepoActionsHub> {
     private _itemsIdMap: IDictionaryStringTo<GitRepository>;
     private _itemsNameMap: IDictionaryStringTo<GitRepository>;
 
-    constructor() {
-        super();
+    constructor(actionsHub: GitRepoActionsHub) {
+        super(actionsHub);
         this._itemsIdMap = {};
         this._itemsNameMap = {};
     }
@@ -22,7 +22,7 @@ export class GitRepoStore extends BaseStore<GitRepository[], GitRepository, stri
     }
 
     protected initializeActionListeners() {
-        GitRepoActionsHub.InitializeGitRepos.addListener((repos: GitRepository[]) => {
+        this.actionsHub.InitializeGitRepos.addListener((repos: GitRepository[]) => {
             if (repos) {
                 this.items = repos;
                 this._itemsIdMap = {};

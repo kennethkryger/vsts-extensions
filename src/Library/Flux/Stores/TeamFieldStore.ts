@@ -2,9 +2,9 @@ import { TeamFieldActionsHub } from "Library/Flux/Actions/ActionsHub";
 import { BaseStore } from "Library/Flux/Stores/BaseStore";
 import { TeamFieldValues } from "TFS/Work/Contracts";
 
-export class TeamFieldStore extends BaseStore<IDictionaryStringTo<TeamFieldValues>, TeamFieldValues, string> {
-    constructor() {
-        super();
+export class TeamFieldStore extends BaseStore<IDictionaryStringTo<TeamFieldValues>, TeamFieldValues, string, TeamFieldActionsHub> {
+    constructor(actionsHub: TeamFieldActionsHub) {
+        super(actionsHub);
         this.items = {};
     }
 
@@ -17,7 +17,7 @@ export class TeamFieldStore extends BaseStore<IDictionaryStringTo<TeamFieldValue
     }
 
     protected initializeActionListeners() {
-        TeamFieldActionsHub.InitializeTeamFieldItem.addListener((values: {teamId: string, teamFieldValues: TeamFieldValues}) => {
+        this.actionsHub.InitializeTeamFieldItem.addListener((values: {teamId: string, teamFieldValues: TeamFieldValues}) => {
             if (values) {
                 this.items[values.teamId.toLowerCase()] = values.teamFieldValues;
             }

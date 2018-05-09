@@ -1,15 +1,17 @@
 import { ErrorMessageActionsHub } from "Library/Flux/Actions/ActionsHub";
 
-export namespace ErrorMessageActions {
-    export function showErrorMessage(errorMessage: string, errorKey: string) {
-        ErrorMessageActionsHub.PushErrorMessage.invoke({errorMessage: errorMessage, errorKey: errorKey});
+export class ErrorMessageActions {
+    constructor(private _actionsHub: ErrorMessageActionsHub) {}
+
+    public showErrorMessage(errorMessage: string, errorKey: string) {
+        this._actionsHub.PushErrorMessage.invoke({errorMessage: errorMessage, errorKey: errorKey});
     }
 
-    export function dismissErrorMessage(errorKey: string) {
-        return ErrorMessageActionsHub.DismissErrorMessage.invoke(errorKey);
+    public dismissErrorMessage(errorKey: string) {
+        this._actionsHub.DismissErrorMessage.invoke(errorKey);
     }
 
-    export function dismissAllErrorMessages() {
-        return ErrorMessageActionsHub.DismissAllErrorMessages.invoke(null);
+    public dismissAllErrorMessages() {
+        this._actionsHub.DismissAllErrorMessages.invoke(null);
     }
 }

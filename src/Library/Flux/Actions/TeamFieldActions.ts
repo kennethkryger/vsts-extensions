@@ -1,18 +1,17 @@
 import { TeamFieldActionsHub } from "Library/Flux/Actions/ActionsHub";
-import { StoreFactory } from "Library/Flux/Stores/BaseStore";
 import { TeamFieldStore } from "Library/Flux/Stores/TeamFieldStore";
 import { TeamContext } from "TFS/Core/Contracts";
 import * as WorkClient from "TFS/Work/RestClient";
 
-export namespace TeamFieldActions {
-    const teamFieldStore: TeamFieldStore = StoreFactory.getInstance<TeamFieldStore>(TeamFieldStore);
+export class TeamFieldActions {
+    constructor(private _actionsHub: TeamFieldActionsHub, private _teamFieldStore: TeamFieldStore) {}
 
-    export async function initializeTeamFields(teamId: string) {
-        if (teamFieldStore.isLoaded(teamId)) {
-            TeamFieldActionsHub.InitializeTeamFieldItem.invoke(null);
+    public async initializeTeamFields(teamId: string) {
+        if (this._teamFieldStore.isLoaded(teamId)) {
+            this._actionsHub.InitializeTeamFieldItem.invoke(null);
         }
-        else if (!teamFieldStore.isLoading(teamId)) {
-            teamFieldStore.setLoading(true, teamId);
+        else if (!this._teamFieldStore.isLoading(teamId)) {
+            this._teamFieldStore.setLoading(true, teamId);
             try {
                 const teamContext: TeamContext = {
                     project: "",
@@ -22,11 +21,11 @@ export namespace TeamFieldActions {
                 };
 
                 const teamFieldValues = await WorkClient.getClient().getTeamFieldValues(teamContext);
-                TeamFieldActionsHub.InitializeTeamFieldItem.invoke({teamId: teamId, teamFieldValues: teamFieldValues});
-                teamFieldStore.setLoading(false, teamId);
+                this._actionsHub.InitializeTeamFieldItem.invoke({teamId: teamId, teamFieldValues: teamFieldValues});
+                this._teamFieldStore.setLoading(false, teamId);
             }
             catch (e) {
-                teamFieldStore.setLoading(false, teamId);
+                this._teamFieldStore.setLoading(false, teamId);
                 throw e.message;
             }
         }

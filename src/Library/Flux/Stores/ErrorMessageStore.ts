@@ -1,9 +1,9 @@
 import { ErrorMessageActionsHub } from "Library/Flux/Actions/ActionsHub";
 import { BaseStore } from "Library/Flux/Stores/BaseStore";
 
-export class ErrorMessageStore extends BaseStore<IDictionaryStringTo<string>, string, string> {
-    constructor() {
-        super();
+export class ErrorMessageStore extends BaseStore<IDictionaryStringTo<string>, string, string, ErrorMessageActionsHub> {
+    constructor(actionsHub: ErrorMessageActionsHub) {
+        super(actionsHub);
         this.items = {};
     }
 
@@ -16,17 +16,17 @@ export class ErrorMessageStore extends BaseStore<IDictionaryStringTo<string>, st
     }
 
     protected initializeActionListeners() {
-        ErrorMessageActionsHub.PushErrorMessage.addListener((error: {errorMessage: string, errorKey: string}) => {
+        this.actionsHub.PushErrorMessage.addListener((error: {errorMessage: string, errorKey: string}) => {
             this.items[error.errorKey] = error.errorMessage;
             this.emitChanged();
         });
 
-        ErrorMessageActionsHub.DismissErrorMessage.addListener((errorKey: string) => {
+        this.actionsHub.DismissErrorMessage.addListener((errorKey: string) => {
             delete this.items[errorKey];
             this.emitChanged();
         });
 
-        ErrorMessageActionsHub.DismissAllErrorMessages.addListener(() => {
+        this.actionsHub.DismissAllErrorMessages.addListener(() => {
             this.items = {};
             this.emitChanged();
         });

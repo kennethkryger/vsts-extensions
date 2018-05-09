@@ -2,12 +2,12 @@ import { WorkItemTagActionsHub } from "Library/Flux/Actions/ActionsHub";
 import { BaseStore } from "Library/Flux/Stores/BaseStore";
 import { WebApiTagDefinition } from "TFS/Core/Contracts";
 
-export class WorkItemTagStore extends BaseStore<WebApiTagDefinition[], WebApiTagDefinition, string> {
+export class WorkItemTagStore extends BaseStore<WebApiTagDefinition[], WebApiTagDefinition, string, WorkItemTagActionsHub> {
     private _itemsIdMap: IDictionaryStringTo<WebApiTagDefinition>;
     private _itemsNameMap: IDictionaryStringTo<WebApiTagDefinition>;
 
-    constructor() {
-        super();
+    constructor(actionsHub: WorkItemTagActionsHub) {
+        super(actionsHub);
         this._itemsIdMap = {};
         this._itemsNameMap = {};
     }
@@ -22,7 +22,7 @@ export class WorkItemTagStore extends BaseStore<WebApiTagDefinition[], WebApiTag
     }
 
     protected initializeActionListeners() {
-        WorkItemTagActionsHub.InitializeTags.addListener((tags: WebApiTagDefinition[]) => {
+        this.actionsHub.InitializeTags.addListener((tags: WebApiTagDefinition[]) => {
             if (tags) {
                 this.items = tags;
                 this._itemsIdMap = {};

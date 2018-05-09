@@ -1,9 +1,9 @@
 import { WorkItemTypeFieldAllowedValuesActionsHub } from "Library/Flux/Actions/ActionsHub";
 import { BaseStore } from "Library/Flux/Stores/BaseStore";
 
-export class WorkItemTypeFieldAllowedValuesStore extends BaseStore<IDictionaryStringTo<string[]>, string[], string> {
-    constructor() {
-        super();
+export class WorkItemTypeFieldAllowedValuesStore extends BaseStore<IDictionaryStringTo<string[]>, string[], string, WorkItemTypeFieldAllowedValuesActionsHub> {
+    constructor(actionsHub: WorkItemTypeFieldAllowedValuesActionsHub) {
+        super(actionsHub);
         this.items = {};
     }
 
@@ -22,7 +22,7 @@ export class WorkItemTypeFieldAllowedValuesStore extends BaseStore<IDictionarySt
     }
 
     protected initializeActionListeners() {
-        WorkItemTypeFieldAllowedValuesActionsHub.InitializeAllowedValues.addListener((data: {
+        this.actionsHub.InitializeAllowedValues.addListener((data: {
             workItemType: string,
             fieldRefName: string,
             allowedValues: string[]

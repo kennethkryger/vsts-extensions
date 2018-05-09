@@ -1,102 +1,101 @@
 import { WorkItemActionsHub } from "Library/Flux/Actions/ActionsHub";
-import { StoreFactory } from "Library/Flux/Stores/BaseStore";
 import { WorkItemStore } from "Library/Flux/Stores/WorkItemStore";
 import { WorkItem, WorkItemErrorPolicy } from "TFS/WorkItemTracking/Contracts";
 import * as WitClient from "TFS/WorkItemTracking/RestClient";
 import { JsonPatchDocument, JsonPatchOperation, Operation } from "VSS/WebApi/Contracts";
 
-export namespace WorkItemActions {
-    const workItemStore: WorkItemStore = StoreFactory.getInstance<WorkItemStore>(WorkItemStore);
+export class WorkItemActions {
+    constructor(private _actionsHub: WorkItemActionsHub, private _workItemStore: WorkItemStore) {}
 
-    export async function initializeWorkItems(ids: number[]) {
+    public async initializeWorkItems(ids: number[]) {
         if (!ids || ids.length === 0) {
-            WorkItemActionsHub.AddOrUpdateWorkItems.invoke(null);
+            this._actionsHub.AddOrUpdateWorkItems.invoke(null);
         }
-        else if (!workItemStore.isLoading()) {
+        else if (!this._workItemStore.isLoading()) {
             const idsToFetch: number[] = [];
             for (const id of ids) {
-                if (!workItemStore.isLoaded(id)) {
+                if (!this._workItemStore.isLoaded(id)) {
                     idsToFetch.push(id);
                 }
             }
 
             if (idsToFetch.length === 0) {
-                WorkItemActionsHub.AddOrUpdateWorkItems.invoke(null);
+                this._actionsHub.AddOrUpdateWorkItems.invoke(null);
                 return;
             }
 
-            workItemStore.setLoading(true);
+            this._workItemStore.setLoading(true);
 
             try {
-                const workItems = await getWorkItems(idsToFetch);
+                const workItems = await this._getWorkItems(idsToFetch);
 
-                WorkItemActionsHub.AddOrUpdateWorkItems.invoke(workItems);
-                workItemStore.setLoading(false);
+                this._actionsHub.AddOrUpdateWorkItems.invoke(workItems);
+                this._workItemStore.setLoading(false);
             }
             catch (e) {
-                workItemStore.setLoading(false);
+                this._workItemStore.setLoading(false);
                 throw e.message;
             }
         }
     }
 
-    export async function refreshWorkItems(ids: number[]) {
+    public async refreshWorkItems(ids: number[]) {
         if (!ids || ids.length === 0) {
-            WorkItemActionsHub.AddOrUpdateWorkItems.invoke(null);
+            this._actionsHub.AddOrUpdateWorkItems.invoke(null);
         }
-        else if (!workItemStore.isLoading()) {
-            workItemStore.setLoading(true);
+        else if (!this._workItemStore.isLoading()) {
+            this._workItemStore.setLoading(true);
 
             try {
-                const workItems = await getWorkItems(ids);
-                WorkItemActionsHub.AddOrUpdateWorkItems.invoke(workItems);
-                workItemStore.setLoading(false);
+                const workItems = await this._getWorkItems(ids);
+                this._actionsHub.AddOrUpdateWorkItems.invoke(workItems);
+                this._workItemStore.setLoading(false);
             }
             catch (e) {
-                workItemStore.setLoading(false);
+                this._workItemStore.setLoading(false);
                 throw e.message;
             }
         }
     }
 
-    export async function initializeWorkItem(id: number) {
-        if (!workItemStore.isLoaded(id)) {
-            WorkItemActionsHub.AddOrUpdateWorkItems.invoke(null);
+    public async initializeWorkItem(id: number) {
+        if (!this._workItemStore.isLoaded(id)) {
+            this._actionsHub.AddOrUpdateWorkItems.invoke(null);
         }
-        else if (!workItemStore.isLoading()) {
-            workItemStore.setLoading(true);
-
-            try {
-                const workItem = await WitClient.getClient().getWorkItem(id);
-                WorkItemActionsHub.AddOrUpdateWorkItems.invoke([workItem]);
-                workItemStore.setLoading(false);
-            }
-            catch (e) {
-                workItemStore.setLoading(false);
-                throw e.message;
-            }
-        }
-    }
-
-    export async function refreshWorkItem(id: number) {
-        if (!workItemStore.isLoading()) {
-            workItemStore.setLoading(true);
+        else if (!this._workItemStore.isLoading()) {
+            this._workItemStore.setLoading(true);
 
             try {
                 const workItem = await WitClient.getClient().getWorkItem(id);
-                WorkItemActionsHub.AddOrUpdateWorkItems.invoke([workItem]);
-                workItemStore.setLoading(false);
+                this._actionsHub.AddOrUpdateWorkItems.invoke([workItem]);
+                this._workItemStore.setLoading(false);
             }
             catch (e) {
-                workItemStore.setLoading(false);
+                this._workItemStore.setLoading(false);
                 throw e.message;
             }
         }
     }
 
-    export async function createWorkItem(workItemType: string, fieldValues: IDictionaryStringTo<string>, projectId?: string): Promise<WorkItem> {
-        if (!workItemStore.isLoading()) {
-            workItemStore.setLoading(true);
+    public async refreshWorkItem(id: number) {
+        if (!this._workItemStore.isLoading()) {
+            this._workItemStore.setLoading(true);
+
+            try {
+                const workItem = await WitClient.getClient().getWorkItem(id);
+                this._actionsHub.AddOrUpdateWorkItems.invoke([workItem]);
+                this._workItemStore.setLoading(false);
+            }
+            catch (e) {
+                this._workItemStore.setLoading(false);
+                throw e.message;
+            }
+        }
+    }
+
+    public async createWorkItem(workItemType: string, fieldValues: IDictionaryStringTo<string>, projectId?: string): Promise<WorkItem> {
+        if (!this._workItemStore.isLoading()) {
+            this._workItemStore.setLoading(true);
 
             const patchDocument: JsonPatchDocument & JsonPatchOperation[] = [];
             for (const fieldRefName of Object.keys(fieldValues)) {
@@ -109,20 +108,20 @@ export namespace WorkItemActions {
 
             try {
                 const workItem = await WitClient.getClient().createWorkItem(patchDocument, projectId || VSS.getWebContext().project.id, workItemType);
-                WorkItemActionsHub.AddOrUpdateWorkItems.invoke([workItem]);
-                workItemStore.setLoading(false);
+                this._actionsHub.AddOrUpdateWorkItems.invoke([workItem]);
+                this._workItemStore.setLoading(false);
                 return workItem;
             }
             catch (e) {
-                workItemStore.setLoading(false);
+                this._workItemStore.setLoading(false);
                 throw e.message;
             }
         }
     }
 
-    export async function updateWorkItem(workItemId: number, fieldValues: IDictionaryStringTo<string>): Promise<WorkItem> {
-        if (!workItemStore.isLoading()) {
-            workItemStore.setLoading(true);
+    public async updateWorkItem(workItemId: number, fieldValues: IDictionaryStringTo<string>): Promise<WorkItem> {
+        if (!this._workItemStore.isLoading()) {
+            this._workItemStore.setLoading(true);
 
             const patchDocument: JsonPatchDocument & JsonPatchOperation[] = [];
             for (const fieldRefName of Object.keys(fieldValues)) {
@@ -135,42 +134,42 @@ export namespace WorkItemActions {
 
             try {
                 const workItem = await WitClient.getClient().updateWorkItem(patchDocument, workItemId);
-                WorkItemActionsHub.AddOrUpdateWorkItems.invoke([workItem]);
-                workItemStore.setLoading(false);
+                this._actionsHub.AddOrUpdateWorkItems.invoke([workItem]);
+                this._workItemStore.setLoading(false);
                 return workItem;
             }
             catch (e) {
-                workItemStore.setLoading(false);
+                this._workItemStore.setLoading(false);
                 throw e.message;
             }
         }
     }
 
-    export async function deleteWorkItem(workItemId: number, projectId?: string, destroy?: boolean): Promise<void> {
-        if (!workItemStore.isLoading()) {
-            workItemStore.setLoading(true);
+    public async deleteWorkItem(workItemId: number, projectId?: string, destroy?: boolean): Promise<void> {
+        if (!this._workItemStore.isLoading()) {
+            this._workItemStore.setLoading(true);
 
             try {
                 await WitClient.getClient().deleteWorkItem(workItemId, projectId, destroy);
-                WorkItemActionsHub.DeleteWorkItems.invoke([workItemId]);
-                workItemStore.setLoading(false);
+                this._actionsHub.DeleteWorkItems.invoke([workItemId]);
+                this._workItemStore.setLoading(false);
             }
             catch (e) {
-                workItemStore.setLoading(false);
+                this._workItemStore.setLoading(false);
                 throw e.message;
             }
         }
     }
 
-    export function refreshWorkItemInStore(workItems: WorkItem[]) {
-        WorkItemActionsHub.AddOrUpdateWorkItems.invoke(workItems);
+    public refreshWorkItemInStore(workItems: WorkItem[]) {
+        this._actionsHub.AddOrUpdateWorkItems.invoke(workItems);
     }
 
-    export function clearWorkItemsCache() {
-        WorkItemActionsHub.ClearWorkItems.invoke(null);
+    public clearWorkItemsCache() {
+        this._actionsHub.ClearWorkItems.invoke(null);
     }
 
-    async function getWorkItems(ids: number[]): Promise<WorkItem[]> {
+    private async _getWorkItems(ids: number[]): Promise<WorkItem[]> {
         const cloneIds = [...ids];
         const idsToFetch: number[][] = [];
         let i = 0;
@@ -186,10 +185,10 @@ export namespace WorkItemActions {
             finalResult.push(...workItemArray);
         }
 
-        return filterNullWorkItems(finalResult, ids);
+        return this._filterNullWorkItems(finalResult, ids);
     }
 
-    function filterNullWorkItems(workItems: WorkItem[], idsToFetch: number[]): WorkItem[] {
+    private _filterNullWorkItems(workItems: WorkItem[], idsToFetch: number[]): WorkItem[] {
         const workItemsMap = {};
         for (const workItem of workItems) {
             if (workItem) {

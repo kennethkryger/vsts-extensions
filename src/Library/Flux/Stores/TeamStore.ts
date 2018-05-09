@@ -2,12 +2,12 @@ import { TeamActionsHub } from "Library/Flux/Actions/ActionsHub";
 import { BaseStore } from "Library/Flux/Stores/BaseStore";
 import { WebApiTeam } from "TFS/Core/Contracts";
 
-export class TeamStore extends BaseStore<WebApiTeam[], WebApiTeam, string> {
+export class TeamStore extends BaseStore<WebApiTeam[], WebApiTeam, string, TeamActionsHub> {
     private _itemsIdMap: IDictionaryStringTo<WebApiTeam>;
     private _itemsNameMap: IDictionaryStringTo<WebApiTeam>;
 
-    constructor() {
-        super();
+    constructor(actionsHub: TeamActionsHub) {
+        super(actionsHub);
         this._itemsIdMap = {};
         this._itemsNameMap = {};
     }
@@ -22,7 +22,7 @@ export class TeamStore extends BaseStore<WebApiTeam[], WebApiTeam, string> {
     }
 
     protected initializeActionListeners() {
-        TeamActionsHub.InitializeTeams.addListener((teams: WebApiTeam[]) => {
+        this.actionsHub.InitializeTeams.addListener((teams: WebApiTeam[]) => {
             if (teams) {
                 this.items = teams;
                 this._itemsIdMap = {};

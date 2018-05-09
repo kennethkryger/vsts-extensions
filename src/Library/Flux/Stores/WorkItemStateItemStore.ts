@@ -2,9 +2,9 @@ import { WorkItemStateItemActionsHub } from "Library/Flux/Actions/ActionsHub";
 import { BaseStore } from "Library/Flux/Stores/BaseStore";
 import { WorkItemStateColor } from "TFS/WorkItemTracking/Contracts";
 
-export class WorkItemStateItemStore extends BaseStore<IDictionaryStringTo<WorkItemStateColor[]>, WorkItemStateColor[], string> {
-    constructor() {
-        super();
+export class WorkItemStateItemStore extends BaseStore<IDictionaryStringTo<WorkItemStateColor[]>, WorkItemStateColor[], string, WorkItemStateItemActionsHub> {
+    constructor(actionsHub: WorkItemStateItemActionsHub) {
+        super(actionsHub);
         this.items = {};
     }
 
@@ -17,7 +17,7 @@ export class WorkItemStateItemStore extends BaseStore<IDictionaryStringTo<WorkIt
     }
 
     protected initializeActionListeners() {
-        WorkItemStateItemActionsHub.InitializeWorkItemStateItems.addListener((stateItems: {witName: string, states: WorkItemStateColor[]}) => {
+        this.actionsHub.InitializeWorkItemStateItems.addListener((stateItems: {witName: string, states: WorkItemStateColor[]}) => {
             if (stateItems) {
                 this.items[stateItems.witName.toLowerCase()] = stateItems.states;
             }

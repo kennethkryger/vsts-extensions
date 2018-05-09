@@ -1,14 +1,16 @@
 import { Observable } from "VSSUI/Utilities/Observable";
 
-export abstract class BaseStore<TCollection, TItem, TKey> extends Observable<void> {
+export abstract class BaseStore<TCollection, TItem, TKey, TActionHub> extends Observable<void> {
     protected items: TCollection;
+    protected actionsHub: TActionHub;
 
     private _isLoading: boolean;
     private _isItemLoadingMap: IDictionaryStringTo<boolean>;
 
-    constructor() {
+    constructor(actionsHub: TActionHub) {
         super();
         this.items = null;
+        this.actionsHub = actionsHub;
         this._isLoading = false;
         this._isItemLoadingMap = {};
 
@@ -77,16 +79,4 @@ export abstract class BaseStore<TCollection, TItem, TKey> extends Observable<voi
 
     protected abstract initializeActionListeners();
     protected abstract convertItemKeyToString(key: TKey): string;
-}
-
-export namespace StoreFactory {
-    const storeInstances: IDictionaryStringTo<BaseStore<any, any, any>> = {};
-
-    export function getInstance<TStore extends BaseStore<any, any, any>>(storeType: {new(): TStore; }): TStore {
-        const instance = new storeType();
-        if (!storeInstances[instance.getKey()]) {
-            storeInstances[instance.getKey()] = instance;
-        }
-        return storeInstances[instance.getKey()] as TStore;
-    }
 }

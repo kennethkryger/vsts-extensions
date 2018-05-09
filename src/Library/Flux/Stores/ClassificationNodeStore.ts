@@ -12,14 +12,14 @@ export enum ClassificationNodeKey {
     Iteration = "Iteration"
 }
 
-export class ClassificationNodeStore extends BaseStore<IClassificationNodeItem, WorkItemClassificationNode, ClassificationNodeKey> {
+export class ClassificationNodeStore extends BaseStore<IClassificationNodeItem, WorkItemClassificationNode, ClassificationNodeKey, ClassificationNodeActionsHub> {
     private _areaPathIdMap: IDictionaryStringTo<WorkItemClassificationNode>;
     private _areaPathMap: IDictionaryStringTo<WorkItemClassificationNode>;
     private _iterationPathIdMap: IDictionaryStringTo<WorkItemClassificationNode>;
     private _iterationPathMap: IDictionaryStringTo<WorkItemClassificationNode>;
 
-    constructor() {
-        super();
+    constructor(actionsHub: ClassificationNodeActionsHub) {
+        super(actionsHub);
 
         this.items = {} as IClassificationNodeItem;
         this._areaPathIdMap = {};
@@ -47,7 +47,7 @@ export class ClassificationNodeStore extends BaseStore<IClassificationNodeItem, 
     }
 
     protected initializeActionListeners() {
-        ClassificationNodeActionsHub.InitializeAreaPaths.addListener((rootNode: WorkItemClassificationNode) => {
+        this.actionsHub.InitializeAreaPaths.addListener((rootNode: WorkItemClassificationNode) => {
             if (rootNode) {
                 this.items.areaPathRoot = rootNode;
                 this._populateNodeData(rootNode, null, ClassificationNodeKey.Area);
@@ -56,7 +56,7 @@ export class ClassificationNodeStore extends BaseStore<IClassificationNodeItem, 
             this.emitChanged();
         });
 
-        ClassificationNodeActionsHub.InitializeIterationPaths.addListener((rootNode: WorkItemClassificationNode) => {
+        this.actionsHub.InitializeIterationPaths.addListener((rootNode: WorkItemClassificationNode) => {
             if (rootNode) {
                 this.items.iterationPathRoot = rootNode;
                 this._populateNodeData(rootNode, null, ClassificationNodeKey.Iteration);

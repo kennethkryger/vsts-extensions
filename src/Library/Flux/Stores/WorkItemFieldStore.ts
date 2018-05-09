@@ -2,12 +2,12 @@ import { WorkItemFieldActionsHub } from "Library/Flux/Actions/ActionsHub";
 import { BaseStore } from "Library/Flux/Stores/BaseStore";
 import { WorkItemField } from "TFS/WorkItemTracking/Contracts";
 
-export class WorkItemFieldStore extends BaseStore<WorkItemField[], WorkItemField, string> {
+export class WorkItemFieldStore extends BaseStore<WorkItemField[], WorkItemField, string, WorkItemFieldActionsHub> {
     private _itemsRefNameMap: IDictionaryStringTo<WorkItemField>;
     private _itemsNameMap: IDictionaryStringTo<WorkItemField>;
 
-    constructor() {
-        super();
+    constructor(actionsHub: WorkItemFieldActionsHub) {
+        super(actionsHub);
         this._itemsRefNameMap = {};
         this._itemsNameMap = {};
     }
@@ -22,7 +22,7 @@ export class WorkItemFieldStore extends BaseStore<WorkItemField[], WorkItemField
     }
 
     protected initializeActionListeners() {
-        WorkItemFieldActionsHub.InitializeWorkItemFields.addListener((fields: WorkItemField[]) => {
+        this.actionsHub.InitializeWorkItemFields.addListener((fields: WorkItemField[]) => {
             if (fields) {
                 this.items = fields;
                 this._itemsRefNameMap = {};

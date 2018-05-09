@@ -29,7 +29,7 @@ export class BaseFluxComponent<TProps extends IBaseFluxComponentProps, TState ex
         }
     }
 
-    protected getStores(): BaseStore<any, any, any>[] {
+    protected getStores(): BaseStore<any, any, any, any>[] {
         return [];
     }
 
