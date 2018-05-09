@@ -1,5 +1,5 @@
 import { BaseStore } from "Library/Flux/BaseStore";
-import { TeamFieldActionsHub } from "Library/Flux/TeamField";
+import { KeyName, TeamFieldActionsHub } from "Library/Flux/TeamField";
 import { TeamFieldValues } from "TFS/Work/Contracts";
 
 export class TeamFieldStore extends BaseStore<IDictionaryStringTo<TeamFieldValues>, TeamFieldValues, string, TeamFieldActionsHub> {
@@ -13,7 +13,7 @@ export class TeamFieldStore extends BaseStore<IDictionaryStringTo<TeamFieldValue
     }
 
     public getKey(): string {
-        return "TeamFieldStore";
+        return KeyName;
     }
 
     protected initializeActionListeners() {

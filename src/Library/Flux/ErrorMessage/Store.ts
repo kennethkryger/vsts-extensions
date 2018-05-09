@@ -1,5 +1,5 @@
 import { BaseStore } from "Library/Flux/BaseStore";
-import { ErrorMessageActionsHub } from "Library/Flux/ErrorMessage";
+import { ErrorMessageActionsHub, KeyName } from "Library/Flux/ErrorMessage";
 
 export class ErrorMessageStore extends BaseStore<IDictionaryStringTo<string>, string, string, ErrorMessageActionsHub> {
     constructor(actionsHub: ErrorMessageActionsHub) {
@@ -8,7 +8,7 @@ export class ErrorMessageStore extends BaseStore<IDictionaryStringTo<string>, st
     }
 
     public getKey(): string {
-        return "ErrorMessageStore";
+        return KeyName;
     }
 
     public getItem(key: string): string {

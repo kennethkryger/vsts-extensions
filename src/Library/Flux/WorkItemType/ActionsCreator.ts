@@ -1,11 +1,17 @@
-import { IActionsCreator } from "Library/Flux/Action";
-import { WorkItemTypeActionsHub, WorkItemTypeStore } from "Library/Flux/WorkItemType";
+import { BaseActionsCreator } from "Library/Flux/Action";
+import { KeyName, WorkItemTypeActionsHub, WorkItemTypeStore } from "Library/Flux/WorkItemType";
 import { localeIgnoreCaseComparer } from "Library/Utilities/String";
 import { WorkItemType } from "TFS/WorkItemTracking/Contracts";
 import * as WitClient from "TFS/WorkItemTracking/RestClient";
 
-export class WorkItemTypeActionsCreator implements IActionsCreator {
-    constructor(private _actionsHub: WorkItemTypeActionsHub, private _workItemTypeStore: WorkItemTypeStore) {}
+export class WorkItemTypeActionsCreator extends BaseActionsCreator {
+    constructor(private _actionsHub: WorkItemTypeActionsHub, private _workItemTypeStore: WorkItemTypeStore) {
+        super();
+    }
+
+    public getKey(): string {
+        return KeyName;
+    }
 
     public async initializeWorkItemTypes() {
         if (this._workItemTypeStore.isLoaded()) {

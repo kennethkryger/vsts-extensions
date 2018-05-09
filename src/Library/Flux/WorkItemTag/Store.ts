@@ -1,5 +1,5 @@
 import { BaseStore } from "Library/Flux/BaseStore";
-import { WorkItemTagActionsHub } from "Library/Flux/WorkItemTag";
+import { KeyName, WorkItemTagActionsHub } from "Library/Flux/WorkItemTag";
 import { WebApiTagDefinition } from "TFS/Core/Contracts";
 
 export class WorkItemTagStore extends BaseStore<WebApiTagDefinition[], WebApiTagDefinition, string, WorkItemTagActionsHub> {
@@ -18,7 +18,7 @@ export class WorkItemTagStore extends BaseStore<WebApiTagDefinition[], WebApiTag
     }
 
     public getKey(): string {
-        return "WorkItemTagStore";
+        return KeyName;
     }
 
     protected initializeActionListeners() {

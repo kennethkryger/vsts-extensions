@@ -1,7 +1,7 @@
-import { IActionsHub } from "Library/Flux/Action";
+import { BaseActionsHub } from "Library/Flux/Action";
 import { Observable } from "VSSUI/Utilities/Observable";
 
-export abstract class BaseStore<TCollection, TItem, TKey, TActionHub extends IActionsHub> extends Observable<void> {
+export abstract class BaseStore<TCollection, TItem, TKey, TActionHub extends BaseActionsHub> extends Observable<void> {
     protected items: TCollection;
     protected actionsHub: TActionHub;
 

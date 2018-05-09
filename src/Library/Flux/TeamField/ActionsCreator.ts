@@ -1,10 +1,16 @@
-import { IActionsCreator } from "Library/Flux/Action";
-import { TeamFieldActionsHub, TeamFieldStore } from "Library/Flux/TeamField";
+import { BaseActionsCreator } from "Library/Flux/Action";
+import { KeyName, TeamFieldActionsHub, TeamFieldStore } from "Library/Flux/TeamField";
 import { TeamContext } from "TFS/Core/Contracts";
 import * as WorkClient from "TFS/Work/RestClient";
 
-export class TeamFieldActionsCreator implements IActionsCreator {
-    constructor(private _actionsHub: TeamFieldActionsHub, private _teamFieldStore: TeamFieldStore) {}
+export class TeamFieldActionsCreator extends BaseActionsCreator {
+    constructor(private _actionsHub: TeamFieldActionsHub, private _teamFieldStore: TeamFieldStore) {
+        super();
+    }
+
+    public getKey(): string {
+        return KeyName;
+    }
 
     public async initializeTeamFields(teamId: string) {
         if (this._teamFieldStore.isLoaded(teamId)) {

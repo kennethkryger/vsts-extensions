@@ -1,12 +1,18 @@
-import { IActionsCreator } from "Library/Flux/Action";
-import { TeamActionsHub, TeamStore } from "Library/Flux/Team";
+import { BaseActionsCreator } from "Library/Flux/Action";
+import { KeyName, TeamActionsHub, TeamStore } from "Library/Flux/Team";
 import { localeIgnoreCaseComparer } from "Library/Utilities/String";
 import { WebApiTeam } from "TFS/Core/Contracts";
 import * as CoreClient from "TFS/Core/RestClient";
 import * as VSS_Service from "VSS/Service";
 
-export class TeamActionsCreator implements IActionsCreator {
-    constructor(private _actionsHub: TeamActionsHub, private _teamStore: TeamStore) {}
+export class TeamActionsCreator extends BaseActionsCreator {
+    constructor(private _actionsHub: TeamActionsHub, private _teamStore: TeamStore) {
+        super();
+    }
+
+    public getKey(): string {
+        return KeyName;
+    }
 
     public async initializeTeams() {
         if (this._teamStore.isLoaded()) {

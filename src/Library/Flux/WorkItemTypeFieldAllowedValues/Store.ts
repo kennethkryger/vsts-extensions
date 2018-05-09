@@ -1,6 +1,6 @@
 import { BaseStore } from "Library/Flux/BaseStore";
 import {
-    WorkItemTypeFieldAllowedValuesActionsHub
+    KeyName, WorkItemTypeFieldAllowedValuesActionsHub
 } from "Library/Flux/WorkItemTypeFieldAllowedValues";
 
 export class WorkItemTypeFieldAllowedValuesStore extends BaseStore<IDictionaryStringTo<string[]>, string[], string, WorkItemTypeFieldAllowedValuesActionsHub> {
@@ -20,7 +20,7 @@ export class WorkItemTypeFieldAllowedValuesStore extends BaseStore<IDictionarySt
     }
 
     public getKey(): string {
-        return "WorkItemTypeFieldAllowedValuesStore";
+        return KeyName;
     }
 
     protected initializeActionListeners() {

@@ -1,11 +1,17 @@
-import { IActionsCreator } from "Library/Flux/Action";
-import { WorkItemActionsHub, WorkItemStore } from "Library/Flux/WorkItem";
+import { BaseActionsCreator } from "Library/Flux/Action";
+import { KeyName, WorkItemActionsHub, WorkItemStore } from "Library/Flux/WorkItem";
 import { WorkItem, WorkItemErrorPolicy } from "TFS/WorkItemTracking/Contracts";
 import * as WitClient from "TFS/WorkItemTracking/RestClient";
 import { JsonPatchDocument, JsonPatchOperation, Operation } from "VSS/WebApi/Contracts";
 
-export class WorkItemActionsCreator implements IActionsCreator {
-    constructor(private _actionsHub: WorkItemActionsHub, private _workItemStore: WorkItemStore) {}
+export class WorkItemActionsCreator extends BaseActionsCreator {
+    constructor(private _actionsHub: WorkItemActionsHub, private _workItemStore: WorkItemStore) {
+        super();
+    }
+
+    public getKey(): string {
+        return KeyName;
+    }
 
     public async initializeWorkItems(ids: number[]) {
         if (!ids || ids.length === 0) {

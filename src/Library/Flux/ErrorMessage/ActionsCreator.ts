@@ -1,8 +1,14 @@
-import { IActionsCreator } from "Library/Flux/Action";
-import { ErrorMessageActionsHub } from "Library/Flux/ErrorMessage";
+import { BaseActionsCreator } from "Library/Flux/Action";
+import { ErrorMessageActionsHub, KeyName } from "Library/Flux/ErrorMessage";
 
-export class ErrorMessageActionsCreator implements IActionsCreator {
-    constructor(private _actionsHub: ErrorMessageActionsHub) {}
+export class ErrorMessageActionsCreator extends BaseActionsCreator {
+    constructor(private _actionsHub: ErrorMessageActionsHub) {
+        super();
+    }
+
+    public getKey(): string {
+        return KeyName;
+    }
 
     public showErrorMessage(errorMessage: string, errorKey: string) {
         this._actionsHub.PushErrorMessage.invoke({errorMessage: errorMessage, errorKey: errorKey});

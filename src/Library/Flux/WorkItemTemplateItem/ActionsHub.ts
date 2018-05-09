@@ -1,6 +1,12 @@
-import { Action, IActionsHub } from "Library/Flux/Action";
+import { Action, BaseActionsHub } from "Library/Flux/Action";
 import { WorkItemTemplate } from "TFS/WorkItemTracking/Contracts";
 
-export class WorkItemTemplateItemActionsHub implements IActionsHub {
+export const KeyName = "WorkItemTemplateItem";
+
+export class WorkItemTemplateItemActionsHub extends BaseActionsHub {
     public InitializeWorkItemTemplateItem = new Action<WorkItemTemplate>();
+
+    public getKey(): string {
+        return KeyName;
+    }
 }

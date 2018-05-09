@@ -1,5 +1,5 @@
 import { BaseStore } from "Library/Flux/BaseStore";
-import { GitRepoActionsHub } from "Library/Flux/GitRepo";
+import { GitRepoActionsHub, KeyName } from "Library/Flux/GitRepo";
 import { GitRepository } from "TFS/VersionControl/Contracts";
 
 export class GitRepoStore extends BaseStore<GitRepository[], GitRepository, string, GitRepoActionsHub> {
@@ -18,7 +18,7 @@ export class GitRepoStore extends BaseStore<GitRepository[], GitRepository, stri
     }
 
     public getKey(): string {
-        return "GitRepoStore";
+        return KeyName;
     }
 
     protected initializeActionListeners() {

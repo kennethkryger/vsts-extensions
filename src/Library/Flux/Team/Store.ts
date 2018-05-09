@@ -1,5 +1,5 @@
 import { BaseStore } from "Library/Flux/BaseStore";
-import { TeamActionsHub } from "Library/Flux/Team";
+import { KeyName, TeamActionsHub } from "Library/Flux/Team";
 import { WebApiTeam } from "TFS/Core/Contracts";
 
 export class TeamStore extends BaseStore<WebApiTeam[], WebApiTeam, string, TeamActionsHub> {
@@ -18,7 +18,7 @@ export class TeamStore extends BaseStore<WebApiTeam[], WebApiTeam, string, TeamA
     }
 
     public getKey(): string {
-        return "TeamStore";
+        return KeyName;
     }
 
     protected initializeActionListeners() {

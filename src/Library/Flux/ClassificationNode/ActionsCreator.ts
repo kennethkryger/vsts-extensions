@@ -1,12 +1,18 @@
-import { IActionsCreator } from "Library/Flux/Action";
+import { BaseActionsCreator } from "Library/Flux/Action";
 import {
-    ClassificationNodeActionsHub, ClassificationNodeKey, ClassificationNodeStore
+    ClassificationNodeActionsHub, ClassificationNodeKey, ClassificationNodeStore, KeyName
 } from "Library/Flux/ClassificationNode";
 import { TreeStructureGroup, WorkItemClassificationNode } from "TFS/WorkItemTracking/Contracts";
 import * as WitClient from "TFS/WorkItemTracking/RestClient";
 
-export class ClassificationNodeActionsCreator implements IActionsCreator {
-    constructor(private _actionsHub: ClassificationNodeActionsHub, private _classificationNodeStore: ClassificationNodeStore) {}
+export class ClassificationNodeActionsCreator extends BaseActionsCreator {
+    constructor(private _actionsHub: ClassificationNodeActionsHub, private _classificationNodeStore: ClassificationNodeStore) {
+        super();
+    }
+
+    public getKey(): string {
+        return KeyName;
+    }
 
     public async initializeAreaPaths() {
         if (this._classificationNodeStore.isLoaded(ClassificationNodeKey.Area)) {

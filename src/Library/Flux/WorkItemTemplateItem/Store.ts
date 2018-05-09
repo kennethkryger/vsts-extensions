@@ -1,5 +1,5 @@
 import { BaseStore } from "Library/Flux/BaseStore";
-import { WorkItemTemplateItemActionsHub } from "Library/Flux/WorkItemTemplateItem";
+import { KeyName, WorkItemTemplateItemActionsHub } from "Library/Flux/WorkItemTemplateItem";
 import { WorkItemTemplate } from "TFS/WorkItemTracking/Contracts";
 
 export class WorkItemTemplateItemStore extends BaseStore<IDictionaryStringTo<WorkItemTemplate>, WorkItemTemplate, string, WorkItemTemplateItemActionsHub> {
@@ -14,7 +14,7 @@ export class WorkItemTemplateItemStore extends BaseStore<IDictionaryStringTo<Wor
     }
 
     public getKey(): string {
-        return "WorkItemTemplateItemStore";
+        return KeyName;
     }
 
     protected initializeActionListeners() {

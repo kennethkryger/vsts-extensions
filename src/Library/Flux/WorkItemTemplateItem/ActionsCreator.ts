@@ -1,11 +1,17 @@
-import { IActionsCreator } from "Library/Flux/Action";
+import { BaseActionsCreator } from "Library/Flux/Action";
 import {
-    WorkItemTemplateItemActionsHub, WorkItemTemplateItemStore
+    KeyName, WorkItemTemplateItemActionsHub, WorkItemTemplateItemStore
 } from "Library/Flux/WorkItemTemplateItem";
 import * as WitClient from "TFS/WorkItemTracking/RestClient";
 
-export class WorkItemTemplateItemActionsCreator implements IActionsCreator {
-    constructor(private _actionsHub: WorkItemTemplateItemActionsHub, private _workItemTemplateItemStore: WorkItemTemplateItemStore) {}
+export class WorkItemTemplateItemActionsCreator extends BaseActionsCreator {
+    constructor(private _actionsHub: WorkItemTemplateItemActionsHub, private _workItemTemplateItemStore: WorkItemTemplateItemStore) {
+        super();
+    }
+
+    public getKey(): string {
+        return KeyName;
+    }
 
     public async initializeWorkItemTemplateItem(teamId: string, id: string, projectId?: string) {
         if (this._workItemTemplateItemStore.isLoaded(id)) {

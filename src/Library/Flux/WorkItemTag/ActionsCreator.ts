@@ -1,11 +1,17 @@
-import { IActionsCreator } from "Library/Flux/Action";
-import { WorkItemTagActionsHub, WorkItemTagStore } from "Library/Flux/WorkItemTag";
+import { BaseActionsCreator } from "Library/Flux/Action";
+import { KeyName, WorkItemTagActionsHub, WorkItemTagStore } from "Library/Flux/WorkItemTag";
 import { localeIgnoreCaseComparer } from "Library/Utilities/String";
 import { WebApiTagDefinition } from "TFS/Core/Contracts";
 import * as Auth from "VSS/Authentication/Services";
 
-export class WorkItemTagActionsCreator implements IActionsCreator {
-    constructor(private _actionsHub: WorkItemTagActionsHub, private _tagsStore: WorkItemTagStore) {}
+export class WorkItemTagActionsCreator extends BaseActionsCreator {
+    constructor(private _actionsHub: WorkItemTagActionsHub, private _tagsStore: WorkItemTagStore) {
+        super();
+    }
+
+    public getKey(): string {
+        return KeyName;
+    }
 
     public async initializeTags() {
         if (this._tagsStore.isLoaded()) {

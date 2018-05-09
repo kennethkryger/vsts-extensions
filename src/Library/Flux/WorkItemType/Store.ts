@@ -1,5 +1,5 @@
 import { BaseStore } from "Library/Flux/BaseStore";
-import { WorkItemTypeActionsHub } from "Library/Flux/WorkItemType";
+import { KeyName, WorkItemTypeActionsHub } from "Library/Flux/WorkItemType";
 import { WorkItemType } from "TFS/WorkItemTracking/Contracts";
 
 export class WorkItemTypeStore extends BaseStore<WorkItemType[], WorkItemType, string, WorkItemTypeActionsHub> {
@@ -16,7 +16,7 @@ export class WorkItemTypeStore extends BaseStore<WorkItemType[], WorkItemType, s
     }
 
     public getKey(): string {
-        return "WorkItemTypeStore";
+        return KeyName;
     }
 
     protected initializeActionListeners() {

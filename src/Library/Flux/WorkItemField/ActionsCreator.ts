@@ -1,11 +1,17 @@
-import { IActionsCreator } from "Library/Flux/Action";
-import { WorkItemFieldActionsHub, WorkItemFieldStore } from "Library/Flux/WorkItemField";
+import { BaseActionsCreator } from "Library/Flux/Action";
+import { KeyName, WorkItemFieldActionsHub, WorkItemFieldStore } from "Library/Flux/WorkItemField";
 import { localeIgnoreCaseComparer } from "Library/Utilities/String";
 import { WorkItemField } from "TFS/WorkItemTracking/Contracts";
 import * as WitClient from "TFS/WorkItemTracking/RestClient";
 
-export class WorkItemFieldActionsCreator implements IActionsCreator {
-    constructor(private _actionsHub: WorkItemFieldActionsHub, private _workItemFieldStore: WorkItemFieldStore) {}
+export class WorkItemFieldActionsCreator extends BaseActionsCreator {
+    constructor(private _actionsHub: WorkItemFieldActionsHub, private _workItemFieldStore: WorkItemFieldStore) {
+        super();
+    }
+
+    public getKey(): string {
+        return KeyName;
+    }
 
     public async initializeWorkItemFields() {
         if (this._workItemFieldStore.isLoaded()) {

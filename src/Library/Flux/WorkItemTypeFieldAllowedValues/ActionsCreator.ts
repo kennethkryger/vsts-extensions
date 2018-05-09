@@ -1,12 +1,18 @@
-import { IActionsCreator } from "Library/Flux/Action";
+import { BaseActionsCreator } from "Library/Flux/Action";
 import {
-    WorkItemTypeFieldAllowedValuesActionsHub, WorkItemTypeFieldAllowedValuesStore
+    KeyName, WorkItemTypeFieldAllowedValuesActionsHub, WorkItemTypeFieldAllowedValuesStore
 } from "Library/Flux/WorkItemTypeFieldAllowedValues";
 import { WorkItemTypeFieldsExpandLevel } from "TFS/WorkItemTracking/Contracts";
 import * as WitClient from "TFS/WorkItemTracking/RestClient";
 
-export class WorkItemTypeFieldAllowedValuesActionsCreator implements IActionsCreator {
-    constructor(private _actionsHub: WorkItemTypeFieldAllowedValuesActionsHub, private _workItemTypeFieldAllowedValuesStore: WorkItemTypeFieldAllowedValuesStore) {}
+export class WorkItemTypeFieldAllowedValuesActionsCreator extends BaseActionsCreator {
+    constructor(private _actionsHub: WorkItemTypeFieldAllowedValuesActionsHub, private _workItemTypeFieldAllowedValuesStore: WorkItemTypeFieldAllowedValuesStore) {
+        super();
+    }
+
+    public getKey(): string {
+        return KeyName;
+    }
 
     public async initializeAllowedValues(workItemType: string, fieldRefName: string) {
         const key = `${workItemType}_${fieldRefName}`;

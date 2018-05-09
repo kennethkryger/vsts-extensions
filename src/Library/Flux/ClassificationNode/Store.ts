@@ -1,5 +1,5 @@
 import { BaseStore } from "Library/Flux/BaseStore";
-import { ClassificationNodeActionsHub } from "Library/Flux/ClassificationNode";
+import { ClassificationNodeActionsHub, KeyName } from "Library/Flux/ClassificationNode";
 import { WorkItemClassificationNode } from "TFS/WorkItemTracking/Contracts";
 
 export interface IClassificationNodeItem {
@@ -43,7 +43,7 @@ export class ClassificationNodeStore extends BaseStore<IClassificationNodeItem, 
     }
 
     public getKey(): string {
-        return "ClassificationNodeStore";
+        return KeyName;
     }
 
     protected initializeActionListeners() {

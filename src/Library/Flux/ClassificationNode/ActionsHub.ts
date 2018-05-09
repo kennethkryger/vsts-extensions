@@ -1,7 +1,13 @@
-import { Action, IActionsHub } from "Library/Flux/Action";
+import { Action, BaseActionsHub } from "Library/Flux/Action";
 import { WorkItemClassificationNode } from "TFS/WorkItemTracking/Contracts";
 
-export class ClassificationNodeActionsHub implements IActionsHub {
+export const KeyName = "ClassificationNode";
+
+export class ClassificationNodeActionsHub extends BaseActionsHub {
     public InitializeAreaPaths = new Action<WorkItemClassificationNode>();
     public InitializeIterationPaths = new Action<WorkItemClassificationNode>();
+
+    public getKey(): string {
+        return KeyName;
+    }
 }

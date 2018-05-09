@@ -1,5 +1,5 @@
 import { BaseStore } from "Library/Flux/BaseStore";
-import { WorkItemStateItemActionsHub } from "Library/Flux/WorkItemStateItem";
+import { KeyName, WorkItemStateItemActionsHub } from "Library/Flux/WorkItemStateItem";
 import { WorkItemStateColor } from "TFS/WorkItemTracking/Contracts";
 
 export class WorkItemStateItemStore extends BaseStore<IDictionaryStringTo<WorkItemStateColor[]>, WorkItemStateColor[], string, WorkItemStateItemActionsHub> {
@@ -13,7 +13,7 @@ export class WorkItemStateItemStore extends BaseStore<IDictionaryStringTo<WorkIt
     }
 
     public getKey(): string {
-        return "WorkItemStateItemStore";
+        return KeyName;
     }
 
     protected initializeActionListeners() {

@@ -1,11 +1,17 @@
-import { IActionsCreator } from "Library/Flux/Action";
-import { GitRepoActionsHub, GitRepoStore } from "Library/Flux/GitRepo";
+import { BaseActionsCreator } from "Library/Flux/Action";
+import { GitRepoActionsHub, GitRepoStore, KeyName } from "Library/Flux/GitRepo";
 import { localeIgnoreCaseComparer } from "Library/Utilities/String";
 import { GitRepository } from "TFS/VersionControl/Contracts";
 import * as GitClient from "TFS/VersionControl/GitRestClient";
 
-export class GitRepoActionsCreator implements IActionsCreator {
-    constructor(private _actionsHub: GitRepoActionsHub, private _gitRepoStore: GitRepoStore) {}
+export class GitRepoActionsCreator extends BaseActionsCreator {
+    constructor(private _actionsHub: GitRepoActionsHub, private _gitRepoStore: GitRepoStore) {
+        super();
+    }
+
+    public getKey(): string {
+        return KeyName;
+    }
 
     public async initializeGitRepos() {
         if (this._gitRepoStore.isLoaded()) {

@@ -27,8 +27,10 @@ export class Action<T> extends Observable<T> {
     }
 }
 
-// tslint:disable-next-line:no-empty-interface
-export interface IActionsHub {}
+export abstract class BaseActionsHub {
+    public abstract getKey(): string;
+}
 
-// tslint:disable-next-line:no-empty-interface
-export interface IActionsCreator {}
+export abstract class BaseActionsCreator {
+    public abstract getKey(): string;
+}
