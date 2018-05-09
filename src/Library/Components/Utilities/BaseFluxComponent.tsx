@@ -1,4 +1,4 @@
-import { BaseStore } from "Library/Flux/Stores/BaseStore";
+import { BaseStore } from "Library/Flux/BaseStore";
 import { BaseComponent, IBaseProps } from "OfficeFabric/Utilities";
 
 export interface IBaseFluxComponentProps extends IBaseProps {

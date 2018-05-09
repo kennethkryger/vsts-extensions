@@ -84,6 +84,7 @@
             "timeEnd",
             "trace"
         ],
+        "export-name": false,
         "no-construct": true,
         "no-debugger": true,
         "no-duplicate-variable": true,
