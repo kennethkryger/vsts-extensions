@@ -4,11 +4,9 @@ import {
     BaseFluxComponent, IBaseFluxComponentState
 } from "Library/Components/Utilities/BaseFluxComponent";
 import { ISimpleComboProps, SimpleCombo } from "Library/Components/VssCombo/SimpleCombo";
-import { WorkItemFieldActions } from "Library/Flux/Actions/WorkItemFieldActions";
-import { WorkItemTypeActions } from "Library/Flux/Actions/WorkItemTypeActions";
-import { BaseStore, StoreFactory } from "Library/Flux/Stores/BaseStore";
-import { WorkItemFieldStore } from "Library/Flux/Stores/WorkItemFieldStore";
-import { WorkItemTypeStore } from "Library/Flux/Stores/WorkItemTypeStore";
+import { BaseStore } from "Library/Flux/BaseStore";
+import { WorkItemFieldActionsCreator, WorkItemFieldStore } from "Library/Flux/WorkItemField";
+import { WorkItemTypeActionsCreator, WorkItemTypeStore } from "Library/Flux/WorkItemType";
 import { arrayEquals, contains } from "Library/Utilities/Array";
 import { isNullOrWhiteSpace, stringEquals } from "Library/Utilities/String";
 import { Spinner, SpinnerSize } from "OfficeFabric/Spinner";
@@ -19,6 +17,10 @@ export interface IWorkItemFieldPickerProps extends ISimpleComboProps<WorkItemFie
     allowedFieldTypes?: FieldType[];
     workItemType?: string;
     excludeFields?: string[];
+    fieldStore: WorkItemFieldStore;
+    fieldActionsCreator: WorkItemFieldActionsCreator;
+    workItemTypeStore: WorkItemTypeStore;
+    workItemTypeActionsCreator: WorkItemTypeActionsCreator;
 }
 
 export interface IWorkItemFieldPickerState extends IBaseFluxComponentState {
@@ -26,19 +28,16 @@ export interface IWorkItemFieldPickerState extends IBaseFluxComponentState {
 }
 
 export class WorkItemFieldPicker extends BaseFluxComponent<IWorkItemFieldPickerProps, IWorkItemFieldPickerState> {
-    private _fieldStore = StoreFactory.getInstance<WorkItemFieldStore>(WorkItemFieldStore);
-    private _workItemTypeStore = StoreFactory.getInstance<WorkItemTypeStore>(WorkItemTypeStore);
-
     public componentDidMount() {
         super.componentDidMount();
         let waitForStores = false;
 
-        if (!this._fieldStore.isLoaded()) {
-            WorkItemFieldActions.initializeWorkItemFields();
+        if (!this.props.fieldStore.isLoaded()) {
+            this.props.fieldActionsCreator.initializeWorkItemFields();
             waitForStores = true;
         }
-        if (!isNullOrWhiteSpace(this.props.workItemType) && !this._workItemTypeStore.isLoaded()) {
-            WorkItemTypeActions.initializeWorkItemTypes();
+        if (!isNullOrWhiteSpace(this.props.workItemType) && !this.props.workItemTypeStore.isLoaded()) {
+            this.props.workItemTypeActionsCreator.initializeWorkItemTypes();
             waitForStores = true;
         }
 
@@ -52,8 +51,8 @@ export class WorkItemFieldPicker extends BaseFluxComponent<IWorkItemFieldPickerP
     public componentWillReceiveProps(nextProps: IWorkItemFieldPickerProps, context?: any) {
         super.componentWillReceiveProps(nextProps, context);
 
-        if (!isNullOrWhiteSpace(nextProps.workItemType) && !this._workItemTypeStore.isLoaded()) {
-            WorkItemTypeActions.initializeWorkItemTypes();
+        if (!isNullOrWhiteSpace(nextProps.workItemType) && !this.props.workItemTypeStore.isLoaded()) {
+            this.props.workItemTypeActionsCreator.initializeWorkItemTypes();
             return;
         }
 
@@ -78,8 +77,8 @@ export class WorkItemFieldPicker extends BaseFluxComponent<IWorkItemFieldPickerP
         return <SimpleCombo {...props} />;
     }
 
-    protected getStores(): BaseStore<any, any, any>[] {
-        return [this._fieldStore, this._workItemTypeStore];
+    protected getStores(): BaseStore<any, any, any, any>[] {
+        return [this.props.fieldStore, this.props.workItemTypeStore];
     }
 
     protected getStoresState(): IWorkItemFieldPickerState {
@@ -89,15 +88,15 @@ export class WorkItemFieldPicker extends BaseFluxComponent<IWorkItemFieldPickerP
     }
 
     private _getAllowedFields(allowedFieldTypes: FieldType[], excludeFields: string[], workItemType: string): WorkItemField[] {
-        if (!this._fieldStore.isLoaded() || (!isNullOrWhiteSpace(workItemType) && !this._workItemTypeStore.isLoaded())) {
+        if (!this.props.fieldStore.isLoaded() || (!isNullOrWhiteSpace(workItemType) && !this.props.workItemTypeStore.isLoaded())) {
             return null;
         }
 
-        const allFields = this._fieldStore.getAll();
+        const allFields = this.props.fieldStore.getAll();
         return allFields.filter(f => {
             let witFields: string[];
-            if (!isNullOrWhiteSpace(workItemType) && this._workItemTypeStore.itemExists(workItemType)) {
-                witFields = this._workItemTypeStore.getItem(workItemType).fields.map(wf => wf.referenceName);
+            if (!isNullOrWhiteSpace(workItemType) && this.props.workItemTypeStore.itemExists(workItemType)) {
+                witFields = this.props.workItemTypeStore.getItem(workItemType).fields.map(wf => wf.referenceName);
             }
 
             return (!allowedFieldTypes || allowedFieldTypes.indexOf(f.type) !== -1)

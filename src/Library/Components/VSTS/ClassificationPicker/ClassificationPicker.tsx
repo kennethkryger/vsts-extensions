@@ -4,11 +4,10 @@ import {
     BaseFluxComponent, IBaseFluxComponentState
 } from "Library/Components/Utilities/BaseFluxComponent";
 import { ITreeComboProps, TreeCombo } from "Library/Components/VssCombo/TreeCombo";
-import { ClassificationNodeActions } from "Library/Flux/Actions/ClassificationNodeActions";
-import { BaseStore, StoreFactory } from "Library/Flux/Stores/BaseStore";
+import { BaseStore } from "Library/Flux/BaseStore";
 import {
-    ClassificationNodeKey, ClassificationNodeStore
-} from "Library/Flux/Stores/ClassificationNodeStore";
+    ClassificationNodeActionsCreator, ClassificationNodeKey, ClassificationNodeStore
+} from "Library/Flux/ClassificationNode";
 import { isNullOrEmpty } from "Library/Utilities/String";
 import { Spinner, SpinnerSize } from "OfficeFabric/Spinner";
 import { css } from "OfficeFabric/Utilities";
@@ -17,6 +16,8 @@ import { TreeNode } from "VSS/Controls/TreeView";
 
 export interface IClassificationPickerProps extends ITreeComboProps {
     keyType: ClassificationNodeKey;
+    store: ClassificationNodeStore;
+    actionsCreator: ClassificationNodeActionsCreator;
 }
 
 export interface IClassificationPickerState extends IBaseFluxComponentState {
@@ -25,8 +26,6 @@ export interface IClassificationPickerState extends IBaseFluxComponentState {
 }
 
 export class ClassificationPicker extends BaseFluxComponent<IClassificationPickerProps, IClassificationPickerState> {
-    private _classificationNodeStore = StoreFactory.getInstance<ClassificationNodeStore>(ClassificationNodeStore);
-
     public componentDidMount() {
         super.componentDidMount();
         this._initializeNodes(this.props.keyType);
@@ -66,7 +65,7 @@ export class ClassificationPicker extends BaseFluxComponent<IClassificationPicke
 
     protected getStoresState(): IClassificationPickerState {
         return {
-            treeNode: this._getTreeNode(this._classificationNodeStore.getItem(this.props.keyType), null, 1)
+            treeNode: this._getTreeNode(this.props.store.getItem(this.props.keyType), null, 1)
         };
     }
 
@@ -76,21 +75,21 @@ export class ClassificationPicker extends BaseFluxComponent<IClassificationPicke
         };
     }
 
-    protected getStores(): BaseStore<any, any, any>[] {
-        return [this._classificationNodeStore];
+    protected getStores(): BaseStore<any, any, any, any>[] {
+        return [this.props.store];
     }
 
     private _initializeNodes(keyType: ClassificationNodeKey) {
-        if (this._classificationNodeStore.isLoaded(keyType)) {
+        if (this.props.store.isLoaded(keyType)) {
             this.setState({
-                treeNode: this._getTreeNode(this._classificationNodeStore.getItem(keyType), null, 1)
+                treeNode: this._getTreeNode(this.props.store.getItem(keyType), null, 1)
             });
         }
         else if (keyType === ClassificationNodeKey.Area) {
-            ClassificationNodeActions.initializeAreaPaths();
+            this.props.actionsCreator.initializeAreaPaths();
         }
         else {
-            ClassificationNodeActions.initializeIterationPaths();
+            this.props.actionsCreator.initializeIterationPaths();
         }
     }
 
@@ -127,10 +126,10 @@ export class ClassificationPicker extends BaseFluxComponent<IClassificationPicke
             return this.props.required ? "A value is required." : null;
         }
         else if (this.props.keyType === ClassificationNodeKey.Area) {
-            return !this._classificationNodeStore.getAreaPathNode(nodePath) ? "This area path doesn't exist in the current project" : null;
+            return !this.props.store.getAreaPathNode(nodePath) ? "This area path doesn't exist in the current project" : null;
         }
         else if (this.props.keyType === ClassificationNodeKey.Iteration) {
-            return !this._classificationNodeStore.getIterationPathNode(nodePath) ? "This iteration path doesn't exist in the current project" : null;
+            return !this.props.store.getIterationPathNode(nodePath) ? "This iteration path doesn't exist in the current project" : null;
         }
 
         return null;

@@ -4,29 +4,31 @@ import {
     BaseFluxComponent, IBaseFluxComponentState
 } from "Library/Components/Utilities/BaseFluxComponent";
 import { ISimpleComboProps, SimpleCombo } from "Library/Components/VssCombo/SimpleCombo";
-import { TeamActions } from "Library/Flux/Actions/TeamActions";
-import { BaseStore, StoreFactory } from "Library/Flux/Stores/BaseStore";
-import { TeamStore } from "Library/Flux/Stores/TeamStore";
+import { BaseStore } from "Library/Flux/BaseStore";
+import { TeamActionsCreator, TeamStore } from "Library/Flux/Team";
 import { Spinner, SpinnerSize } from "OfficeFabric/Spinner";
 import { css } from "OfficeFabric/Utilities";
 import { WebApiTeam } from "TFS/Core/Contracts";
+
+export interface ITeamPickerProps extends ISimpleComboProps<WebApiTeam> {
+    store: TeamStore;
+    actionsCreator: TeamActionsCreator;
+}
 
 export interface ITeamPickerState extends IBaseFluxComponentState {
     allTeams?: WebApiTeam[];
 }
 
-export class TeamPicker extends BaseFluxComponent<ISimpleComboProps<WebApiTeam>, ITeamPickerState> {
-    private _teamStore = StoreFactory.getInstance<TeamStore>(TeamStore);
-
+export class TeamPicker extends BaseFluxComponent<ITeamPickerProps, ITeamPickerState> {
     public componentDidMount() {
         super.componentDidMount();
-        if (this._teamStore.isLoaded()) {
+        if (this.props.store.isLoaded()) {
             this.setState({
-                allTeams: this._teamStore.getAll()
+                allTeams: this.props.store.getAll()
             });
         }
         else {
-            TeamActions.initializeTeams();
+            this.props.actionsCreator.initializeTeams();
         }
     }
 
@@ -46,13 +48,13 @@ export class TeamPicker extends BaseFluxComponent<ISimpleComboProps<WebApiTeam>,
         return <SimpleCombo {...props} />;
     }
 
-    protected getStores(): BaseStore<any, any, any>[] {
-        return [this._teamStore];
+    protected getStores(): BaseStore<any, any, any, any>[] {
+        return [this.props.store];
     }
 
     protected getStoresState(): ITeamPickerState {
         return {
-            allTeams: this._teamStore.getAll()
+            allTeams: this.props.store.getAll()
         };
     }
 }

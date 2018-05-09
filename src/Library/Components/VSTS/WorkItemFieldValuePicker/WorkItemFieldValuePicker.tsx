@@ -14,14 +14,11 @@ import { DatePickerCombo } from "Library/Components/VssCombo/DatePickerCombo";
 import { SimpleCombo } from "Library/Components/VssCombo/SimpleCombo";
 import { ClassificationPicker } from "Library/Components/VSTS/ClassificationPicker";
 import { WorkItemTagPicker } from "Library/Components/VSTS/WorkItemTagPicker";
+import { BaseStore } from "Library/Flux/BaseStore";
+import { ClassificationNodeKey } from "Library/Flux/ClassificationNode";
 import {
-    WorkItemTypeFieldAllowedValuesActions
-} from "Library/Flux/Actions/WorkItemTypeFieldAllowedValuesActions";
-import { BaseStore, StoreFactory } from "Library/Flux/Stores/BaseStore";
-import { ClassificationNodeKey } from "Library/Flux/Stores/ClassificationNodeStore";
-import {
-    WorkItemTypeFieldAllowedValuesStore
-} from "Library/Flux/Stores/WorkItemTypeFieldAllowedValuesStore";
+    WorkItemTypeFieldAllowedValuesActionsCreator, WorkItemTypeFieldAllowedValuesStore
+} from "Library/Flux/WorkItemTypeFieldAllowedValues";
 import { isNullOrWhiteSpace, stringEquals } from "Library/Utilities/String";
 import { Checkbox } from "OfficeFabric/Checkbox";
 import { css } from "OfficeFabric/Utilities";
