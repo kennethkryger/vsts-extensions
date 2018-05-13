@@ -1,29 +1,76 @@
 import { IObservable, Observable } from "VSSUI/Utilities/Observable";
 
 /**
- * An IVssObservableService<T> is a standard service that offers an observable as part
- * of the service itself. If the service wants to publish events this is an easy
- * model to follow.
+ * When an action occurs on an IObservableCollection the event should take the form
+ * of an ICollectionEntry<T> where T is the type of object being stored in
+ * the collection.
  */
-export interface IAppService<T> extends IObservable<T> {
-    /**
-     * serviceStart is called when a service is retrieved from the IAppContext
-     * and the service implements IAppService.
-     */
-    serviceStart?(pageContext: IAppContext): void;
-
-    /**
-     * serviceEnd is called when the pageContext is being unloaded, this gives services
-     * the opportunity to clean up anything they need to.
-     */
-    serviceEnd?(pageContext: IAppContext): void;
+export interface ICollectionEntry<T> {
+    key: string;
+    value?: T;
 }
 
 /**
- * An ObservableService is a service that allows callers to signup for notifications when
- * data within the service is changed.
+ * An Observable collection is used to track a set of objects by name and offer notifications
+ * for consumers when the collection has changed.
+ *
+ * EventTypes:
+ *  add - ICollectionEvent<V>
  */
-export abstract class AppService<T> extends Observable<T> implements IAppService<T> {
+export interface IObservableCollection<V> extends IObservable<ICollectionEntry<V>> {
+
+    /**
+     * Adding an object to the collection will notify all observers of the collection
+     * and keep track of the objects.
+     *
+     * @param objectName - name of the object be registered.
+     *
+     * @param objectDefinition - details of the object being registered
+     */
+    add(objectName: string, objectDefinition: V): void;
+
+    /**
+     * get is used to retrieve the objectDefinition for named object.
+     *
+     * @param objectName - name of the object to get the definition.
+     */
+    get(objectName: string): V | undefined;
+
+    /**
+     * A read-only collection of the existing objects.
+     */
+    keys(): string[];
+}
+
+/**
+ * An ObservableCollection can be used to key a named collection of objects
+ * and offer an observable endpoint.
+ */
+export class ObservableCollection<V> extends Observable<ICollectionEntry<V>> implements IObservableCollection<V> {
+    private objects: { [objectName: string]: V } = {};
+
+    public add(objectName: string, objectDefinition: V): void {
+        if (!this.objects.hasOwnProperty(objectName)) {
+            this.objects[objectName] = objectDefinition;
+            this.notify({ key: objectName, value: objectDefinition }, "add");
+        }
+    }
+
+    public get(objectName: string): V | undefined {
+        return this.objects[objectName];
+    }
+
+    public keys(): string[] {
+        return Object.keys(this.objects);
+    }
+}
+
+export interface IAppService {
+    serviceStart?(pageContext: IAppContext): void;
+    serviceEnd?(pageContext: IAppContext): void;
+}
+
+export abstract class AppService implements IAppService {
     protected pageContext: IAppContext;
 
     public serviceStart(pageContext: IAppContext): void {
@@ -31,7 +78,7 @@ export abstract class AppService<T> extends Observable<T> implements IAppService
     }
 
     public serviceEnd(_pageContext: IAppContext): void {
-        // override
+        // dispose
     }
 
     public serviceRestart(pageContext: IAppContext): void {
@@ -40,169 +87,101 @@ export abstract class AppService<T> extends Observable<T> implements IAppService
 }
 
 /**
- * The IAppContext is at the core of the VSS platform. It acts as the
- * service provider for the page. Callers should register and interact with
- * API's through the pageContext instead of dealing directly with instances.
- * This supports a better seperation of concerns and encapsulation within
- * service objects through interfaces.
+ * An IAppObservableService<T> is a standard service that offers an observable as part
+ * of the service itself. If the service wants to publish events this is an easy
+ * model to follow.
  */
-export interface IAppContext {
-
-    /**
-     * Get a service by service name. The caller supplies the 'expected' type and
-     * this method returns it as this type. There is no actual validation so it is
-     * the responsibility of the caller to ensure the type is correct.
-     *
-     * @param serviceName - name of the service to retrieve.
-     */
-    getService<T extends IAppService>(serviceName: string): T;
-
-    /**
-     * For callers that want a unique number for this page. They can call getUniqueNumber().
-     */
-    getUniqueNumber(): number;
+export interface IAppObservableService<T> extends IAppService, IObservable<T> {
 }
 
 /**
- * Core WebContext used by the web platform to manage the page being executed
+ * An ObservableService is a service that allows callers to signup for notifications when
+ * data within the service is changed.
  */
+export abstract class AppObservableService<T> extends AppService implements IAppObservableService<T> {
+    private observable = new Observable<T>();
+
+    public subscribe(observer: (value: T, action: string) => void, action?: string): void {
+        this.observable.subscribe(observer, action);
+    }
+
+    public unsubscribe(observer: (value: T, action: string) => void, action?: string): void {
+        this.observable.unsubscribe(observer, action);
+    }
+
+    protected _notify(value: T, action: string, persistEvent?: boolean) {
+        this.observable.notify(value, action, persistEvent);
+    }
+}
+
+/**
+ * A service factory is the method used to create and initialize an IAppService.
+ */
+export type ServiceFactory = new () => IAppService;
+
+/**
+ * Details that describe how a service is created and its capabilities.
+ */
+export interface IServiceDefinition {
+    /**
+     * This is the constructor used to create an instance of the service.
+     */
+    serviceFactory: ServiceFactory;
+}
+
+/**
+ * Create and expose the service registry to the platform for developers to register
+ * their services.
+ */
+export const Services: IObservableCollection<IServiceDefinition> = new ObservableCollection<IServiceDefinition>();
+
+export interface IAppContext {
+    getService<T extends IAppService>(serviceName: string): T;
+}
+
 export class AppContext implements IAppContext {
-
-    // State information used to track services being initialized and destroyed.
     private initializatonInProgress: { [serviceName: string]: boolean } = {};
-    private contextUnloadInProgress: boolean;
-
-    // Details about the registered and active services.
     private serviceInstances: { [serviceName: string]: IAppService } = {};
-    private subscriber: (entry: ICollectionEntry<IServiceDefinition>, action: string) => void;
     private services: IObservableCollection<IServiceDefinition>;
-
-    // Unique counter for the pageContext.
-    private uniqueNumber: number = 0;
 
     constructor(serviceRegistry: IObservableCollection<IServiceDefinition>) {
         this.services = serviceRegistry;
-
-        // Start any new services that are registered after context creation that are startup
-        this.subscriber = (entry: ICollectionEntry<IServiceDefinition>, action: string) => {
-            if (action === "add") {
-                if (entry && entry.value && entry.value.options && (entry.value.options & ServiceOptions.Startup) === ServiceOptions.Startup) {
-                    this.getService<IAppService>(entry.key);
-                }
-            }
-        };
-
-        // Subscribe to service changes to ensure we start any persistant ones upon registration
-        this.services.subscribe(this.subscriber);
-
-        // Once the initial document is loaded we will setup of FPS navigation handler.
-        document.addEventListener("DOMContentLoaded", () => {
-
-            // Signup for FPS navigation events. We will use it to reset the service instances
-            // associated with the current page.
-            document.body.addEventListener("fpsLoaded", (event: FastPageSwitchEvent<FastPageSwitchEventLoadedDetail>) => {
-                const persistantInstances: { [serviceName: string]: IAppService } = {};
-
-                // Mark the context as being unloaded while we shutdown existing services.
-                this.contextUnloadInProgress = true;
-
-                // Go through all active services at this point in time.
-                for (const serviceName of Object.keys(this.serviceInstances)) {
-                    const serviceDefinition = this.services.get(serviceName);
-
-                    // Save any persistant services for restart, and clear any non persistant services.
-                    if (serviceDefinition && serviceDefinition.options && (serviceDefinition.options & ServiceOptions.Persistant) === ServiceOptions.Persistant) {
-                        persistantInstances[serviceName] = this.serviceInstances[serviceName];
-                    }
-                    else {
-
-                        // If the service implemented serviceEnd we will call it before removing from the context.
-                        const registeredService = this.serviceInstances[serviceName];
-                        if (registeredService._serviceEnd) {
-                            try {
-                                registeredService._serviceEnd(this);
-                            }
-                            catch (exception) {
-                                console.error(exception);
-                            }
-                        }
-
-                        delete this.serviceInstances[serviceName];
-                    }
-                }
-
-                this.contextUnloadInProgress = false;
-
-                // First restart any services that already exist. This may get dependent services that are
-                // marked as startup created.
-                for (let serviceName in persistantInstances) {
-                    const serviceInstance = persistantInstances[serviceName] as IVssPersistantService;
-
-                    if (serviceInstance && serviceInstance._serviceRestart) {
-                        serviceInstance._serviceRestart(this);
-                    }
-                }
-
-                // Now create any services that are marked as startup services.
-                for (let serviceName of this.services.keys()) {
-                    const serviceDefinition = this.services.get(serviceName);
-
-                    if (serviceDefinition && serviceDefinition.options && (serviceDefinition.options & ServiceOptions.Startup) === ServiceOptions.Startup) {
-                        if (!this.serviceInstances[serviceName]) {
-                            this._loadService<IAppService>(serviceName, serviceDefinition);
-                        }
-                    }
-                }
-            });
-        });
     }
 
     public getService<T extends IAppService>(serviceName: string): T {
+        let registeredService = this.serviceInstances[serviceName];
 
-        if (!this.contextUnloadInProgress) {
-            let registeredService = this.serviceInstances[serviceName];
-
-            // If no service is available, we will start an instance of the service.
-            if (!registeredService) {
-                const serviceDefinition = this.services.get(serviceName);
-                if (serviceDefinition) {
-                    if (!serviceDefinition.options || (serviceDefinition.options & ServiceOptions.Private) !== ServiceOptions.Private) {
-                        registeredService = this._loadService(serviceName, serviceDefinition);
-                    }
-                }
-
-                if (!registeredService) {
-                    throw new Error(`No service has been registered with the name "${serviceName}".`);
-                }
+        // If no service is available, we will start an instance of the service.
+        if (!registeredService) {
+            const serviceDefinition = this.services.get(serviceName);
+            if (serviceDefinition) {
+                registeredService = this._loadService(serviceName, serviceDefinition);
             }
 
-            return registeredService as T;
+            if (!registeredService) {
+                throw new Error(`No service has been registered with the name "${serviceName}".`);
+            }
         }
-        else {
-            throw new Error("Services can't be requested while a shutdown is in progress");
-        }
-    }
 
-    public getUniqueNumber(): number {
-        return ++this.uniqueNumber;
+        return registeredService as T;
     }
 
     private _loadService<T>(serviceName: string, serviceDefinition: IServiceDefinition): T {
         let registeredService: IAppService;
 
         if (this.initializatonInProgress[serviceName]) {
-            throw "Unable to initialize service due to cyclic dependency: " + serviceName;
+            throw `Unable to initialize service due to cyclic dependency: ${serviceName}`;
         }
 
         try {
 
-            // Mark this service as initialization in progress to detect cyclic dependencies in _serviceStart.
+            // Mark this service as initialization in progress to detect cyclic dependencies in serviceStart.
             this.initializatonInProgress[serviceName] = true;
 
             // Create and initialize a new instance of the service.
             registeredService = new serviceDefinition.serviceFactory();
-            if (registeredService._serviceStart) {
-                registeredService._serviceStart(this);
+            if (registeredService.serviceStart) {
+                registeredService.serviceStart(this);
             }
         }
         catch (exception) {

@@ -82,7 +82,7 @@ export abstract class BaseStore<TCollection, TItem, TKey> extends Observable<voi
 export namespace StoreFactory {
     const storeInstances: IDictionaryStringTo<BaseStore<any, any, any>> = {};
 
-    export function getInstance<TStore extends BaseStore<any, any, any>>(storeType: {new(): TStore; }): TStore {
+    export function getInstance<TStore extends BaseStore<any, any, any>>(storeType: {new(): TStore }): TStore {
         const instance = new storeType();
         if (!storeInstances[instance.getKey()]) {
             storeInstances[instance.getKey()] = instance;
