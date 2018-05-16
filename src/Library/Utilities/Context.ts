@@ -93,27 +93,27 @@ export class ObservableCollection<V> extends Observable<ICollectionEntry<V>> imp
     }
 }
 
-export interface IVssService {
-    serviceStart?(pageContext: IVssPageContext): void;
-    serviceEnd?(pageContext: IVssPageContext): void;
+export interface IAppService {
+    serviceStart?(pageContext: IAppPageContext): void;
+    serviceEnd?(pageContext: IAppPageContext): void;
 }
 
-export abstract class VssService implements IVssService {
-    protected pageContext: IVssPageContext;
+export abstract class AppService implements IAppService {
+    protected pageContext: IAppPageContext;
 
-    public serviceStart(pageContext: IVssPageContext): void {
+    public serviceStart(pageContext: IAppPageContext): void {
         this.pageContext = pageContext;
     }
 
-    public serviceEnd(_pageContext: IVssPageContext): void {
+    public serviceEnd(_pageContext: IAppPageContext): void {
         // dispose
     }
 }
 
-export interface IVssObservableService<T> extends IVssService, IObservable<T> {
+export interface IAppObservableService<T> extends IAppService, IObservable<T> {
 }
 
-export abstract class VssObservableService<T> extends VssService implements IVssObservableService<T> {
+export abstract class AppObservableService<T> extends AppService implements IAppObservableService<T> {
     private observable = new Observable<T>();
 
     public subscribe(observer: (value: T, action: string) => void, action?: string): void {
@@ -124,12 +124,12 @@ export abstract class VssObservableService<T> extends VssService implements IVss
         this.observable.unsubscribe(observer, action);
     }
 
-    protected _notify(value: T, action: string, persistEvent?: boolean) {
+    protected notify(value: T, action: string, persistEvent?: boolean) {
         this.observable.notify(value, action, persistEvent);
     }
 }
 
-export type ServiceFactory = new () => IVssService;
+export type ServiceFactory = new () => IAppService;
 
 export interface IServiceDefinition {
     serviceFactory: ServiceFactory;
@@ -137,21 +137,21 @@ export interface IServiceDefinition {
 
 export const Services: IObservableCollection<IServiceDefinition> = new ObservableCollection<IServiceDefinition>();
 
-export interface IVssPageContext {
-    getService<T extends IVssService>(serviceName: string): T;
+export interface IAppPageContext {
+    getService<T extends IAppService>(serviceName: string): T;
 }
 
-class VssPageContext implements IVssPageContext {
+class AppPageContext implements IAppPageContext {
     private initializatonInProgress: { [serviceName: string]: boolean } = {};
 
-    private serviceInstances: { [serviceName: string]: IVssService } = {};
+    private serviceInstances: { [serviceName: string]: IAppService } = {};
     private services: IObservableCollection<IServiceDefinition>;
 
     constructor(serviceRegistry: IObservableCollection<IServiceDefinition>) {
         this.services = serviceRegistry;
     }
 
-    public getService<T extends IVssService>(serviceName: string): T {
+    public getService<T extends IAppService>(serviceName: string): T {
         let registeredService = this.serviceInstances[serviceName];
 
         // If no service is available, we will start an instance of the service.
@@ -170,7 +170,7 @@ class VssPageContext implements IVssPageContext {
     }
 
     private _loadService<T>(serviceName: string, serviceDefinition: IServiceDefinition): T {
-        let registeredService: IVssService;
+        let registeredService: IAppService;
 
         if (this.initializatonInProgress[serviceName]) {
             throw `Unable to initialize service due to cyclic dependency: ${serviceName}`;
@@ -202,4 +202,4 @@ class VssPageContext implements IVssPageContext {
 /**
  * Context for the currently executing page
  */
-export const PageContext: IVssPageContext = new VssPageContext(Services);
+export const PageContext: IAppPageContext = new AppPageContext(Services);
