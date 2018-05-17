@@ -221,11 +221,11 @@ export class BugBashItemEditor extends BaseFluxComponent<IBugBashItemEditorProps
         );
     }
 
-    protected getStores(): BaseStore<any, any, any>[] {
+    protected getObservableDataServices(): BaseStore<any, any, any>[] {
         return [StoresHub.bugBashItemCommentStore, StoresHub.bugBashItemStore, StoresHub.errorMessageStore];
     }
 
-    protected getStoresState(): IBugBashItemEditorState {
+    protected getDataServiceState(): IBugBashItemEditorState {
         return {
             comments: StoresHub.bugBashItemCommentStore.getItem(this.props.bugBashItem.id),
             commentsLoading: StoresHub.bugBashItemCommentStore.isLoading(this.props.bugBashItem.id),

@@ -27,7 +27,7 @@ export abstract class BaseDataService<TCollection, TItem, TKey> extends AppObser
 
     public isLoading(key?: TKey): boolean {
         if (key) {
-            return this._isLoading || this._isItemLoadingMap[this.convertItemKeyToString(key)] === true;
+            return this._isLoading || this._isItemLoadingMap[this.convertItemKeyToString(key).toLowerCase()] === true;
         }
         else {
             return this._isLoading;
@@ -36,18 +36,19 @@ export abstract class BaseDataService<TCollection, TItem, TKey> extends AppObser
 
     public setLoading(loading: boolean, key?: TKey) {
         if (key) {
+            const stringKey = this.convertItemKeyToString(key).toLowerCase();
             if (loading) {
-                this._isItemLoadingMap[this.convertItemKeyToString(key)] = true;
+                this._isItemLoadingMap[stringKey] = true;
             }
             else {
-                delete this._isItemLoadingMap[this.convertItemKeyToString(key)];
+                delete this._isItemLoadingMap[stringKey];
             }
         }
         else {
             this._isLoading = loading;
         }
 
-        this.emitChanged();
+        this._notifyChanged();
     }
 
     public itemExists(key: TKey): boolean {
@@ -58,19 +59,11 @@ export abstract class BaseDataService<TCollection, TItem, TKey> extends AppObser
         return this.items;
     }
 
-    public addChangedListener(listener: () => void) {
-        this.subscribe(listener);
-    }
-
-    public removeChangedListener(listener: () => void) {
-        this.unsubscribe(listener);
-    }
-
     public abstract getItem(key: TKey): TItem;
     public abstract getKey(): string;
 
-    protected emitChanged() {
-        this.notify(null, null);
+    protected _notifyChanged() {
+        this.notify(null, "dataChanged");
     }
 
     protected abstract convertItemKeyToString(key: TKey): string;

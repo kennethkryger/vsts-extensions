@@ -78,11 +78,11 @@ export class WorkItemFieldPicker extends BaseFluxComponent<IWorkItemFieldPickerP
         return <SimpleCombo {...props} />;
     }
 
-    protected getStores(): BaseStore<any, any, any>[] {
+    protected getObservableDataServices(): BaseStore<any, any, any>[] {
         return [this._fieldStore, this._workItemTypeStore];
     }
 
-    protected getStoresState(): IWorkItemFieldPickerState {
+    protected getDataServiceState(): IWorkItemFieldPickerState {
         return {
             allowedFields: this._getAllowedFields(this.props.allowedFieldTypes, this.props.excludeFields, this.props.workItemType)
         };

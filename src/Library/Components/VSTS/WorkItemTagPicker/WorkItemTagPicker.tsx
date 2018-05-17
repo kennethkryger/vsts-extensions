@@ -89,13 +89,13 @@ export class WorkItemTagPicker extends BaseFluxComponent<IWorkItemTagPickerProps
         );
     }
 
-    protected getStoresState(): IWorkItemTagPickerState {
+    protected getDataServiceState(): IWorkItemTagPickerState {
         return {
             allTags: this._workItemTagStore.getAll()
         };
     }
 
-    protected getStores(): BaseStore<any, any, any>[] {
+    protected getObservableDataServices(): BaseStore<any, any, any>[] {
         return [this._workItemTagStore];
     }
 

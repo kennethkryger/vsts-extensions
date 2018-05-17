@@ -255,11 +255,11 @@ export class BugBashView extends BaseFluxComponent<IBugBashViewProps, IBugBashVi
         };
     }
 
-    protected getStores(): BaseStore<any, any, any>[] {
+    protected getObservableDataServices(): BaseStore<any, any, any>[] {
         return [StoresHub.bugBashStore, StoresHub.bugBashItemStore, StoresHub.longTextStore];
     }
 
-    protected getStoresState(): IBugBashViewState {
+    protected getDataServiceState(): IBugBashViewState {
         const bugBashItems = StoresHub.bugBashItemStore.isLoaded() ? StoresHub.bugBashItemStore.getFilteredItems() : null;
         const bugBash = this.props.bugBashId ? StoresHub.bugBashStore.getItem(this.props.bugBashId) : StoresHub.bugBashStore.getNewBugBash();
 

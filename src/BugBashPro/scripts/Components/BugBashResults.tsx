@@ -137,11 +137,11 @@ export class BugBashResults extends BaseFluxComponent<IBugBashResultsProps, IBug
         };
     }
 
-    protected getStores(): BaseStore<any, any, any>[] {
+    protected getObservableDataServices(): BaseStore<any, any, any>[] {
         return [StoresHub.bugBashItemStore, StoresHub.teamStore, StoresHub.workItemStore];
     }
 
-    protected getStoresState(): IBugBashResultsState {
+    protected getDataServiceState(): IBugBashResultsState {
         const bugBashItems = StoresHub.bugBashItemStore.getFilteredItems();
 
         let selectedBugBashItem = null;

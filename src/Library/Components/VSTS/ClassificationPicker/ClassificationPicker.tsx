@@ -64,7 +64,7 @@ export class ClassificationPicker extends BaseFluxComponent<IClassificationPicke
         return <TreeCombo {...props} />;
     }
 
-    protected getStoresState(): IClassificationPickerState {
+    protected getDataServiceState(): IClassificationPickerState {
         return {
             treeNode: this._getTreeNode(this._classificationNodeStore.getItem(this.props.keyType), null, 1)
         };
@@ -76,7 +76,7 @@ export class ClassificationPicker extends BaseFluxComponent<IClassificationPicke
         };
     }
 
-    protected getStores(): BaseStore<any, any, any>[] {
+    protected getObservableDataServices(): BaseStore<any, any, any>[] {
         return [this._classificationNodeStore];
     }
 

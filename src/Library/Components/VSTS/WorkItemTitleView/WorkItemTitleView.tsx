@@ -93,11 +93,11 @@ export class WorkItemTitleView extends BaseFluxComponent<IWorkItemTitleViewProps
         this.state = { workItemType: null };
     }
 
-    protected getStores(): BaseStore<any, any, any>[] {
+    protected getObservableDataServices(): BaseStore<any, any, any>[] {
         return [this._workItemTypeStore];
     }
 
-    protected getStoresState(): IWorkItemTitleViewState {
+    protected getDataServiceState(): IWorkItemTitleViewState {
         return {
             workItemType: this._workItemTypeStore.isLoaded() ? this._workItemTypeStore.getItem(this.props.workItemType) : null
         };

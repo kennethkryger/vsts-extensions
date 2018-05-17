@@ -195,11 +195,11 @@ export class RelatedWits extends BaseFluxComponent<IBaseFluxComponentProps, IRel
         };
     }
 
-    protected getStores(): BaseStore<any, any, any>[] {
+    protected getObservableDataServices(): BaseStore<any, any, any>[] {
         return [StoresHub.relatedWorkItemsStore];
     }
 
-    protected getStoresState(): IRelatedWitsState {
+    protected getDataServiceState(): IRelatedWitsState {
         return {
             workItems: StoresHub.relatedWorkItemsStore.isLoading() ? null : StoresHub.relatedWorkItemsStore.getFilteredItems()
         };

@@ -1,4 +1,4 @@
-import { BaseStore } from "Library/Flux/Stores/BaseStore";
+import { BaseDataService } from "Library/Services/BaseDataService";
 import { BaseComponent, IBaseProps } from "OfficeFabric/Utilities";
 
 export interface IBaseFluxComponentProps extends IBaseProps {
@@ -17,23 +17,23 @@ export class BaseFluxComponent<TProps extends IBaseFluxComponentProps, TState ex
 
     public componentDidMount() {
         super.componentDidMount();
-        for (const store of this.getStores()) {
-            store.addChangedListener(this._onStoreChanged);
+        for (const dataService of this.getObservableDataServices()) {
+            dataService.subscribe(this._onDataChanged, "dataChanged");
         }
     }
 
     public componentWillUnmount() {
         super.componentWillUnmount();
-        for (const store of this.getStores()) {
-            store.removeChangedListener(this._onStoreChanged);
+        for (const dataService of this.getObservableDataServices()) {
+            dataService.subscribe(this._onDataChanged, "dataChanged");
         }
     }
 
-    protected getStores(): BaseStore<any, any, any>[] {
+    protected getObservableDataServices(): BaseDataService<any, any, any>[] {
         return [];
     }
 
-    protected getStoresState(): TState {
+    protected getDataServiceState(): TState {
         return {} as TState;
     }
 
@@ -41,8 +41,8 @@ export class BaseFluxComponent<TProps extends IBaseFluxComponentProps, TState ex
         this.state = {} as TState;
     }
 
-    private _onStoreChanged = () => {
-        const newStoreState = this.getStoresState();
-        this.setState(newStoreState);
+    private _onDataChanged = () => {
+        const newDataState = this.getDataServiceState();
+        this.setState(newDataState);
     }
 }

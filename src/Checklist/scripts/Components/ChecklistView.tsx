@@ -117,11 +117,11 @@ export class ChecklistView extends AutoResizableComponent<IChecklistViewProps, I
         };
     }
 
-    protected getStores(): BaseStore<any, any, any>[] {
+    protected getObservableDataServices(): BaseStore<any, any, any>[] {
         return [StoresHub.checklistStore, StoresHub.errorMessageStore];
     }
 
-    protected getStoresState(): IChecklistViewState {
+    protected getDataServiceState(): IChecklistViewState {
         const {workItemId} = this.props;
         const checklists = this._getChecklists(workItemId);
         const error = StoresHub.errorMessageStore.getItem("ChecklistError");

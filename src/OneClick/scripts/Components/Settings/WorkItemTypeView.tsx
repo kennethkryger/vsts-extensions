@@ -85,7 +85,7 @@ export class WorkItemTypeView extends BaseFluxComponent<IWorkItemTypeViewProps, 
         }
     }
 
-    protected getStoresState(): IWorkItemTypeViewState {
+    protected getDataServiceState(): IWorkItemTypeViewState {
         const workItemTypeEnabled = StoresHub.settingsStore.getItem<boolean>(SettingKey.WorkItemTypeEnabled);
         return {
             loading: workItemTypeEnabled == null,
@@ -93,7 +93,7 @@ export class WorkItemTypeView extends BaseFluxComponent<IWorkItemTypeViewProps, 
         } as IWorkItemTypeViewState;
     }
 
-    protected getStores(): BaseStore<any, any, any>[] {
+    protected getObservableDataServices(): BaseStore<any, any, any>[] {
         return [StoresHub.settingsStore];
     }
 

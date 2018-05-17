@@ -167,11 +167,11 @@ export class RuleGroupView extends BaseFluxComponent<IRuleGroupViewProps, IRuleG
         };
     }
 
-    protected getStores(): BaseStore<any, any, any>[] {
+    protected getObservableDataServices(): BaseStore<any, any, any>[] {
         return [StoresHub.ruleGroupStore, StoresHub.settingsStore, StoresHub.ruleStore];
     }
 
-    protected getStoresState(): IRuleGroupViewState {
+    protected getDataServiceState(): IRuleGroupViewState {
         const userSubscriptions = StoresHub.settingsStore.getItem<string[]>(SettingKey.UserSubscriptions);
         const personalRulesEnabled = StoresHub.settingsStore.getItem<boolean>(SettingKey.PersonalRulesEnabled);
         const globalRulesEnabled = StoresHub.settingsStore.getItem<boolean>(SettingKey.GlobalRulesEnabled);

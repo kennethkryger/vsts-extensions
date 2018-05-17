@@ -131,11 +131,11 @@ export class App extends BaseFluxComponent<IBaseFluxComponentProps, IAppState> {
         };
     }
 
-    protected getStores(): BaseStore<any, any, any>[] {
+    protected getObservableDataServices(): BaseStore<any, any, any>[] {
         return [StoresHub.userSettingsStore];
     }
 
-    protected getStoresState(): IAppState {
+    protected getDataServiceState(): IAppState {
         return {
             userSettingsAvailable: StoresHub.userSettingsStore.isLoading() ? true : StoresHub.userSettingsStore.itemExists(VSS.getWebContext().user.email)
         } as IAppState;

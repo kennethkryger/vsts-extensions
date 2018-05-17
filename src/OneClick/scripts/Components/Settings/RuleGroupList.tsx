@@ -160,11 +160,11 @@ export class RuleGroupList extends BaseFluxComponent<IRuleGroupListProps, IRuleG
         this.state = this._getNewState();
     }
 
-    protected getStores(): BaseStore<any, any, any>[] {
+    protected getObservableDataServices(): BaseStore<any, any, any>[] {
         return [StoresHub.ruleGroupStore, StoresHub.settingsStore];
     }
 
-    protected getStoresState(): IRuleGroupListState {
+    protected getDataServiceState(): IRuleGroupListState {
         return this._getNewState();
     }
 

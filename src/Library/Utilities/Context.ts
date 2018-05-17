@@ -141,6 +141,10 @@ export interface IAppPageContext {
     getService<T extends IAppService>(serviceName: string): T;
 }
 
+export interface IReactAppContext {
+    appContext: IAppPageContext;
+}
+
 class AppPageContext implements IAppPageContext {
     private initializatonInProgress: { [serviceName: string]: boolean } = {};
 

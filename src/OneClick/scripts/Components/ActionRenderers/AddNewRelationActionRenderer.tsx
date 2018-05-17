@@ -159,11 +159,11 @@ export class AddNewRelationActionRenderer extends BaseFluxComponent<IAddNewRelat
         );
     }
 
-    protected getStores(): BaseStore<any, any, any>[] {
+    protected getObservableDataServices(): BaseStore<any, any, any>[] {
         return [StoresHub.teamStore, StoresHub.workItemTypeStore, StoresHub.workItemRelationTypeStore, StoresHub.workItemTemplateStore];
     }
 
-    protected getStoresState(): IAddNewRelationActionRendererState {
+    protected getDataServiceState(): IAddNewRelationActionRendererState {
         return {
             loading: StoresHub.workItemTypeStore.isLoading() || StoresHub.teamStore.isLoading() || StoresHub.workItemRelationTypeStore.isLoading(),
             templates: StoresHub.workItemTemplateStore.getItem(this.props.teamId || "") || []

@@ -117,14 +117,14 @@ export class BugBashEditor extends BaseFluxComponent<IBugBashEditorProps, IBugBa
         };
     }
 
-    protected getStores(): BaseStore<any, any, any>[] {
+    protected getObservableDataServices(): BaseStore<any, any, any>[] {
         return [
             StoresHub.bugBashStore,
             StoresHub.workItemFieldStore,
             StoresHub.teamStore, StoresHub.workItemTemplateStore, StoresHub.workItemTypeStore, StoresHub.errorMessageStore];
     }
 
-    protected getStoresState(): IBugBashEditorState {
+    protected getDataServiceState(): IBugBashEditorState {
         let state = {
             loading: StoresHub.workItemTypeStore.isLoading() || StoresHub.workItemFieldStore.isLoading() || StoresHub.teamStore.isLoading(),
             error: StoresHub.errorMessageStore.getItem(ErrorKeys.BugBashError)

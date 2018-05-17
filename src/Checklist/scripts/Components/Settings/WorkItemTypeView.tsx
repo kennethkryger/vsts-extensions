@@ -108,11 +108,11 @@ export class WorkItemTypeView extends BaseFluxComponent<IWorkItemTypeViewProps, 
         };
     }
 
-    protected getStores(): BaseStore<any, any, any>[] {
+    protected getObservableDataServices(): BaseStore<any, any, any>[] {
         return [StoresHub.checklistStore, StoresHub.errorMessageStore];
     }
 
-    protected getStoresState(): IWorkItemTypeViewState {
+    protected getDataServiceState(): IWorkItemTypeViewState {
         const {workItemType} = this.props;
         const checklist = this._getChecklist(workItemType);
         const error = StoresHub.errorMessageStore.getItem("ChecklistError");

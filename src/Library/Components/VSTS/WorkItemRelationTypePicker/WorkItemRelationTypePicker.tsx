@@ -46,13 +46,13 @@ export class WorkItemRelationTypePicker extends BaseFluxComponent<ISimpleComboPr
         return <SimpleCombo {...props} />;
     }
 
-    protected getStoresState(): IWorkItemRelationTypePickerState {
+    protected getDataServiceState(): IWorkItemRelationTypePickerState {
         return {
             relationTypes: this._workItemRelationTypeStore.getAll()
         };
     }
 
-    protected getStores(): BaseStore<any, any, any>[] {
+    protected getObservableDataServices(): BaseStore<any, any, any>[] {
         return [this._workItemRelationTypeStore];
     }
 }

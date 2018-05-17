@@ -102,7 +102,7 @@ export class SettingsPanel extends BaseFluxComponent<IBaseFluxComponentProps, IS
         }
     }
 
-    protected getStores(): BaseStore<any, any, any>[] {
+    protected getObservableDataServices(): BaseStore<any, any, any>[] {
         return [StoresHub.bugBashSettingsStore, StoresHub.gitRepoStore, StoresHub.teamStore, StoresHub.userSettingsStore, StoresHub.errorMessageStore];
     }
 
@@ -112,7 +112,7 @@ export class SettingsPanel extends BaseFluxComponent<IBaseFluxComponentProps, IS
         } as ISettingsPanelState;
     }
 
-    protected getStoresState(): ISettingsPanelState {
+    protected getDataServiceState(): ISettingsPanelState {
         const isLoading = StoresHub.bugBashSettingsStore.isLoading()
             || StoresHub.gitRepoStore.isLoading()
             || StoresHub.teamStore.isLoading()

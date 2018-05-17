@@ -92,11 +92,11 @@ export class BugBashDetails extends BaseFluxComponent<IBugBashDetailsProps, IBug
         };
     }
 
-    protected getStores(): BaseStore<any, any, any>[] {
+    protected getObservableDataServices(): BaseStore<any, any, any>[] {
         return [StoresHub.longTextStore, StoresHub.errorMessageStore];
     }
 
-    protected getStoresState(): IBugBashDetailsState {
+    protected getDataServiceState(): IBugBashDetailsState {
         return {
             loading: StoresHub.longTextStore.isLoading(this.props.id),
             longText: StoresHub.longTextStore.getItem(this.props.id),

@@ -91,11 +91,11 @@ export class SettingsApp extends BaseFluxComponent<IBaseFluxComponentProps, IApp
         };
     }
 
-    protected getStores(): BaseStore<any, any, any>[] {
+    protected getObservableDataServices(): BaseStore<any, any, any>[] {
         return [StoresHub.workItemTypeStore];
     }
 
-    protected getStoresState(): IAppState {
+    protected getDataServiceState(): IAppState {
         const workItemTypes = StoresHub.workItemTypeStore.getAll();
         let newState = {
             loading: StoresHub.workItemTypeStore.isLoading()

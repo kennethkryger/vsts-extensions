@@ -59,11 +59,11 @@ export class AddExistingRelationActionRenderer extends BaseFluxComponent<IAddExi
         );
     }
 
-    protected getStores(): BaseStore<any, any, any>[] {
+    protected getObservableDataServices(): BaseStore<any, any, any>[] {
         return [StoresHub.workItemRelationTypeStore];
     }
 
-    protected getStoresState(): IBaseFluxComponentState {
+    protected getDataServiceState(): IBaseFluxComponentState {
         return {
             loading: StoresHub.workItemRelationTypeStore.isLoading(),
         };

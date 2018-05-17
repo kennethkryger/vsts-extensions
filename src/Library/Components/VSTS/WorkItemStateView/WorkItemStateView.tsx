@@ -79,7 +79,7 @@ export class WorkItemStateView extends BaseFluxComponent<IWorkItemStateViewProps
         );
     }
 
-    protected getStoresState(): IWorkItemStateViewState {
+    protected getDataServiceState(): IWorkItemStateViewState {
         const workItemTypeStates = this._workItemStateItemStore.getItem(this.props.workItemType);
 
         return {
@@ -91,7 +91,7 @@ export class WorkItemStateView extends BaseFluxComponent<IWorkItemStateViewProps
         this.state = { workItemTypeState: null };
     }
 
-    protected getStores(): BaseStore<any, any, any>[] {
+    protected getObservableDataServices(): BaseStore<any, any, any>[] {
         return [this._workItemStateItemStore];
     }
 }

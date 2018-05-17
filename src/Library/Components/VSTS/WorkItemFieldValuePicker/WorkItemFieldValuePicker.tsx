@@ -246,13 +246,13 @@ export class WorkItemFieldValuePicker extends BaseFluxComponent<IWorkItemFieldVa
         };
     }
 
-    protected getStoresState(): IWorkItemFieldValuePickerState {
+    protected getDataServiceState(): IWorkItemFieldValuePickerState {
         return {
             allowedValues: this.props.field ? this._fieldAllowedValuesStore.getAllowedValues(this.props.workItemType, this.props.field.referenceName) : null
         };
     }
 
-    protected getStores(): BaseStore<any, any, any>[] {
+    protected getObservableDataServices(): BaseStore<any, any, any>[] {
         return [this._fieldAllowedValuesStore];
     }
 

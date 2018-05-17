@@ -46,13 +46,13 @@ export class WorkItemTypePicker extends BaseFluxComponent<ISimpleComboProps<Work
         return <SimpleCombo {...props} />;
     }
 
-    protected getStoresState(): IWorkItemTypePickerState {
+    protected getDataServiceState(): IWorkItemTypePickerState {
         return {
             allWits: this._workItemTypeStore.getAll()
         };
     }
 
-    protected getStores(): BaseStore<any, any, any>[] {
+    protected getObservableDataServices(): BaseStore<any, any, any>[] {
         return [this._workItemTypeStore];
     }
 

@@ -4,7 +4,7 @@ import { localeIgnoreCaseComparer } from "Library/Utilities/String";
 import { WorkItemType } from "TFS/WorkItemTracking/Contracts";
 import * as WitClient from "TFS/WorkItemTracking/RestClient";
 
-export const workItemTypeServiceName = "WorkItemTypeService";
+export const WorkItemTypeServiceName = "WorkItemTypeService";
 
 export class WorkItemTypeService extends BaseDataService<WorkItemType[], WorkItemType, string> {
     private _itemsIdMap: IDictionaryStringTo<WorkItemType>;
@@ -20,20 +20,19 @@ export class WorkItemTypeService extends BaseDataService<WorkItemType[], WorkIte
     }
 
     public getKey(): string {
-        return "WorkItemTypeStore";
+        return WorkItemTypeServiceName;
     }
 
     public async initializeWorkItemTypes() {
         if (this.isLoaded()) {
-            this.emitChanged();
+            this._notifyChanged();
         }
         else if (!this.isLoading()) {
             this.setLoading(true);
             try {
                 const workItemTypes = await WitClient.getClient().getWorkItemTypes(VSS.getWebContext().project.id);
                 workItemTypes.sort((a: WorkItemType, b: WorkItemType) => localeIgnoreCaseComparer(a.name, b.name));
-
-                this._populateData(workItemTypes);
+                this._populateWorkItemTypes(workItemTypes);
             }
             catch (e) {
                 this.setLoading(false);
@@ -46,7 +45,7 @@ export class WorkItemTypeService extends BaseDataService<WorkItemType[], WorkIte
         return key;
     }
 
-    private _populateData(workItemTypes: WorkItemType[]) {
+    private _populateWorkItemTypes(workItemTypes: WorkItemType[]) {
         if (workItemTypes) {
             this.items = workItemTypes;
             this._itemsIdMap = {};
@@ -60,4 +59,4 @@ export class WorkItemTypeService extends BaseDataService<WorkItemType[], WorkIte
     }
 }
 
-Services.add(workItemTypeServiceName, { serviceFactory: WorkItemTypeService });
+Services.add(WorkItemTypeServiceName, { serviceFactory: WorkItemTypeService });

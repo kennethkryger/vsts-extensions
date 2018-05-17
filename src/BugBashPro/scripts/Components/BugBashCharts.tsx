@@ -236,11 +236,11 @@ export class BugBashCharts extends BaseFluxComponent<IBugBashChartsProps, IBugBa
         };
     }
 
-    protected getStores(): BaseStore<any, any, any>[] {
+    protected getObservableDataServices(): BaseStore<any, any, any>[] {
         return [StoresHub.bugBashItemStore, StoresHub.teamStore, StoresHub.userSettingsStore];
     }
 
-    protected getStoresState(): IBugBashChartsState {
+    protected getDataServiceState(): IBugBashChartsState {
         const bugBashItems = StoresHub.bugBashItemStore.getFilteredItems();
 
         return {

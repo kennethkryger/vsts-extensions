@@ -88,11 +88,11 @@ export class FieldChangedPicker extends BaseFluxComponent<IFieldChangedPickerPro
         );
     }
 
-    protected getStores(): BaseStore<any, any, any>[] {
+    protected getObservableDataServices(): BaseStore<any, any, any>[] {
         return [StoresHub.workItemFieldStore];
     }
 
-    protected getStoresState(): IBaseFluxComponentState {
+    protected getDataServiceState(): IBaseFluxComponentState {
         return {
             loading: StoresHub.workItemFieldStore.isLoading()
         };

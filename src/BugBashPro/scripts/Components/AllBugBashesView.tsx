@@ -173,7 +173,7 @@ export class AllBugBashesView extends BaseFluxComponent<IBaseFluxComponentProps,
         );
     }
 
-    protected getStoresState(): IAllBugBashesViewState {
+    protected getDataServiceState(): IAllBugBashesViewState {
         const allBugBashes = StoresHub.bugBashStore.getFilteredItems() || [];
         const currentTime = new Date();
 
@@ -187,7 +187,7 @@ export class AllBugBashesView extends BaseFluxComponent<IBaseFluxComponentProps,
         } as IAllBugBashesViewState;
     }
 
-    protected getStores(): BaseStore<any, any, any>[] {
+    protected getObservableDataServices(): BaseStore<any, any, any>[] {
         return [StoresHub.bugBashStore, StoresHub.errorMessageStore];
     }
 

@@ -46,11 +46,11 @@ export class TeamPicker extends BaseFluxComponent<ISimpleComboProps<WebApiTeam>,
         return <SimpleCombo {...props} />;
     }
 
-    protected getStores(): BaseStore<any, any, any>[] {
+    protected getObservableDataServices(): BaseStore<any, any, any>[] {
         return [this._teamStore];
     }
 
-    protected getStoresState(): ITeamPickerState {
+    protected getDataServiceState(): ITeamPickerState {
         return {
             allTeams: this._teamStore.getAll()
         };
