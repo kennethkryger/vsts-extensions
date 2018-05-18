@@ -7,6 +7,7 @@ import { InfoLabel } from "Common/Components/InfoLabel";
 import {
     IVssComponentProps, IVssComponentState, VssComponent
 } from "Common/Components/Utilities/VssComponent";
+import { IReactAppContext } from "Common/Utilities/Context";
 import { stringEquals } from "Common/Utilities/String";
 import { DefaultButton } from "OfficeFabric/Button";
 import { Callout } from "OfficeFabric/Callout";
@@ -27,7 +28,7 @@ export interface IColorPickerState extends IVssComponentState {
 export class ColorPicker extends VssComponent<IColorPickerProps, IColorPickerState> {
     private _targetElement: HTMLElement;
 
-    public componentWillReceiveProps(nextProps: IColorPickerProps, context?: any) {
+    public componentWillReceiveProps(nextProps: IColorPickerProps, context?: IReactAppContext) {
         super.componentWillReceiveProps(nextProps, context);
 
         if (!stringEquals(nextProps.selectedColor, this.state.selectedColor, true)) {

@@ -8,6 +8,7 @@ import { IFocussable } from "Common/Components/Interfaces";
 import {
     IVssComponentProps, IVssComponentState, VssComponent
 } from "Common/Components/Utilities/VssComponent";
+import { IReactAppContext } from "Common/Utilities/Context";
 import { delay, DelayedFunction } from "Common/Utilities/Core";
 import { isNullOrEmpty } from "Common/Utilities/String";
 import { css } from "OfficeFabric/Utilities";
@@ -78,7 +79,7 @@ export class TreeCombo extends VssComponent<ITreeComboProps, ITreeComboState> im
         this._dispose();
     }
 
-    public componentWillReceiveProps(nextProps: ITreeComboProps, context?: any) {
+    public componentWillReceiveProps(nextProps: ITreeComboProps, context?: IReactAppContext) {
         super.componentWillReceiveProps(nextProps, context);
         this._disposeDelayedFunction();
 

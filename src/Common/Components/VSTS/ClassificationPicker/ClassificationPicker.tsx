@@ -35,7 +35,7 @@ export class ClassificationPicker extends VssComponent<IClassificationPickerProp
         this._initializeNodes(this.props.keyType);
     }
 
-    public componentWillReceiveProps(nextProps: IClassificationPickerProps, context?: any) {
+    public componentWillReceiveProps(nextProps: IClassificationPickerProps, context?: IReactAppContext) {
         super.componentWillReceiveProps(nextProps, context);
         if (nextProps.value !== this.props.value) {
             this.setState({

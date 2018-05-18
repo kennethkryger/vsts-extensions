@@ -54,7 +54,7 @@ export class WorkItemFieldPicker extends VssComponent<IWorkItemFieldPickerProps,
         }
     }
 
-    public componentWillReceiveProps(nextProps: IWorkItemFieldPickerProps, context?: any) {
+    public componentWillReceiveProps(nextProps: IWorkItemFieldPickerProps, context?: IReactAppContext) {
         super.componentWillReceiveProps(nextProps, context);
 
         if (!isNullOrWhiteSpace(nextProps.workItemType) && !this._workItemTypeService.isLoaded()) {

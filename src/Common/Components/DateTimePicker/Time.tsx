@@ -3,6 +3,7 @@ import * as React from "react";
 import {
     IVssComponentProps, IVssComponentState, VssComponent
 } from "Common/Components/Utilities/VssComponent";
+import { IReactAppContext } from "Common/Utilities/Context";
 import { CategoryRange, NumericValueRange, ValueSpinner } from "./ValueSpinner";
 
 export interface ITimeProps extends IVssComponentProps {
@@ -30,7 +31,9 @@ export class Time extends VssComponent<ITimeProps, ITimeState> {
     private _minuteRange: NumericValueRange;
     private _AMPMRange: CategoryRange;
 
-    public componentWillReceiveProps(props: ITimeProps) {
+    public componentWillReceiveProps(props: ITimeProps, context?: IReactAppContext) {
+        super.componentWillReceiveProps(props, context);
+
         if (this.props && (this.props.hour !== props.hour || this.props.minute !== props.minute)) {
             const newTime = this._calculateTimeRange(props);
             this.setState({

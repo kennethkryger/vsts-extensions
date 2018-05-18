@@ -1,4 +1,5 @@
 import { VssComponent } from "Common/Components/Utilities/VssComponent";
+import { IReactAppContext } from "Common/Utilities/Context";
 import { throttledDelegate } from "Common/Utilities/Core";
 
 export abstract class AutoResizableComponent<TP, TS> extends VssComponent<TP, TS> {
@@ -8,7 +9,7 @@ export abstract class AutoResizableComponent<TP, TS> extends VssComponent<TP, TS
     private _bodyElement: HTMLBodyElement;
     private _windowWidth: number;
 
-    constructor(props: TP, context?: any) {
+    constructor(props: TP, context?: IReactAppContext) {
         super(props, context);
 
         this._bodyElement = document.getElementsByTagName("body").item(0) as HTMLBodyElement;

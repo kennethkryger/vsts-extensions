@@ -48,7 +48,7 @@ export class WorkItemTitleView extends VssComponent<IWorkItemTitleViewProps, IWo
         }
     }
 
-    public componentWillReceiveProps(nextProps: IWorkItemTitleViewProps, context?: any) {
+    public componentWillReceiveProps(nextProps: IWorkItemTitleViewProps, context?: IReactAppContext) {
         super.componentWillReceiveProps(nextProps, context);
 
         if (!stringEquals(nextProps.workItemType, this.props.workItemType, true)) {

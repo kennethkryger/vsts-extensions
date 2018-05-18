@@ -5,6 +5,7 @@ import * as React from "react";
 import {
     IVssComponentProps, IVssComponentState, VssComponent
 } from "Common/Components/Utilities/VssComponent";
+import { IReactAppContext } from "Common/Utilities/Context";
 import { IconButton } from "OfficeFabric/Button";
 
 export class NumericValueRange implements IValueRange<number> {
@@ -86,7 +87,7 @@ export interface IValueSpinnerState<T> extends IVssComponentState {
 }
 
 export class ValueSpinner<T> extends VssComponent<IValueSpinnerProps<T>, IValueSpinnerState<T>> {
-    public componentWillReceiveProps(props: IValueSpinnerProps<T>, context?: any) {
+    public componentWillReceiveProps(props: IValueSpinnerProps<T>, context?: IReactAppContext) {
         super.componentWillReceiveProps(props, context);
 
         if (this.props && (this.props.value !== props.value)) {

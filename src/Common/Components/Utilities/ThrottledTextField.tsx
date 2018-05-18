@@ -6,6 +6,7 @@ import { InfoLabel } from "Common/Components/InfoLabel";
 import { InputError } from "Common/Components/InputError";
 import { IFocussable } from "Common/Components/Interfaces";
 import { IVssComponentState, VssComponent } from "Common/Components/Utilities/VssComponent";
+import { IReactAppContext } from "Common/Utilities/Context";
 import { delay, DelayedFunction } from "Common/Utilities/Core";
 import { isNullOrEmpty } from "Common/Utilities/String";
 import { ITextField, ITextFieldProps, TextField } from "OfficeFabric/TextField";
@@ -62,7 +63,7 @@ export class ThrottledTextField extends VssComponent<IThrottledTextFieldProps, I
         this._disposeDelayedFunction();
     }
 
-    public componentWillReceiveProps(nextProps: IThrottledTextFieldProps, context?: any) {
+    public componentWillReceiveProps(nextProps: IThrottledTextFieldProps, context?: IReactAppContext) {
         super.componentWillReceiveProps(nextProps, context);
         this._disposeDelayedFunction();
 
