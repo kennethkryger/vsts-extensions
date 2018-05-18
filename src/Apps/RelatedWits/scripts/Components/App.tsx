@@ -8,12 +8,14 @@ import { IdentityView } from "Common/Components/IdentityView";
 import { InfoLabel } from "Common/Components/InfoLabel";
 import { Loading } from "Common/Components/Loading";
 import { getAsyncLoadedComponent } from "Common/Components/Utilities/AsyncLoadedComponent";
+import { ReactRootComponent } from "Common/Components/Utilities/ReactRootComponent";
 import {
     IVssComponentProps, IVssComponentState, VssComponent
 } from "Common/Components/Utilities/VssComponent";
 import { WorkItemStateView } from "Common/Components/VSTS/WorkItemStateView";
 import { WorkItemTitleView } from "Common/Components/VSTS/WorkItemTitleView";
-import { BaseStore } from "Common/Flux/Stores/BaseStore";
+import { BaseDataService } from "Common/Services/BaseDataService";
+import { AppContext, IReactAppContext } from "Common/Utilities/Context";
 import { delegate } from "Common/Utilities/Core";
 import * as ExtensionDataManager from "Common/Utilities/ExtensionDataManager";
 import { parseUniquefiedIdentityName } from "Common/Utilities/Identity";
@@ -31,10 +33,11 @@ import {
     DirectionalHint, TooltipDelay, TooltipHost, TooltipOverflowMode
 } from "OfficeFabric/Tooltip";
 import { ISelection, Selection, SelectionMode } from "OfficeFabric/utilities/selection";
-import { RelatedWorkItemsActions } from "RelatedWits/Actions/RelatedWorkItemsActions";
 import * as SettingsPanel_Async from "RelatedWits/Components/SettingsPanel";
 import { Constants, ISettings, WorkItemFieldNames } from "RelatedWits/Models";
-import { StoresHub } from "RelatedWits/Stores/StoresHub";
+import {
+    RelatedWorkItemsService, RelatedWorkItemsServiceName
+} from "RelatedWits/Services/RelatedWorkItemsService";
 import { WorkItem, WorkItemRelation, WorkItemRelationType } from "TFS/WorkItemTracking/Contracts";
 import {
     IWorkItemChangedArgs, IWorkItemLoadedArgs, IWorkItemNotificationListener
@@ -69,8 +72,9 @@ export class RelatedWits extends VssComponent<IVssComponentProps, IRelatedWitsSt
     private _hubViewState: IHubViewState;
     private _filterBar: IFilterBar;
     private _selection: ISelection;
+    private _relatedWorkItemsService: RelatedWorkItemsService;
 
-    constructor(props: IVssComponentProps, context?: any) {
+    constructor(props: IVssComponentProps, context?: IReactAppContext) {
         super(props, context);
 
         this._hubViewState = new HubViewState();
@@ -78,6 +82,8 @@ export class RelatedWits extends VssComponent<IVssComponentProps, IRelatedWitsSt
         this._selection = new Selection({
             getKey: (item: any) => item.id
         });
+
+        this._relatedWorkItemsService = this.context.appContext.getService<RelatedWorkItemsService>(RelatedWorkItemsServiceName);
     }
 
     public componentDidMount() {
@@ -115,7 +121,7 @@ export class RelatedWits extends VssComponent<IVssComponentProps, IRelatedWitsSt
         this._hubViewState.filter.unsubscribe(this._onFilterChange, FILTER_CHANGE_EVENT);
         document.removeEventListener("keydown", this._focusFilterBar);
         VSS.unregister(VSS.getContribution().id);
-        RelatedWorkItemsActions.clean();
+        this._relatedWorkItemsService.clean();
     }
 
     public render(): JSX.Element {
@@ -187,21 +193,21 @@ export class RelatedWits extends VssComponent<IVssComponentProps, IRelatedWitsSt
         }
     }
 
-    protected getInitialState(): void {
-        this.state = {
+    protected getInitialState(): IRelatedWitsState {
+        return {
             isWorkItemLoaded: false,
             workItems: null,
             settings: null
         };
     }
 
-    protected getObservableDataServices(): BaseStore<any, any, any>[] {
-        return [StoresHub.relatedWorkItemsStore];
+    protected getObservableDataServices(): BaseDataService<any, any, any>[] {
+        return [this._relatedWorkItemsService];
     }
 
     protected getDataServiceState(): IRelatedWitsState {
         return {
-            workItems: StoresHub.relatedWorkItemsStore.isLoading() ? null : StoresHub.relatedWorkItemsStore.getFilteredItems()
+            workItems: this._relatedWorkItemsService.isLoading() ? null : this._relatedWorkItemsService.getFilteredItems()
         };
     }
 
@@ -265,8 +271,8 @@ export class RelatedWits extends VssComponent<IVssComponentProps, IRelatedWitsSt
                 minWidth: 40,
                 maxWidth: 70,
                 isResizable: true,
-                isSorted: (StoresHub.relatedWorkItemsStore.sortState && StoresHub.relatedWorkItemsStore.sortState.sortKey) === WorkItemFieldNames.ID,
-                isSortedDescending: !!(StoresHub.relatedWorkItemsStore.sortState && StoresHub.relatedWorkItemsStore.sortState.isSortedDescending),
+                isSorted: (this._relatedWorkItemsService.sortState && this._relatedWorkItemsService.sortState.sortKey) === WorkItemFieldNames.ID,
+                isSortedDescending: !!(this._relatedWorkItemsService.sortState && this._relatedWorkItemsService.sortState.isSortedDescending),
                 onRender: (workItem: WorkItem) => {
                     const id = workItem.id.toString();
                     return (
@@ -288,8 +294,8 @@ export class RelatedWits extends VssComponent<IVssComponentProps, IRelatedWitsSt
                 minWidth: 300,
                 maxWidth: 600,
                 isResizable: true,
-                isSorted: (StoresHub.relatedWorkItemsStore.sortState && StoresHub.relatedWorkItemsStore.sortState.sortKey) === WorkItemFieldNames.Title,
-                isSortedDescending: !!(StoresHub.relatedWorkItemsStore.sortState && StoresHub.relatedWorkItemsStore.sortState.isSortedDescending),
+                isSorted: (this._relatedWorkItemsService.sortState && this._relatedWorkItemsService.sortState.sortKey) === WorkItemFieldNames.Title,
+                isSortedDescending: !!(this._relatedWorkItemsService.sortState && this._relatedWorkItemsService.sortState.isSortedDescending),
                 onRender: (workItem: WorkItem) => {
                     const title = workItem.fields[WorkItemFieldNames.Title];
                     return (
@@ -310,8 +316,8 @@ export class RelatedWits extends VssComponent<IVssComponentProps, IRelatedWitsSt
                 minWidth: 100,
                 maxWidth: 200,
                 isResizable: true,
-                isSorted: (StoresHub.relatedWorkItemsStore.sortState && StoresHub.relatedWorkItemsStore.sortState.sortKey) === WorkItemFieldNames.State,
-                isSortedDescending: !!(StoresHub.relatedWorkItemsStore.sortState && StoresHub.relatedWorkItemsStore.sortState.isSortedDescending),
+                isSorted: (this._relatedWorkItemsService.sortState && this._relatedWorkItemsService.sortState.sortKey) === WorkItemFieldNames.State,
+                isSortedDescending: !!(this._relatedWorkItemsService.sortState && this._relatedWorkItemsService.sortState.isSortedDescending),
                 onRender: (workItem: WorkItem) => {
                     const state = workItem.fields[WorkItemFieldNames.State];
                     return (
@@ -330,8 +336,8 @@ export class RelatedWits extends VssComponent<IVssComponentProps, IRelatedWitsSt
                 minWidth: 150,
                 maxWidth: 250,
                 isResizable: true,
-                isSorted: (StoresHub.relatedWorkItemsStore.sortState && StoresHub.relatedWorkItemsStore.sortState.sortKey) === WorkItemFieldNames.AssignedTo,
-                isSortedDescending: !!(StoresHub.relatedWorkItemsStore.sortState && StoresHub.relatedWorkItemsStore.sortState.isSortedDescending),
+                isSorted: (this._relatedWorkItemsService.sortState && this._relatedWorkItemsService.sortState.sortKey) === WorkItemFieldNames.AssignedTo,
+                isSortedDescending: !!(this._relatedWorkItemsService.sortState && this._relatedWorkItemsService.sortState.isSortedDescending),
                 onRender: (workItem: WorkItem) => {
                     const assignedTo = workItem.fields[WorkItemFieldNames.AssignedTo] || "";
                     return <IdentityView identityDistinctName={assignedTo} />;
@@ -344,8 +350,8 @@ export class RelatedWits extends VssComponent<IVssComponentProps, IRelatedWitsSt
                 minWidth: 250,
                 maxWidth: 400,
                 isResizable: true,
-                isSorted: (StoresHub.relatedWorkItemsStore.sortState && StoresHub.relatedWorkItemsStore.sortState.sortKey) === WorkItemFieldNames.AreaPath,
-                isSortedDescending: !!(StoresHub.relatedWorkItemsStore.sortState && StoresHub.relatedWorkItemsStore.sortState.isSortedDescending),
+                isSorted: (this._relatedWorkItemsService.sortState && this._relatedWorkItemsService.sortState.sortKey) === WorkItemFieldNames.AreaPath,
+                isSortedDescending: !!(this._relatedWorkItemsService.sortState && this._relatedWorkItemsService.sortState.isSortedDescending),
                 onRender: (workItem: WorkItem) => {
                     const area = workItem.fields[WorkItemFieldNames.AreaPath];
                     return (
@@ -386,7 +392,7 @@ export class RelatedWits extends VssComponent<IVssComponentProps, IRelatedWitsSt
                             if (!value) {
                                 return null;
                             }
-                            return { title: `${StoresHub.relatedWorkItemsStore.propertyMap[filterItemKey][value]}` };
+                            return { title: `${this._relatedWorkItemsService.propertyMap[filterItemKey][value]}` };
                         })
                     }
                 ]}
@@ -489,11 +495,11 @@ export class RelatedWits extends VssComponent<IVssComponentProps, IRelatedWitsSt
 
     private _openWorkItemDialog = async (e: React.MouseEvent<HTMLElement>, workItem: WorkItem) => {
         const updatedWorkItem = await openWorkItemDialog(e, workItem);
-        RelatedWorkItemsActions.updateWorkItemInStore(updatedWorkItem);
+        this._relatedWorkItemsService.updateWorkItemInStore(updatedWorkItem);
     }
 
     private _getPicklistItems = (fieldName: WorkItemFieldNames): string[] => {
-        return Object.keys(StoresHub.relatedWorkItemsStore.propertyMap[fieldName]);
+        return Object.keys(this._relatedWorkItemsService.propertyMap[fieldName]);
     }
 
     private _getListItem = (key: string, fieldName: WorkItemFieldNames): IPickListItem => {
@@ -613,16 +619,16 @@ export class RelatedWits extends VssComponent<IVssComponentProps, IRelatedWitsSt
         this._initializeLinksData();
 
         const query = await this._createQuery(this.state.settings.fields, this.state.settings.sortByField);
-        RelatedWorkItemsActions.refresh(query, this.state.settings.top);
+        this._relatedWorkItemsService.refresh(query, this.state.settings.top);
     }
 
     private _onFilterChange = (filterState: IFilterState) => {
-        RelatedWorkItemsActions.applyFilter(filterState);
+        this._relatedWorkItemsService.applyFilter(filterState);
     }
 
     private _onSortChange = (_ev?: React.MouseEvent<HTMLElement>, column?: IColumn) => {
         if (column.key !== "linked") {
-            RelatedWorkItemsActions.applySort({
+            this._relatedWorkItemsService.applySort({
                 sortKey: column.key as WorkItemFieldNames,
                 isSortedDescending: !column.isSortedDescending
             });
@@ -644,5 +650,5 @@ export function init() {
     initializeIcons();
 
     const container = document.getElementById("ext-container");
-    ReactDOM.render(<RelatedWits />, container);
+    ReactDOM.render(<ReactRootComponent appContext={AppContext}><RelatedWits /></ReactRootComponent>, container);
 }

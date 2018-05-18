@@ -206,4 +206,4 @@ class AppPageContext implements IAppPageContext {
 /**
  * Context for the currently executing page
  */
-export const PageContext: IAppPageContext = new AppPageContext(Services);
+export const AppContext: IAppPageContext = new AppPageContext(Services);

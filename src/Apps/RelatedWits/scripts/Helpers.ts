@@ -96,5 +96,5 @@ export function workItemComparer(workItem1: WorkItem, workItem2: WorkItem, sortS
         compareValue = (v1 > v2) ? 1 : -1;
     }
 
-    return isSortedDescending ? -1 * compareValue : compareValue;
+    return isSortedDescending ? compareValue * -1 : compareValue;
 }

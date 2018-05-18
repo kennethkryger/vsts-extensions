@@ -67,7 +67,8 @@ module.exports = {
         {
             "q": true,
             "react": true,
-            "react-dom": true
+            "react-dom": true,
+            "Common/Utilities/Context": true,
         },
         /^VSS\/.*/, /^TFS\/.*/, /^q$/
     ],

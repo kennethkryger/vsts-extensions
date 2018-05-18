@@ -1,12 +1,15 @@
-import { BaseStore } from "Common/Flux/Stores/BaseStore";
+import { BaseDataService } from "Common/Services/BaseDataService";
 import { findIndex } from "Common/Utilities/Array";
-import { ActionsHub } from "RelatedWits/Actions/ActionsHub";
+import { Services } from "Common/Utilities/Context";
 import { workItemComparer, workItemMatchesFilter } from "RelatedWits/Helpers";
-import { ISortState, WorkItemFieldNames } from "RelatedWits/Models";
-import { WorkItem } from "TFS/WorkItemTracking/Contracts";
+import { Constants, ISortState, WorkItemFieldNames } from "RelatedWits/Models";
+import { WorkItem, WorkItemErrorPolicy } from "TFS/WorkItemTracking/Contracts";
+import * as WitClient from "TFS/WorkItemTracking/RestClient";
 import { IFilterState } from "VSSUI/Utilities/Filter";
 
-export class RelatedWorkItemsStore extends BaseStore<WorkItem[], WorkItem, number> {
+export const RelatedWorkItemsServiceName = "RelatedWorkItemsService";
+
+export class RelatedWorkItemsService extends BaseDataService<WorkItem[], WorkItem, number> {
     private _filteredItems: WorkItem[];
     private _filterState: IFilterState;
     private _sortState: ISortState;
@@ -50,52 +53,68 @@ export class RelatedWorkItemsStore extends BaseStore<WorkItem[], WorkItem, numbe
         return "RelatedWorkItemsStore";
     }
 
-    protected initializeActionListeners() {
-        ActionsHub.UpdateWorkItemInStore.addListener(workItem => {
-            if (workItem) {
-                const index = findIndex(this.items, w => w.id === workItem.id);
-                if (index !== -1) {
-                    this.items[index] = workItem;
-                    this._filteredItems = this._applyFilterAndSort(this.items);
-                    this._refreshPropertyMap();
-                }
+    public applyFilter(filterState: IFilterState) {
+        this._filterState = filterState;
+        this._filteredItems = this._applyFilterAndSort(this.items);
+        this._notifyChanged();
+    }
+
+    public clearSortAndFilter() {
+        this._filterState = null;
+        this._sortState = null;
+        this._filteredItems = this.items ? [...this.items] : null;
+        this._notifyChanged();
+    }
+
+    public applySort(sortState: ISortState) {
+        this._sortState = sortState;
+        this._filteredItems = this._applyFilterAndSort(this.items);
+        this._notifyChanged();
+    }
+
+    public clean() {
+        this._filterState = null;
+        this._sortState = null;
+        this._filteredItems = null;
+        this.items = null;
+        this._refreshPropertyMap();
+        this._notifyChanged();
+    }
+
+    public updateWorkItemInStore(workItem: WorkItem) {
+        if (workItem) {
+            const index = findIndex(this.items, w => w.id === workItem.id);
+            if (index !== -1) {
+                this.items[index] = workItem;
+                this._filteredItems = this._applyFilterAndSort(this.items);
+                this._refreshPropertyMap();
+            }
+        }
+
+        this._notifyChanged();
+    }
+
+    public async refresh(query: {project: string, wiql: string}, top: number) {
+        if (!this.isLoading()) {
+            this.setLoading(true);
+
+            let workItems: WorkItem[];
+            const queryResult = await WitClient.getClient().queryByWiql({query: query.wiql}, query.project, null, false, top);
+            if (queryResult.workItems && queryResult.workItems.length > 0) {
+                workItems = await WitClient.getClient().getWorkItems(
+                    queryResult.workItems.map(w => w.id),
+                    Constants.DEFAULT_FIELDS_TO_RETRIEVE,
+                    null,
+                    null,
+                    WorkItemErrorPolicy.Omit);
+            }
+            else {
+                workItems = [];
             }
 
-            this.emitChanged();
-        });
-
-        ActionsHub.ApplyFilter.addListener((filterState: IFilterState) => {
-            this._filterState = filterState;
-            this._filteredItems = this._applyFilterAndSort(this.items);
-            this.emitChanged();
-        });
-
-        ActionsHub.ClearSortAndFilter.addListener(() => {
-            this._filterState = null;
-            this._sortState = null;
-            this._filteredItems = this.items ? [...this.items] : null;
-            this.emitChanged();
-        });
-
-        ActionsHub.ApplySort.addListener((sortState: ISortState) => {
-            this._sortState = sortState;
-            this._filteredItems = this._applyFilterAndSort(this.items);
-            this.emitChanged();
-        });
-
-        ActionsHub.Clean.addListener(() => {
-            this._filterState = null;
-            this._sortState = null;
-            this._filteredItems = null;
-            this.items = null;
-            this._refreshPropertyMap();
-            this.emitChanged();
-        });
-
-        ActionsHub.Refresh.addListener(items => {
-            this._refreshWorkItems(items);
-            this.emitChanged();
-        });
+            this._refreshWorkItems(workItems);
+            this.setLoading(false);
+        }
     }
 
     protected convertItemKeyToString(key: number): string {
@@ -154,3 +173,5 @@ export class RelatedWorkItemsStore extends BaseStore<WorkItem[], WorkItem, numbe
         }
     }
 }
+
+Services.add(RelatedWorkItemsServiceName, { serviceFactory: RelatedWorkItemsService });

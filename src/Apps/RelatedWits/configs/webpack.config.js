@@ -4,7 +4,8 @@ const CopyWebpackPlugin = require("copy-webpack-plugin");
 const config = {
     entry: {
         "RelatedWits/scripts/App": "./src/Apps/RelatedWits/scripts/Components/App.tsx",
-        "RelatedWits/scripts/SettingsPanel": "./src/Apps/RelatedWits/scripts/Components/SettingsPanel.tsx"
+        "RelatedWits/scripts/SettingsPanel": "./src/Apps/RelatedWits/scripts/Components/SettingsPanel.tsx",
+        "RelatedWits/scripts/Context": "./src/Common/Utilities/Context.ts"
     },
     plugins: [
         new CopyWebpackPlugin([
