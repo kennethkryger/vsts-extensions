@@ -23,8 +23,8 @@ import { LongText } from "BugBashPro/ViewModels/LongText";
 import { Loading } from "Common/Components/Loading";
 import { getAsyncLoadedComponent } from "Common/Components/Utilities/AsyncLoadedComponent";
 import {
-    BaseFluxComponent, IBaseFluxComponentProps, IBaseFluxComponentState
-} from "Common/Components/Utilities/BaseFluxComponent";
+    IVssComponentProps, IVssComponentState, VssComponent
+} from "Common/Components/Utilities/VssComponent";
 import { BaseStore } from "Common/Flux/Stores/BaseStore";
 import { confirmAction, delegate } from "Common/Utilities/Core";
 import { parseUniquefiedIdentityName } from "Common/Utilities/Identity";
@@ -47,13 +47,13 @@ import { HubViewState, IHubViewState } from "VSSUI/Utilities/HubViewState";
 import { IViewOptionsValues, VIEW_OPTIONS_CHANGE_EVENT } from "VSSUI/Utilities/ViewOptions";
 import { VssIconType } from "VSSUI/VssIcon";
 
-export interface IBugBashViewProps extends IBaseFluxComponentProps {
+export interface IBugBashViewProps extends IVssComponentProps {
     pivotKey: BugBashViewPivotKeys;
     bugBashId?: string;
     bugBashItemId?: string;
 }
 
-export interface IBugBashViewState extends IBaseFluxComponentState {
+export interface IBugBashViewState extends IVssComponentState {
     bugBash: BugBash;
     bugBashDetails?: LongText;
     paneMode?: BugBashViewActions;
@@ -85,7 +85,7 @@ const AsyncBugBashCharts = getAsyncLoadedComponent(
     (m: typeof BugBashCharts_Async) => m.BugBashCharts,
     () => <Loading />);
 
-export class BugBashView extends BaseFluxComponent<IBugBashViewProps, IBugBashViewState> {
+export class BugBashView extends VssComponent<IBugBashViewProps, IBugBashViewState> {
     private _hubViewState: IHubViewState;
     private _filterBar: IFilterBar;
 
@@ -242,7 +242,7 @@ export class BugBashView extends BaseFluxComponent<IBugBashViewProps, IBugBashVi
         );
     }
 
-    protected initializeState() {
+    protected getInitialState() {
         this.state = {
             bugBash: this.props.bugBashId ? null : StoresHub.bugBashStore.getNewBugBash(),
             paneMode: readLocalSetting("bugbashviewactionkey", WebSettingsScope.User, BugBashViewActions.PendingItemsOnly) as BugBashViewActions,

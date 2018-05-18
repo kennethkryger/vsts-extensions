@@ -1,16 +1,14 @@
 import { AutoResizableComponent } from "Common/Components/Utilities/AutoResizableComponent";
-import {
-    IBaseFluxComponentProps, IBaseFluxComponentState
-} from "Common/Components/Utilities/BaseFluxComponent";
+import { IVssComponentProps, IVssComponentState } from "Common/Components/Utilities/VssComponent";
 import { delay, DelayedFunction } from "Common/Utilities/Core";
 import { getFormService } from "Common/Utilities/WorkItemFormHelpers";
 import * as WitExtensionContracts from "TFS/WorkItemTracking/ExtensionContracts";
 
-export interface IWorkItemFieldControlProps extends IBaseFluxComponentProps {
+export interface IWorkItemFieldControlProps extends IVssComponentProps {
     fieldName: string;
 }
 
-export interface IWorkItemFieldControlState<T> extends IBaseFluxComponentState {
+export interface IWorkItemFieldControlState<T> extends IVssComponentState {
     error?: string;
     value?: T;
 }

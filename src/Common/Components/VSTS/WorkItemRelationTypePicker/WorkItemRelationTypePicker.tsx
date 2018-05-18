@@ -1,32 +1,37 @@
 import * as React from "react";
 
-import {
-    BaseFluxComponent, IBaseFluxComponentState
-} from "Common/Components/Utilities/BaseFluxComponent";
+import { IVssComponentState, VssComponent } from "Common/Components/Utilities/VssComponent";
 import { ISimpleComboProps, SimpleCombo } from "Common/Components/VssCombo/SimpleCombo";
-import { WorkItemRelationTypeActions } from "Common/Flux/Actions/WorkItemRelationTypeActions";
-import { BaseStore, StoreFactory } from "Common/Flux/Stores/BaseStore";
-import { WorkItemRelationTypeStore } from "Common/Flux/Stores/WorkItemRelationTypeStore";
+import { BaseDataService } from "Common/Services/BaseDataService";
+import {
+    WorkItemRelationTypeService, WorkItemRelationTypeServiceName
+} from "Common/Services/WorkItemRelationTypeService";
+import { IReactAppContext } from "Common/Utilities/Context";
 import { Spinner, SpinnerSize } from "OfficeFabric/Spinner";
 import { css } from "OfficeFabric/Utilities";
 import { WorkItemRelationType } from "TFS/WorkItemTracking/Contracts";
 
-export interface IWorkItemRelationTypePickerState extends IBaseFluxComponentState {
+export interface IWorkItemRelationTypePickerState extends IVssComponentState {
     relationTypes?: WorkItemRelationType[];
 }
 
-export class WorkItemRelationTypePicker extends BaseFluxComponent<ISimpleComboProps<WorkItemRelationType>, IWorkItemRelationTypePickerState> {
-    private _workItemRelationTypeStore = StoreFactory.getInstance<WorkItemRelationTypeStore>(WorkItemRelationTypeStore);
+export class WorkItemRelationTypePicker extends VssComponent<ISimpleComboProps<WorkItemRelationType>, IWorkItemRelationTypePickerState> {
+    private _workItemRelationTypeService: WorkItemRelationTypeService;
+
+    constructor(props: ISimpleComboProps<WorkItemRelationType>, context?: IReactAppContext) {
+        super(props, context);
+        this._workItemRelationTypeService = this.context.appContext.getService<WorkItemRelationTypeService>(WorkItemRelationTypeServiceName);
+    }
 
     public componentDidMount() {
         super.componentDidMount();
-        if (this._workItemRelationTypeStore.isLoaded()) {
+        if (this._workItemRelationTypeService.isLoaded()) {
             this.setState({
-                relationTypes: this._workItemRelationTypeStore.getAll()
+                relationTypes: this._workItemRelationTypeService.getAll()
             });
         }
         else {
-            WorkItemRelationTypeActions.initializeWorkItemRelationTypes();
+            this._workItemRelationTypeService.initializeWorkItemRelationTypes();
         }
     }
 
@@ -48,11 +53,11 @@ export class WorkItemRelationTypePicker extends BaseFluxComponent<ISimpleComboPr
 
     protected getDataServiceState(): IWorkItemRelationTypePickerState {
         return {
-            relationTypes: this._workItemRelationTypeStore.getAll()
+            relationTypes: this._workItemRelationTypeService.getAll()
         };
     }
 
-    protected getObservableDataServices(): BaseStore<any, any, any>[] {
-        return [this._workItemRelationTypeStore];
+    protected getObservableDataServices(): BaseDataService<any, any, any>[] {
+        return [this._workItemRelationTypeService];
     }
 }

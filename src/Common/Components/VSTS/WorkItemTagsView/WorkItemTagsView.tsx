@@ -2,11 +2,11 @@ import "./WorkItemTagsView.scss";
 
 import * as React from "react";
 
-import { IBaseFluxComponentProps } from "Common/Components/Utilities/BaseFluxComponent";
+import { IVssComponentProps } from "Common/Components/Utilities/VssComponent";
 import { Label } from "OfficeFabric/Label";
 import { css } from "OfficeFabric/Utilities";
 
-export interface IWorkItemTagsViewProps extends IBaseFluxComponentProps {
+export interface IWorkItemTagsViewProps extends IVssComponentProps {
     tags: string[];
 }
 

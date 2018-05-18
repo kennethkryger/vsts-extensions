@@ -6,8 +6,8 @@ import { InfoLabel } from "Common/Components/InfoLabel";
 import { InputError } from "Common/Components/InputError";
 import { IFocussable } from "Common/Components/Interfaces";
 import {
-    BaseFluxComponent, IBaseFluxComponentProps, IBaseFluxComponentState
-} from "Common/Components/Utilities/BaseFluxComponent";
+    IVssComponentProps, IVssComponentState, VssComponent
+} from "Common/Components/Utilities/VssComponent";
 import { delay, DelayedFunction } from "Common/Utilities/Core";
 import { isNullOrEmpty } from "Common/Utilities/String";
 import { css } from "OfficeFabric/Utilities";
@@ -15,7 +15,7 @@ import { Control } from "VSS/Controls";
 import { Combo, IComboOptions } from "VSS/Controls/Combos";
 import { TreeNode } from "VSS/Controls/TreeView";
 
-export interface ITreeComboProps extends IBaseFluxComponentProps {
+export interface ITreeComboProps extends IVssComponentProps {
     options?: TreeNode[];
     value?: string;
     error?: string;
@@ -27,11 +27,11 @@ export interface ITreeComboProps extends IBaseFluxComponentProps {
     onChange(newValue: string): void;
 }
 
-export interface ITreeComboState extends IBaseFluxComponentState {
+export interface ITreeComboState extends IVssComponentState {
     internalValue?: string;
 }
 
-export class TreeCombo extends BaseFluxComponent<ITreeComboProps, ITreeComboState> implements IFocussable {
+export class TreeCombo extends VssComponent<ITreeComboProps, ITreeComboState> implements IFocussable {
     private _control: Combo;
     private _delayedFunction: DelayedFunction;
     private _container: HTMLDivElement;
@@ -94,9 +94,9 @@ export class TreeCombo extends BaseFluxComponent<ITreeComboProps, ITreeComboStat
         }
     }
 
-    protected initializeState(): void {
-        this.state = {
-            internalValue: this.props.value || ""
+    protected getInitialState(props: ITreeComboProps): ITreeComboState {
+        return {
+            internalValue: props.value || ""
         };
     }
 

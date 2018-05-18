@@ -12,9 +12,7 @@ import {
 import { StoresHub } from "Checklist/Stores/StoresHub";
 import { Loading } from "Common/Components/Loading";
 import { AutoResizableComponent } from "Common/Components/Utilities/AutoResizableComponent";
-import {
-    IBaseFluxComponentProps, IBaseFluxComponentState
-} from "Common/Components/Utilities/BaseFluxComponent";
+import { IVssComponentProps, IVssComponentState } from "Common/Components/Utilities/VssComponent";
 import { BaseStore } from "Common/Flux/Stores/BaseStore";
 import { findIndex } from "Common/Utilities/Array";
 import { delegate } from "Common/Utilities/Core";
@@ -45,14 +43,14 @@ const SortableList = SortableContainer(({items}) => {
     );
 });
 
-export interface IChecklistViewProps extends IBaseFluxComponentProps {
+export interface IChecklistViewProps extends IVssComponentProps {
     workItemId: number;
     workItemType: string;
     projectId: string;
     isPersonal?: boolean;
 }
 
-export interface IChecklistViewState extends IBaseFluxComponentState {
+export interface IChecklistViewState extends IVssComponentState {
     checklists: IWorkItemChecklists;
     error?: string;
     disabled?: boolean;
@@ -105,7 +103,7 @@ export class ChecklistView extends AutoResizableComponent<IChecklistViewProps, I
         }
     }
 
-    protected initializeState() {
+    protected getInitialState() {
         const {workItemId} = this.props;
         const error = StoresHub.errorMessageStore.getItem("ChecklistError");
 

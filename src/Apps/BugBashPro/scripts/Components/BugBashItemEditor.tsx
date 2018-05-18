@@ -13,10 +13,10 @@ import { StoresHub } from "BugBashPro/Stores/StoresHub";
 import { BugBashItem } from "BugBashPro/ViewModels/BugBashItem";
 import { Loading } from "Common/Components/Loading";
 import { DEFAULT_BUTTONS } from "Common/Components/RichEditor/Toolbar/RichEditorToolbarButtonNames";
-import {
-    BaseFluxComponent, IBaseFluxComponentProps, IBaseFluxComponentState
-} from "Common/Components/Utilities/BaseFluxComponent";
 import { ThrottledTextField } from "Common/Components/Utilities/ThrottledTextField";
+import {
+    IVssComponentProps, IVssComponentState, VssComponent
+} from "Common/Components/Utilities/VssComponent";
 import { TeamPicker } from "Common/Components/VSTS/TeamPicker";
 import { ErrorMessageActions } from "Common/Flux/Actions/ErrorMessageActions";
 import { BaseStore } from "Common/Flux/Stores/BaseStore";
@@ -35,19 +35,19 @@ import {
 } from "OfficeFabric/Tooltip";
 import { WebApiTeam } from "TFS/Core/Contracts";
 
-export interface IBugBashItemEditorProps extends IBaseFluxComponentProps {
+export interface IBugBashItemEditorProps extends IVssComponentProps {
     bugBashItem: BugBashItem;
     bugBashId: string;
     isMaximized?: boolean;
 }
 
-export interface IBugBashItemEditorState extends IBaseFluxComponentState {
+export interface IBugBashItemEditorState extends IVssComponentState {
     comments?: IBugBashItemComment[];
     commentsLoading?: boolean;
     error?: string;
 }
 
-export class BugBashItemEditor extends BaseFluxComponent<IBugBashItemEditorProps, IBugBashItemEditorState> {
+export class BugBashItemEditor extends VssComponent<IBugBashItemEditorProps, IBugBashItemEditorState> {
     public componentDidMount() {
         super.componentDidMount();
 
@@ -232,7 +232,7 @@ export class BugBashItemEditor extends BaseFluxComponent<IBugBashItemEditorProps
         };
     }
 
-    protected initializeState() {
+    protected getInitialState() {
         this.state = {
             comments: this.props.bugBashItem.isNew() ? [] : null,
             commentsLoading: this.props.bugBashItem.isNew() ? false : true

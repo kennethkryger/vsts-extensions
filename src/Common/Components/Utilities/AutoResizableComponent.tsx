@@ -1,7 +1,7 @@
-import { BaseFluxComponent } from "Common/Components/Utilities/BaseFluxComponent";
+import { VssComponent } from "Common/Components/Utilities/VssComponent";
 import { throttledDelegate } from "Common/Utilities/Core";
 
-export abstract class AutoResizableComponent<TP, TS> extends BaseFluxComponent<TP, TS> {
+export abstract class AutoResizableComponent<TP, TS> extends VssComponent<TP, TS> {
     private static WIDTH_DELTA: number = 10; // Minimum change in window width to react to
 
     private _windowResizeThrottleDelegate: any;

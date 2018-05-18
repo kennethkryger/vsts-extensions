@@ -7,19 +7,20 @@ import { IRichEditorToolbarButtonOptions } from "Common/Components/RichEditor/To
 import {
     RichEditorToolbarButtonNames
 } from "Common/Components/RichEditor/Toolbar/RichEditorToolbarButtonNames";
+import { IVssComponentProps, VssComponent } from "Common/Components/Utilities/VssComponent";
 import { IconButton } from "OfficeFabric/Button";
 import { FocusZone, FocusZoneDirection } from "OfficeFabric/FocusZone";
 import { DirectionalHint, TooltipDelay, TooltipHost } from "OfficeFabric/Tooltip";
 import { css } from "OfficeFabric/Utilities";
 import Editor from "roosterjs-editor-core/lib/editor/Editor";
 
-export interface IRichEditorToolbarProps {
+export interface IRichEditorToolbarProps extends IVssComponentProps {
     buttons: RichEditorToolbarButtonNames[];
     options?: IRichEditorToolbarButtonOptions;
     getEditor(): Editor;
 }
 
-export class RichEditorToolbar extends React.Component<IRichEditorToolbarProps, {}> {
+export class RichEditorToolbar extends VssComponent<IRichEditorToolbarProps, {}> {
     public render(): JSX.Element {
         const {buttons} = this.props;
 

@@ -14,8 +14,8 @@ import { Badge } from "Common/Components/Badge";
 import { Loading } from "Common/Components/Loading";
 import { getAsyncLoadedComponent } from "Common/Components/Utilities/AsyncLoadedComponent";
 import {
-    BaseFluxComponent, IBaseFluxComponentProps, IBaseFluxComponentState
-} from "Common/Components/Utilities/BaseFluxComponent";
+    IVssComponentProps, IVssComponentState, VssComponent
+} from "Common/Components/Utilities/VssComponent";
 import { BaseStore } from "Common/Flux/Stores/BaseStore";
 import { getHostNavigationService, navigate } from "Common/Utilities/Navigation";
 import { Fabric } from "OfficeFabric/Fabric";
@@ -32,7 +32,7 @@ export enum AppViewMode {
     Details
 }
 
-export interface IAppState extends IBaseFluxComponentState {
+export interface IAppState extends IVssComponentState {
     appViewMode: AppViewMode;
     bugBashId?: string;
     bugBashItemId?: string;
@@ -45,7 +45,7 @@ const AsyncAllBugBashView = getAsyncLoadedComponent(
     (m: typeof AllBugBashesView_Async) => m.AllBugBashesView,
     () => <Loading />);
 
-export class App extends BaseFluxComponent<IBaseFluxComponentProps, IAppState> {
+export class App extends VssComponent<IVssComponentProps, IAppState> {
     private _navigationService: HostNavigationService;
 
     public componentDidMount() {
@@ -60,7 +60,7 @@ export class App extends BaseFluxComponent<IBaseFluxComponentProps, IAppState> {
         this._detachNavigate();
     }
 
-    public shouldComponentUpdate(_nextProps: Readonly<IBaseFluxComponentProps>, nextState: Readonly<IAppState>) {
+    public shouldComponentUpdate(_nextProps: Readonly<IVssComponentProps>, nextState: Readonly<IAppState>) {
         if (this.state.appViewMode !== nextState.appViewMode
             || this.state.bugBashId !== nextState.bugBashId
             || this.state.bugBashItemId !== nextState.bugBashItemId
@@ -124,7 +124,7 @@ export class App extends BaseFluxComponent<IBaseFluxComponentProps, IAppState> {
         );
     }
 
-    protected initializeState() {
+    protected getInitialState() {
         this.state = {
             appViewMode: null,
             userSettingsAvailable: true

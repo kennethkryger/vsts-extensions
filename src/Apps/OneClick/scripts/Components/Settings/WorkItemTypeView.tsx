@@ -2,8 +2,8 @@ import * as React from "react";
 
 import { Loading } from "Common/Components/Loading";
 import {
-    BaseFluxComponent, IBaseFluxComponentProps, IBaseFluxComponentState
-} from "Common/Components/Utilities/BaseFluxComponent";
+    IVssComponentProps, IVssComponentState, VssComponent
+} from "Common/Components/Utilities/VssComponent";
 import { BaseStore } from "Common/Flux/Stores/BaseStore";
 import { confirmAction } from "Common/Utilities/Core";
 import { getCurrentUserName } from "Common/Utilities/Identity";
@@ -19,16 +19,16 @@ import { IRuleGroup } from "OneClick/Interfaces";
 import { trackEvent } from "OneClick/Telemetry";
 import { ZeroData, ZeroDataActionType } from "VSSUI/ZeroData";
 
-export interface IWorkItemTypeViewProps extends IBaseFluxComponentProps {
+export interface IWorkItemTypeViewProps extends IVssComponentProps {
     workItemTypeName: string;
     ruleGroupId?: string;
 }
 
-export interface IWorkItemTypeViewState extends IBaseFluxComponentState {
+export interface IWorkItemTypeViewState extends IVssComponentState {
     workItemTypeEnabled?: boolean;
 }
 
-export class WorkItemTypeView extends BaseFluxComponent<IWorkItemTypeViewProps, IWorkItemTypeViewState> {
+export class WorkItemTypeView extends VssComponent<IWorkItemTypeViewProps, IWorkItemTypeViewState> {
     public componentDidMount() {
         super.componentDidMount();
         this._refresh();
@@ -97,7 +97,7 @@ export class WorkItemTypeView extends BaseFluxComponent<IWorkItemTypeViewProps, 
         return [StoresHub.settingsStore];
     }
 
-    protected initializeState() {
+    protected getInitialState() {
         this.state = {
             loading: true,
             workItemTypeEnabled: null

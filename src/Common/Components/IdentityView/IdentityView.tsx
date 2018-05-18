@@ -1,13 +1,13 @@
 import * as React from "react";
 
-import { IBaseFluxComponentProps } from "Common/Components/Utilities/BaseFluxComponent";
+import { IVssComponentProps } from "Common/Components/Utilities/VssComponent";
 import {
     IdentityRef, parseUniquefiedIdentityName, parseWorkItemIdentityName
 } from "Common/Utilities/Identity";
 import { Persona, PersonaSize } from "OfficeFabric/Persona";
 import { css } from "OfficeFabric/Utilities";
 
-export interface IIdentityViewProps extends IBaseFluxComponentProps {
+export interface IIdentityViewProps extends IVssComponentProps {
     identityRef?: IdentityRef;
     identityDistinctName?: string;
     useWorkItemIdentityParser?: boolean;

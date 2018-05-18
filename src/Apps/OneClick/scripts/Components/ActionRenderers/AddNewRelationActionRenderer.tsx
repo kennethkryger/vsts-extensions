@@ -6,8 +6,8 @@ import { InfoLabel } from "Common/Components/InfoLabel";
 import { InputError } from "Common/Components/InputError";
 import { Loading } from "Common/Components/Loading";
 import {
-    BaseFluxComponent, IBaseFluxComponentProps, IBaseFluxComponentState
-} from "Common/Components/Utilities/BaseFluxComponent";
+    IVssComponentProps, IVssComponentState, VssComponent
+} from "Common/Components/Utilities/VssComponent";
 import { TeamPicker } from "Common/Components/VSTS/TeamPicker";
 import { WorkItemRelationTypePicker } from "Common/Components/VSTS/WorkItemRelationTypePicker";
 import { WorkItemTypePicker } from "Common/Components/VSTS/WorkItemTypePicker";
@@ -27,7 +27,7 @@ import {
     WorkItemRelationType, WorkItemTemplateReference, WorkItemType
 } from "TFS/WorkItemTracking/Contracts";
 
-export interface IAddNewRelationActionRendererProps extends IBaseFluxComponentProps {
+export interface IAddNewRelationActionRendererProps extends IVssComponentProps {
     workItemType: string;
     relationType: string;
     teamId: string;
@@ -40,11 +40,11 @@ export interface IAddNewRelationActionRendererProps extends IBaseFluxComponentPr
     onAutoCreateChange(value: boolean): void;
 }
 
-export interface IAddNewRelationActionRendererState extends IBaseFluxComponentState {
+export interface IAddNewRelationActionRendererState extends IVssComponentState {
     templates?: WorkItemTemplateReference[];
 }
 
-export class AddNewRelationActionRenderer extends BaseFluxComponent<IAddNewRelationActionRendererProps, IAddNewRelationActionRendererState> {
+export class AddNewRelationActionRenderer extends VssComponent<IAddNewRelationActionRendererProps, IAddNewRelationActionRendererState> {
     public componentDidMount() {
         super.componentDidMount();
         WorkItemTypeActions.initializeWorkItemTypes();
@@ -170,7 +170,7 @@ export class AddNewRelationActionRenderer extends BaseFluxComponent<IAddNewRelat
         };
     }
 
-    protected initializeState(): void {
+    protected getInitialState(): void {
         this.state = {
             loading: true,
             templates: []

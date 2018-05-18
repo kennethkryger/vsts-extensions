@@ -3,8 +3,8 @@ import "./FileUploadDialog.scss";
 import * as React from "react";
 
 import {
-    BaseFluxComponent, IBaseFluxComponentProps, IBaseFluxComponentState
-} from "Common/Components/Utilities/BaseFluxComponent";
+    IVssComponentProps, IVssComponentState, VssComponent
+} from "Common/Components/Utilities/VssComponent";
 import { DefaultButton, PrimaryButton } from "OfficeFabric/Button";
 import { Dialog, DialogFooter, DialogType } from "OfficeFabric/Dialog";
 import { css } from "OfficeFabric/Utilities";
@@ -12,7 +12,7 @@ import {
     FileInput, FileInputContentType, FileInputResult, FileInputUpdateEventData
 } from "VSSUI/FileInput";
 
-export interface IFileInputDialogProps extends IBaseFluxComponentProps {
+export interface IFileInputDialogProps extends IVssComponentProps {
     maximumNumberOfFiles?: number;
     allowedFileExtensions?: string[];
     maxFileSize?: number;
@@ -22,11 +22,11 @@ export interface IFileInputDialogProps extends IBaseFluxComponentProps {
     onOkClick(files: FileInputResult[]): void;
 }
 
-export interface IFileInputDialogState extends IBaseFluxComponentState {
+export interface IFileInputDialogState extends IVssComponentState {
     files: FileInputResult[];
 }
 
-export class FileUploadDialog extends BaseFluxComponent<IFileInputDialogProps, IFileInputDialogState> {
+export class FileUploadDialog extends VssComponent<IFileInputDialogProps, IFileInputDialogState> {
     public render(): JSX.Element {
         const {title, maxFileSize, className, resultContentType, maximumNumberOfFiles, allowedFileExtensions} = this.props;
 

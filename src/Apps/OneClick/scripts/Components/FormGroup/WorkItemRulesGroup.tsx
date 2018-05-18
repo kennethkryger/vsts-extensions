@@ -7,9 +7,7 @@ import { arrayMove, SortableContainer, SortableElement } from "react-sortable-ho
 import { initializeIcons } from "@uifabric/icons";
 import { Loading } from "Common/Components/Loading";
 import { AutoResizableComponent } from "Common/Components/Utilities/AutoResizableComponent";
-import {
-    IBaseFluxComponentProps, IBaseFluxComponentState
-} from "Common/Components/Utilities/BaseFluxComponent";
+import { IVssComponentProps, IVssComponentState } from "Common/Components/Utilities/VssComponent";
 import { contains, subtract } from "Common/Utilities/Array";
 import { getCurrentUserName } from "Common/Utilities/Identity";
 import {
@@ -39,7 +37,7 @@ import {
 } from "TFS/WorkItemTracking/ExtensionContracts";
 import { ZeroData, ZeroDataActionType } from "VSSUI/ZeroData";
 
-export interface IWorkItemRulesGroupState extends IBaseFluxComponentState {
+export interface IWorkItemRulesGroupState extends IVssComponentState {
     rules?: Rule[];
     workItemTypeEnabled?: boolean;
     ruleExecutionError?: IActionError;
@@ -63,7 +61,7 @@ const SortableList = SortableContainer(({items}) => {
     );
 });
 
-export class WorkItemRulesGroup extends AutoResizableComponent<IBaseFluxComponentProps, IWorkItemRulesGroupState> {
+export class WorkItemRulesGroup extends AutoResizableComponent<IVssComponentProps, IWorkItemRulesGroupState> {
     private _project: TeamProject;
     private _workItemTypeName: string;
     private _cacheStamp: number;
@@ -164,7 +162,7 @@ export class WorkItemRulesGroup extends AutoResizableComponent<IBaseFluxComponen
         );
     }
 
-    protected initializeState() {
+    protected getInitialState() {
         this.state = {
             loading: false,
             workItemTypeEnabled: true,

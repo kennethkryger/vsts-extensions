@@ -5,8 +5,8 @@ import * as React from "react";
 import { IdentityView } from "Common/Components/IdentityView";
 import { Loading } from "Common/Components/Loading";
 import {
-    BaseFluxComponent, IBaseFluxComponentProps, IBaseFluxComponentState
-} from "Common/Components/Utilities/BaseFluxComponent";
+    IVssComponentProps, IVssComponentState, VssComponent
+} from "Common/Components/Utilities/VssComponent";
 import { BaseStore } from "Common/Flux/Stores/BaseStore";
 import { confirmAction, delegate } from "Common/Utilities/Core";
 import { getDistinctNameFromIdentityRef } from "Common/Utilities/Identity";
@@ -42,13 +42,13 @@ import { VssDetailsList } from "VSSUI/VssDetailsList";
 import { VssIcon, VssIconType } from "VSSUI/VssIcon";
 import { ZeroData } from "VSSUI/ZeroData";
 
-export interface IRuleGroupListProps extends IBaseFluxComponentProps {
+export interface IRuleGroupListProps extends IVssComponentProps {
     workItemTypeName: string;
     refresh(): void;
     toggleSubscription(subscribe: boolean, ruleGroup: IRuleGroup): void;
 }
 
-export interface IRuleGroupListState extends IBaseFluxComponentState {
+export interface IRuleGroupListState extends IVssComponentState {
     ruleGroups?: IRuleGroup[];
     isGroupPanelOpen?: boolean;
     isSettingsPanelOpen?: boolean;
@@ -60,7 +60,7 @@ export interface IRuleGroupListState extends IBaseFluxComponentState {
     workItemTypeEnabled?: boolean;
 }
 
-export class RuleGroupList extends BaseFluxComponent<IRuleGroupListProps, IRuleGroupListState> {
+export class RuleGroupList extends VssComponent<IRuleGroupListProps, IRuleGroupListState> {
     private _hubViewState: IHubViewState;
     private _filterBar: IFilterBar;
 
@@ -156,7 +156,7 @@ export class RuleGroupList extends BaseFluxComponent<IRuleGroupListProps, IRuleG
         );
     }
 
-    protected initializeState() {
+    protected getInitialState() {
         this.state = this._getNewState();
     }
 

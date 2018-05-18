@@ -2,19 +2,21 @@ import "./DateTimePicker.scss";
 
 import * as React from "react";
 
+import {
+    IVssComponentProps, IVssComponentState, VssComponent
+} from "Common/Components/Utilities/VssComponent";
 import { Calendar } from "OfficeFabric/Calendar";
 import { IDatePickerStrings } from "OfficeFabric/components/DatePicker/DatePicker.types";
 import { css } from "OfficeFabric/Utilities";
 import { Time } from "./Time";
 
-export interface IDateTimePickerProps {
+export interface IDateTimePickerProps extends IVssComponentProps {
     today: Date;
     value: Date;
-    className?: string;
     onSelectDate?(date: Date): void;
 }
 
-export interface IDateTimePickerState {
+export interface IDateTimePickerState extends IVssComponentState {
     selectedDate: Date;
 }
 
@@ -76,26 +78,7 @@ const DEFAULT_STRINGS: IDatePickerStrings = {
     nextYearAriaLabel: "Go to next year"
   };
 
-export class DateTimePicker extends React.Component<IDateTimePickerProps, IDateTimePickerState> {
-    constructor(props: IDateTimePickerProps) {
-        super(props);
-
-        const { today, value } = props;
-
-        let initialDate: Date = null;
-        if (value) {
-            initialDate = new Date(value.getTime());
-        }
-        else {
-            initialDate = new Date(today.getTime());
-            initialDate.setHours(0, 0, 0, 0);
-        }
-
-        this.state = {
-            selectedDate: initialDate
-        };
-    }
-
+export class DateTimePicker extends VssComponent<IDateTimePickerProps, IDateTimePickerState> {
     public render(): JSX.Element {
         const { today, className } = this.props;
         const { selectedDate } = this.state;
@@ -120,6 +103,23 @@ export class DateTimePicker extends React.Component<IDateTimePickerProps, IDateT
                 </div>
             </div >
         );
+    }
+
+    protected getInitialState(props: IDateTimePickerProps): IDateTimePickerState {
+        const { today, value } = props;
+
+        let initialDate: Date = null;
+        if (value) {
+            initialDate = new Date(value.getTime());
+        }
+        else {
+            initialDate = new Date(today.getTime());
+            initialDate.setHours(0, 0, 0, 0);
+        }
+
+        return {
+            selectedDate: initialDate
+        };
     }
 
     private _onSelectDate = (date: Date) => {

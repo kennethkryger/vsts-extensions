@@ -3,9 +3,9 @@ import { Services } from "Common/Utilities/Context";
 import { WorkItemStateColor } from "TFS/WorkItemTracking/Contracts";
 import * as WitClient from "TFS/WorkItemTracking/RestClient";
 
-export const WorkItemStateItemServicesName = "WorkItemStateItemServices";
+export const WorkItemStateItemServiceName = "WorkItemStateItemService";
 
-export class WorkItemStateItemServices extends BaseDataService<IDictionaryStringTo<WorkItemStateColor[]>, WorkItemStateColor[], string> {
+export class WorkItemStateItemService extends BaseDataService<IDictionaryStringTo<WorkItemStateColor[]>, WorkItemStateColor[], string> {
     constructor() {
         super();
         this.items = {};
@@ -16,7 +16,7 @@ export class WorkItemStateItemServices extends BaseDataService<IDictionaryString
     }
 
     public getKey(): string {
-        return WorkItemStateItemServicesName;
+        return WorkItemStateItemServiceName;
     }
 
     public async initializeWorkItemStates(workItemTypeName: string) {
@@ -49,4 +49,4 @@ export class WorkItemStateItemServices extends BaseDataService<IDictionaryString
     }
 }
 
-Services.add(WorkItemStateItemServicesName, { serviceFactory: WorkItemStateItemServices });
+Services.add(WorkItemStateItemServiceName, { serviceFactory: WorkItemStateItemService });

@@ -13,8 +13,8 @@ import { BugBash } from "BugBashPro/ViewModels/BugBash";
 import { BugBashItem } from "BugBashPro/ViewModels/BugBashItem";
 import { Loading } from "Common/Components/Loading";
 import {
-    BaseFluxComponent, IBaseFluxComponentProps, IBaseFluxComponentState
-} from "Common/Components/Utilities/BaseFluxComponent";
+    IVssComponentProps, IVssComponentState, VssComponent
+} from "Common/Components/Utilities/VssComponent";
 import { TeamActions } from "Common/Flux/Actions/TeamActions";
 import { BaseStore } from "Common/Flux/Stores/BaseStore";
 import { isGuid } from "Common/Utilities/Guid";
@@ -26,7 +26,7 @@ import { Label } from "OfficeFabric/Label";
 import { Bar, BarChart, CartesianGrid, ResponsiveContainer, Tooltip, XAxis, YAxis } from "recharts";
 import { ZeroData } from "VSSUI/ZeroData";
 
-interface IBugBashChartsState extends IBaseFluxComponentState {
+interface IBugBashChartsState extends IVssComponentState {
     allBugBashItems: BugBashItem[];
     pendingBugBashItems: BugBashItem[];
     acceptedBugBashItems: BugBashItem[];
@@ -34,7 +34,7 @@ interface IBugBashChartsState extends IBaseFluxComponentState {
     groupedByTeam?: boolean;
 }
 
-interface IBugBashChartsProps extends IBaseFluxComponentProps {
+interface IBugBashChartsProps extends IVssComponentProps {
     bugBash: BugBash;
     view?: string;
 }
@@ -72,7 +72,7 @@ const CustomTooltip: React.StatelessComponent<any> =
         }
     };
 
-export class BugBashCharts extends BaseFluxComponent<IBugBashChartsProps, IBugBashChartsState> {
+export class BugBashCharts extends VssComponent<IBugBashChartsProps, IBugBashChartsState> {
     public componentDidMount() {
         super.componentDidMount();
         TeamActions.initializeTeams();
@@ -225,7 +225,7 @@ export class BugBashCharts extends BaseFluxComponent<IBugBashChartsProps, IBugBa
         );
     }
 
-    protected initializeState() {
+    protected getInitialState() {
         this.state = {
             allBugBashItems: null,
             pendingBugBashItems: null,

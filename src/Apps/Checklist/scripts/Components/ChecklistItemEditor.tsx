@@ -4,8 +4,8 @@ import * as React from "react";
 
 import { ChecklistItemState, ChecklistItemStates, IChecklistItem } from "Checklist/Interfaces";
 import {
-    BaseFluxComponent, IBaseFluxComponentProps, IBaseFluxComponentState
-} from "Common/Components/Utilities/BaseFluxComponent";
+    IVssComponentProps, IVssComponentState, VssComponent
+} from "Common/Components/Utilities/VssComponent";
 import { isNullOrWhiteSpace } from "Common/Utilities/String";
 import { DefaultButton, IconButton } from "OfficeFabric/Button";
 import { Checkbox } from "OfficeFabric/Checkbox";
@@ -14,7 +14,7 @@ import { TextField } from "OfficeFabric/TextField";
 import { DirectionalHint, TooltipDelay, TooltipHost } from "OfficeFabric/Tooltip";
 import { css, KeyCodes } from "OfficeFabric/Utilities";
 
-export interface IChecklistItemEditorProps extends IBaseFluxComponentProps {
+export interface IChecklistItemEditorProps extends IVssComponentProps {
     checklistItem?: IChecklistItem;
     disabled?: boolean;
     inputPlaceholder?: string;
@@ -24,11 +24,11 @@ export interface IChecklistItemEditorProps extends IBaseFluxComponentProps {
     onCancel?(): void;
 }
 
-export interface IChecklistItemEditorState extends IBaseFluxComponentState {
+export interface IChecklistItemEditorState extends IVssComponentState {
     checklistItem: IChecklistItem;
 }
 
-export class ChecklistItemEditor extends BaseFluxComponent<IChecklistItemEditorProps, IChecklistItemEditorState> {
+export class ChecklistItemEditor extends VssComponent<IChecklistItemEditorProps, IChecklistItemEditorState> {
     public componentWillReceiveProps(nextProps: IChecklistItemEditorProps, context?: any) {
         super.componentWillReceiveProps(nextProps, context);
         this.setState({
@@ -124,7 +124,7 @@ export class ChecklistItemEditor extends BaseFluxComponent<IChecklistItemEditorP
         );
     }
 
-    protected initializeState() {
+    protected getInitialState() {
         this.state = {
             checklistItem: this.props.checklistItem ? {...this.props.checklistItem} : this._getDefaultItem()
         };

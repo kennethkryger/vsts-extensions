@@ -8,8 +8,8 @@ import { WorkItemTypeView } from "Checklist/Components/Settings/WorkItemTypeView
 import { StoresHub } from "Checklist/Stores/StoresHub";
 import { Loading } from "Common/Components/Loading";
 import {
-    BaseFluxComponent, IBaseFluxComponentProps, IBaseFluxComponentState
-} from "Common/Components/Utilities/BaseFluxComponent";
+    IVssComponentProps, IVssComponentState, VssComponent
+} from "Common/Components/Utilities/VssComponent";
 import { WorkItemTypeActions } from "Common/Flux/Actions/WorkItemTypeActions";
 import { BaseStore } from "Common/Flux/Stores/BaseStore";
 import { getHostNavigationService, navigate } from "Common/Utilities/Navigation";
@@ -20,11 +20,11 @@ import { INavLink, Nav } from "OfficeFabric/Nav";
 import { DirectionalHint, TooltipDelay, TooltipHost } from "OfficeFabric/Tooltip";
 import { HostNavigationService } from "VSS/SDK/Services/Navigation";
 
-export interface IAppState extends IBaseFluxComponentState {
+export interface IAppState extends IVssComponentState {
     selectedWit?: string;
 }
 
-export class SettingsApp extends BaseFluxComponent<IBaseFluxComponentProps, IAppState> {
+export class SettingsApp extends VssComponent<IVssComponentProps, IAppState> {
     private _navigationService: HostNavigationService;
 
     public componentDidMount() {
@@ -85,7 +85,7 @@ export class SettingsApp extends BaseFluxComponent<IBaseFluxComponentProps, IApp
         );
     }
 
-    protected initializeState() {
+    protected getInitialState() {
         this.state = {
             loading: true
         };

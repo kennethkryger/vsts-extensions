@@ -1,30 +1,24 @@
 import * as React from "react";
 
+import {
+    IVssComponentProps, IVssComponentState, VssComponent
+} from "Common/Components/Utilities/VssComponent";
+
 export type ModuleComponentSelector<TProps> = (...modules: any[]) => React.ComponentClass<TProps> | React.StatelessComponent<TProps>;
 
-interface IAsyncLoadedComponentProps<TProps> {
+interface IAsyncLoadedComponentProps<TProps> extends IVssComponentProps {
     modules: string[];
     moduleComponentSelector: ModuleComponentSelector<TProps>;
     props: TProps;
     componentWhileLoading?(): JSX.Element;
 }
 
-interface IAsyncLoadedComponentState<TProps> {
-    isLoading: boolean;
+interface IAsyncLoadedComponentState<TProps> extends IVssComponentState {
     componentType: React.ComponentClass<TProps> | React.StatelessComponent<TProps>;
 }
 
-class AsyncLoadedComponent<TProps> extends React.Component<IAsyncLoadedComponentProps<TProps>, IAsyncLoadedComponentState<TProps>> {
+class AsyncLoadedComponent<TProps> extends VssComponent<IAsyncLoadedComponentProps<TProps>, IAsyncLoadedComponentState<TProps>> {
     private _isMounted: boolean = false;
-
-    constructor(props?: IAsyncLoadedComponentProps<TProps>, context?: any) {
-        super(props, context);
-
-        this.state = {
-            isLoading: false,
-            componentType: null
-        };
-    }
 
     public render(): JSX.Element {
         if (!this.state.componentType) {
@@ -39,18 +33,20 @@ class AsyncLoadedComponent<TProps> extends React.Component<IAsyncLoadedComponent
     }
 
     public componentDidMount(): void {
+        super.componentDidMount();
+
         this._isMounted = true;
 
-        if (!this.state.componentType && !this.state.isLoading) {
+        if (!this.state.componentType && !this.state.loading) {
             this.setState({
-                isLoading: true,
+                loading: true,
                 componentType: null
             });
 
             VSS.require(this.props.modules, (...modules) => {
                 if (this._isMounted) {
                     this.setState({
-                        isLoading: false,
+                        loading: false,
                         componentType: this.props.moduleComponentSelector(...modules)
                     });
                 }
@@ -59,14 +55,23 @@ class AsyncLoadedComponent<TProps> extends React.Component<IAsyncLoadedComponent
     }
 
     public componentWillUnmount(): void {
-        if (this.state.isLoading) {
+        super.componentWillUnmount();
+
+        if (this.state.loading) {
             this.setState({
-                isLoading: false,
+                loading: false,
                 componentType: null
             });
         }
 
         this._isMounted = false;
+    }
+
+    protected getInitialState(): IAsyncLoadedComponentState<TProps> {
+        return {
+            loading: false,
+            componentType: null
+        };
     }
 }
 

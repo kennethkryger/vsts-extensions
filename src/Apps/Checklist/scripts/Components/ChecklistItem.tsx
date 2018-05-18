@@ -4,8 +4,8 @@ import * as React from "react";
 
 import { ChecklistItemState, ChecklistItemStates, IChecklistItem } from "Checklist/Interfaces";
 import {
-    BaseFluxComponent, IBaseFluxComponentProps, IBaseFluxComponentState
-} from "Common/Components/Utilities/BaseFluxComponent";
+    IVssComponentProps, IVssComponentState, VssComponent
+} from "Common/Components/Utilities/VssComponent";
 import { IconButton } from "OfficeFabric/Button";
 import { Checkbox } from "OfficeFabric/Checkbox";
 import {
@@ -13,7 +13,7 @@ import {
 } from "OfficeFabric/Tooltip";
 import { css } from "OfficeFabric/Utilities";
 
-export interface IChecklistItemProps extends IBaseFluxComponentProps {
+export interface IChecklistItemProps extends IVssComponentProps {
     checklistItem: IChecklistItem;
     disabled?: boolean;
     disableStateChange?: boolean;
@@ -23,7 +23,7 @@ export interface IChecklistItemProps extends IBaseFluxComponentProps {
     onToggleCheck?(checklistItem: IChecklistItem, checked: boolean): void;
 }
 
-export class ChecklistItem extends BaseFluxComponent<IChecklistItemProps, IBaseFluxComponentState> {
+export class ChecklistItem extends VssComponent<IChecklistItemProps, IVssComponentState> {
     public render(): JSX.Element {
         const {checklistItem, disabled, disableStateChange, allowEditDefaultItems} = this.props;
         const isCompleted = checklistItem.state === ChecklistItemState.Completed;

@@ -2,8 +2,8 @@ import * as React from "react";
 
 import { Loading } from "Common/Components/Loading";
 import {
-    BaseFluxComponent, IBaseFluxComponentProps, IBaseFluxComponentState
-} from "Common/Components/Utilities/BaseFluxComponent";
+    IVssComponentProps, IVssComponentState, VssComponent
+} from "Common/Components/Utilities/VssComponent";
 import { WorkItemFieldPicker } from "Common/Components/VSTS/WorkItemFieldPicker";
 import { WorkItemFieldValuePicker } from "Common/Components/VSTS/WorkItemFieldValuePicker";
 import { WorkItemFieldActions } from "Common/Flux/Actions/WorkItemFieldActions";
@@ -15,7 +15,7 @@ import { ExcludedFields } from "OneClick/Constants";
 import { StoresHub } from "OneClick/Flux/Stores/StoresHub";
 import { WorkItemField } from "TFS/WorkItemTracking/Contracts";
 
-export interface IFieldChangedPickerProps extends IBaseFluxComponentProps {
+export interface IFieldChangedPickerProps extends IVssComponentProps {
     fieldRefName: string;
     workItemType: string;
     oldFieldValue: string;
@@ -27,7 +27,7 @@ export interface IFieldChangedPickerProps extends IBaseFluxComponentProps {
     onNewFieldValueChange(value: string): void;
 }
 
-export class FieldChangedPicker extends BaseFluxComponent<IFieldChangedPickerProps, IBaseFluxComponentState> {
+export class FieldChangedPicker extends VssComponent<IFieldChangedPickerProps, IVssComponentState> {
     public componentDidMount() {
         super.componentDidMount();
         WorkItemFieldActions.initializeWorkItemFields();
@@ -92,13 +92,13 @@ export class FieldChangedPicker extends BaseFluxComponent<IFieldChangedPickerPro
         return [StoresHub.workItemFieldStore];
     }
 
-    protected getDataServiceState(): IBaseFluxComponentState {
+    protected getDataServiceState(): IVssComponentState {
         return {
             loading: StoresHub.workItemFieldStore.isLoading()
         };
     }
 
-    protected initializeState(): void {
+    protected getInitialState(): void {
         this.state = {
             loading: true
         };

@@ -2,6 +2,9 @@ import "./ValueSpinner.scss";
 
 import * as React from "react";
 
+import {
+    IVssComponentProps, IVssComponentState, VssComponent
+} from "Common/Components/Utilities/VssComponent";
 import { IconButton } from "OfficeFabric/Button";
 
 export class NumericValueRange implements IValueRange<number> {
@@ -72,26 +75,20 @@ export interface IValueRange<T> {
     toString(value: T): string;
 }
 
-export interface IValueSpinnerProp<T> {
+export interface IValueSpinnerProps<T> extends IVssComponentProps {
     value: T;
     valueRange: IValueRange<T>;
     onValueChange?(value: T): void;
 }
 
-export interface IValueSpinnerState<T> {
+export interface IValueSpinnerState<T> extends IVssComponentState {
     value: T;
 }
 
-export class ValueSpinner<T> extends React.Component<IValueSpinnerProp<T>, IValueSpinnerState<T>> {
-    constructor(props: IValueSpinnerProp<T>) {
-        super(props);
+export class ValueSpinner<T> extends VssComponent<IValueSpinnerProps<T>, IValueSpinnerState<T>> {
+    public componentWillReceiveProps(props: IValueSpinnerProps<T>, context?: any) {
+        super.componentWillReceiveProps(props, context);
 
-        this.state = {
-            value: props.value
-        };
-    }
-
-    public componentWillReceiveProps(props: IValueSpinnerProp<T>) {
         if (this.props && (this.props.value !== props.value)) {
             this.setState({
                 value: props.value
@@ -119,6 +116,12 @@ export class ValueSpinner<T> extends React.Component<IValueSpinnerProp<T>, IValu
                 />
             </div>
         );
+    }
+
+    protected getInitialState(props: IValueSpinnerProps<T>): IValueSpinnerState<T> {
+        return {
+            value: props.value
+        };
     }
 
     private _onValueChange(value: T) {

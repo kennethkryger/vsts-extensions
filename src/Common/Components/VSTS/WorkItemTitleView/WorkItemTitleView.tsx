@@ -3,11 +3,11 @@ import "./WorkItemTitleView.scss";
 import * as React from "react";
 
 import {
-    BaseFluxComponent, IBaseFluxComponentProps, IBaseFluxComponentState
-} from "Common/Components/Utilities/BaseFluxComponent";
-import { WorkItemTypeActions } from "Common/Flux/Actions/WorkItemTypeActions";
-import { BaseStore, StoreFactory } from "Common/Flux/Stores/BaseStore";
-import { WorkItemTypeStore } from "Common/Flux/Stores/WorkItemTypeStore";
+    IVssComponentProps, IVssComponentState, VssComponent
+} from "Common/Components/Utilities/VssComponent";
+import { BaseDataService } from "Common/Services/BaseDataService";
+import { WorkItemTypeService, WorkItemTypeServiceName } from "Common/Services/WorkItemTypeService";
+import { IReactAppContext } from "Common/Utilities/Context";
 import { stringEquals } from "Common/Utilities/String";
 import { Link } from "OfficeFabric/Link";
 import {
@@ -16,7 +16,7 @@ import {
 import { css } from "OfficeFabric/Utilities";
 import { WorkItemType } from "TFS/WorkItemTracking/Contracts";
 
-export interface IWorkItemTitleViewProps extends IBaseFluxComponentProps {
+export interface IWorkItemTitleViewProps extends IVssComponentProps {
     workItemId: number;
     title: string;
     workItemType: string;
@@ -24,22 +24,27 @@ export interface IWorkItemTitleViewProps extends IBaseFluxComponentProps {
     onClick?(e: React.MouseEvent<HTMLElement>): void;
 }
 
-export interface IWorkItemTitleViewState extends IBaseFluxComponentState {
+export interface IWorkItemTitleViewState extends IVssComponentState {
     workItemType: WorkItemType;
 }
 
-export class WorkItemTitleView extends BaseFluxComponent<IWorkItemTitleViewProps, IWorkItemTitleViewState> {
-    private _workItemTypeStore = StoreFactory.getInstance<WorkItemTypeStore>(WorkItemTypeStore);
+export class WorkItemTitleView extends VssComponent<IWorkItemTitleViewProps, IWorkItemTitleViewState> {
+    private _workItemTypeService: WorkItemTypeService;
+
+    constructor(props: IWorkItemTitleViewProps, context?: IReactAppContext) {
+        super(props, context);
+        this._workItemTypeService = this.context.appContext.getService<WorkItemTypeService>(WorkItemTypeServiceName);
+    }
 
     public componentDidMount() {
         super.componentDidMount();
-        if (this._workItemTypeStore.isLoaded()) {
+        if (this._workItemTypeService.isLoaded()) {
             this.setState({
-                workItemType: this._workItemTypeStore.getItem(this.props.workItemType)
+                workItemType: this._workItemTypeService.getItem(this.props.workItemType)
             });
         }
         else {
-            WorkItemTypeActions.initializeWorkItemTypes();
+            this._workItemTypeService.initializeWorkItemTypes();
         }
     }
 
@@ -47,9 +52,9 @@ export class WorkItemTitleView extends BaseFluxComponent<IWorkItemTitleViewProps
         super.componentWillReceiveProps(nextProps, context);
 
         if (!stringEquals(nextProps.workItemType, this.props.workItemType, true)) {
-            if (this._workItemTypeStore.isLoaded()) {
+            if (this._workItemTypeService.isLoaded()) {
                 this.setState({
-                    workItemType: this._workItemTypeStore.getItem(nextProps.workItemType)
+                    workItemType: this._workItemTypeService.getItem(nextProps.workItemType)
                 });
             }
         }
@@ -89,17 +94,17 @@ export class WorkItemTitleView extends BaseFluxComponent<IWorkItemTitleViewProps
         );
     }
 
-    protected initializeState(): void {
-        this.state = { workItemType: null };
+    protected getInitialState(): IWorkItemTitleViewState {
+        return { workItemType: null };
     }
 
-    protected getObservableDataServices(): BaseStore<any, any, any>[] {
-        return [this._workItemTypeStore];
+    protected getObservableDataServices(): BaseDataService<any, any, any>[] {
+        return [this._workItemTypeService];
     }
 
     protected getDataServiceState(): IWorkItemTitleViewState {
         return {
-            workItemType: this._workItemTypeStore.isLoaded() ? this._workItemTypeStore.getItem(this.props.workItemType) : null
+            workItemType: this._workItemTypeService.isLoaded() ? this._workItemTypeService.getItem(this.props.workItemType) : null
         };
     }
 

@@ -4,12 +4,10 @@ import { SettingsActions } from "BugBashPro/Actions/SettingsActions";
 import { StoresHub } from "BugBashPro/Stores/StoresHub";
 import { Loading } from "Common/Components/Loading";
 import { IRichEditorProps, RichEditor } from "Common/Components/RichEditor";
-import {
-    BaseFluxComponent, IBaseFluxComponentState
-} from "Common/Components/Utilities/BaseFluxComponent";
+import { IVssComponentState, VssComponent } from "Common/Components/Utilities/VssComponent";
 import { BaseStore } from "Common/Flux/Stores/BaseStore";
 
-export class RichEditorComponent extends BaseFluxComponent<IRichEditorProps, IBaseFluxComponentState> {
+export class RichEditorComponent extends VssComponent<IRichEditorProps, IVssComponentState> {
     public componentDidMount() {
         super.componentDidMount();
         if (!StoresHub.bugBashSettingsStore.isLoaded()) {
@@ -30,13 +28,13 @@ export class RichEditorComponent extends BaseFluxComponent<IRichEditorProps, IBa
         return [StoresHub.bugBashSettingsStore];
     }
 
-    protected initializeState() {
+    protected getInitialState() {
         this.state = {
             loading: !StoresHub.bugBashSettingsStore.isLoaded()
         };
     }
 
-    protected getDataServiceState(): IBaseFluxComponentState {
+    protected getDataServiceState(): IVssComponentState {
         return {
             loading: StoresHub.bugBashSettingsStore.isLoading()
         };

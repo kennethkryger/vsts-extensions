@@ -1,32 +1,35 @@
 import * as React from "react";
 
-import {
-    BaseFluxComponent, IBaseFluxComponentState
-} from "Common/Components/Utilities/BaseFluxComponent";
+import { IVssComponentState, VssComponent } from "Common/Components/Utilities/VssComponent";
 import { ISimpleComboProps, SimpleCombo } from "Common/Components/VssCombo/SimpleCombo";
-import { WorkItemTypeActions } from "Common/Flux/Actions/WorkItemTypeActions";
-import { BaseStore, StoreFactory } from "Common/Flux/Stores/BaseStore";
-import { WorkItemTypeStore } from "Common/Flux/Stores/WorkItemTypeStore";
+import { BaseDataService } from "Common/Services/BaseDataService";
+import { WorkItemTypeService, WorkItemTypeServiceName } from "Common/Services/WorkItemTypeService";
+import { IReactAppContext } from "Common/Utilities/Context";
 import { Spinner, SpinnerSize } from "OfficeFabric/Spinner";
 import { css } from "OfficeFabric/Utilities";
 import { WorkItemType } from "TFS/WorkItemTracking/Contracts";
 
-export interface IWorkItemTypePickerState extends IBaseFluxComponentState {
+export interface IWorkItemTypePickerState extends IVssComponentState {
     allWits?: WorkItemType[];
 }
 
-export class WorkItemTypePicker extends BaseFluxComponent<ISimpleComboProps<WorkItemType>, IWorkItemTypePickerState> {
-    private _workItemTypeStore = StoreFactory.getInstance<WorkItemTypeStore>(WorkItemTypeStore);
+export class WorkItemTypePicker extends VssComponent<ISimpleComboProps<WorkItemType>, IWorkItemTypePickerState> {
+    private _workItemTypeService: WorkItemTypeService;
+
+    constructor(props: ISimpleComboProps<WorkItemType>, context?: IReactAppContext) {
+        super(props, context);
+        this._workItemTypeService = this.context.appContext.getService<WorkItemTypeService>(WorkItemTypeServiceName);
+    }
 
     public componentDidMount() {
         super.componentDidMount();
-        if (this._workItemTypeStore.isLoaded()) {
+        if (this._workItemTypeService.isLoaded()) {
             this.setState({
-                allWits: this._workItemTypeStore.getAll()
+                allWits: this._workItemTypeService.getAll()
             });
         }
         else {
-            WorkItemTypeActions.initializeWorkItemTypes();
+            this._workItemTypeService.initializeWorkItemTypes();
         }
     }
 
@@ -48,12 +51,11 @@ export class WorkItemTypePicker extends BaseFluxComponent<ISimpleComboProps<Work
 
     protected getDataServiceState(): IWorkItemTypePickerState {
         return {
-            allWits: this._workItemTypeStore.getAll()
+            allWits: this._workItemTypeService.getAll()
         };
     }
 
-    protected getObservableDataServices(): BaseStore<any, any, any>[] {
-        return [this._workItemTypeStore];
+    protected getObservableDataServices(): BaseDataService<any, any, any>[] {
+        return [this._workItemTypeService];
     }
-
 }

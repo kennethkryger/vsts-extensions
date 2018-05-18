@@ -12,8 +12,8 @@ import {
     ALL_BUTTONS, RichEditorToolbarButtonNames
 } from "Common/Components/RichEditor/Toolbar/RichEditorToolbarButtonNames";
 import {
-    BaseFluxComponent, IBaseFluxComponentProps, IBaseFluxComponentState
-} from "Common/Components/Utilities/BaseFluxComponent";
+    IVssComponentProps, IVssComponentState, VssComponent
+} from "Common/Components/Utilities/VssComponent";
 import { delay, DelayedFunction } from "Common/Utilities/Core";
 import { isNullOrEmpty } from "Common/Utilities/String";
 import { css } from "OfficeFabric/Utilities";
@@ -24,7 +24,7 @@ import ContentEdit from "roosterjs-editor-plugins/lib/ContentEdit/ContentEdit";
 import DefaultShortcut from "roosterjs-editor-plugins/lib/DefaultShortcut/DefaultShortcut";
 import HyperLink from "roosterjs-editor-plugins/lib/HyperLink/HyperLink";
 
-export interface IRichEditorProps extends IBaseFluxComponentProps {
+export interface IRichEditorProps extends IVssComponentProps {
     value?: string;
     delay?: number;
     label?: string;
@@ -36,7 +36,7 @@ export interface IRichEditorProps extends IBaseFluxComponentProps {
     onChange(newValue: string): void;
 }
 
-export interface IRichEditorState extends IBaseFluxComponentState {
+export interface IRichEditorState extends IVssComponentState {
     value?: string;
 }
 
@@ -45,7 +45,7 @@ export interface IEditorOptions {
     getPastedImageUrl?(value: string): Promise<string>;
 }
 
-export class RichEditor extends BaseFluxComponent<IRichEditorProps, IRichEditorState> implements IFocussable {
+export class RichEditor extends VssComponent<IRichEditorProps, IRichEditorState> implements IFocussable {
     private _contentDiv: HTMLDivElement;
     private _delayedFunction: DelayedFunction;
     private _editor: Editor;
@@ -121,10 +121,10 @@ export class RichEditor extends BaseFluxComponent<IRichEditorProps, IRichEditorS
         );
     }
 
-    protected initializeState(): void {
-        this.state = {
-            value: this.props.value || ""
-        };
+    protected getInitialState(props: IRichEditorProps): IRichEditorProps {
+        return {
+            value: props.value || ""
+        } as IRichEditorProps;
     }
 
     private _renderToolbar(): JSX.Element {

@@ -10,8 +10,8 @@ import { IChecklistItem, IWorkItemChecklist } from "Checklist/Interfaces";
 import { StoresHub } from "Checklist/Stores/StoresHub";
 import { Loading } from "Common/Components/Loading";
 import {
-    BaseFluxComponent, IBaseFluxComponentProps, IBaseFluxComponentState
-} from "Common/Components/Utilities/BaseFluxComponent";
+    IVssComponentProps, IVssComponentState, VssComponent
+} from "Common/Components/Utilities/VssComponent";
 import { BaseStore } from "Common/Flux/Stores/BaseStore";
 import { findIndex } from "Common/Utilities/Array";
 import { isNullOrWhiteSpace, stringEquals } from "Common/Utilities/String";
@@ -44,18 +44,18 @@ const SortableList = SortableContainer(({items}) => {
     );
 });
 
-export interface IWorkItemTypeViewProps extends IBaseFluxComponentProps {
+export interface IWorkItemTypeViewProps extends IVssComponentProps {
     workItemType: string;
 }
 
-export interface IWorkItemTypeViewState extends IBaseFluxComponentState {
+export interface IWorkItemTypeViewState extends IVssComponentState {
     checklist: IWorkItemChecklist;
     error?: string;
     disabled?: boolean;
     editItem?: IChecklistItem;
 }
 
-export class WorkItemTypeView extends BaseFluxComponent<IWorkItemTypeViewProps, IWorkItemTypeViewState> {
+export class WorkItemTypeView extends VssComponent<IWorkItemTypeViewProps, IWorkItemTypeViewState> {
     private _hubViewState: IHubViewState;
 
     constructor(props: IWorkItemTypeViewProps, context?: any) {
@@ -99,7 +99,7 @@ export class WorkItemTypeView extends BaseFluxComponent<IWorkItemTypeViewProps, 
         );
     }
 
-    protected initializeState() {
+    protected getInitialState() {
         this.state = {
             checklist: null,
             disabled: false,

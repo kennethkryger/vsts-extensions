@@ -4,28 +4,26 @@ import * as React from "react";
 
 import { RichEditor } from "Common/Components/RichEditor";
 import { DEFAULT_BUTTONS } from "Common/Components/RichEditor/Toolbar/RichEditorToolbarButtonNames";
-import {
-    BaseFluxComponent, IBaseFluxComponentProps, IBaseFluxComponentState
-} from "Common/Components/Utilities/BaseFluxComponent";
 import { ThrottledTextField } from "Common/Components/Utilities/ThrottledTextField";
+import {
+    IVssComponentProps, IVssComponentState, VssComponent
+} from "Common/Components/Utilities/VssComponent";
 import { DatePickerCombo } from "Common/Components/VssCombo/DatePickerCombo";
 import { SimpleCombo } from "Common/Components/VssCombo/SimpleCombo";
 import { ClassificationPicker } from "Common/Components/VSTS/ClassificationPicker";
 import { WorkItemTagPicker } from "Common/Components/VSTS/WorkItemTagPicker";
+import { BaseDataService } from "Common/Services/BaseDataService";
+import { ClassificationNodeKey } from "Common/Services/ClassificationNodeService";
 import {
-    WorkItemTypeFieldAllowedValuesActions
-} from "Common/Flux/Actions/WorkItemTypeFieldAllowedValuesActions";
-import { BaseStore, StoreFactory } from "Common/Flux/Stores/BaseStore";
-import { ClassificationNodeKey } from "Common/Flux/Stores/ClassificationNodeStore";
-import {
-    WorkItemTypeFieldAllowedValuesStore
-} from "Common/Flux/Stores/WorkItemTypeFieldAllowedValuesStore";
+    WorkItemTypeFieldAllowedValuesService, WorkItemTypeFieldAllowedValuesServiceName
+} from "Common/Services/WorkItemTypeFieldAllowedValuesService";
+import { IReactAppContext } from "Common/Utilities/Context";
 import { isNullOrWhiteSpace, stringEquals } from "Common/Utilities/String";
 import { Checkbox } from "OfficeFabric/Checkbox";
 import { css } from "OfficeFabric/Utilities";
 import { FieldType, WorkItemField } from "TFS/WorkItemTracking/Contracts";
 
-export interface IWorkItemFieldValuePickerProps extends IBaseFluxComponentProps {
+export interface IWorkItemFieldValuePickerProps extends IVssComponentProps {
     field: WorkItemField;
     workItemType: string;
     value?: any;
@@ -38,12 +36,12 @@ export interface IWorkItemFieldValuePickerProps extends IBaseFluxComponentProps 
     onChange(value: any): void;
 }
 
-export interface IWorkItemFieldValuePickerState extends IBaseFluxComponentState {
+export interface IWorkItemFieldValuePickerState extends IVssComponentState {
     allowedValues?: string[];
     internalValue?: any;
 }
 
-export class WorkItemFieldValuePicker extends BaseFluxComponent<IWorkItemFieldValuePickerProps, IWorkItemFieldValuePickerState> {
+export class WorkItemFieldValuePicker extends VssComponent<IWorkItemFieldValuePickerProps, IWorkItemFieldValuePickerState> {
     private static FieldTypesSupportingAllowedValues = [
         FieldType.String,
         FieldType.Integer,
@@ -53,7 +51,12 @@ export class WorkItemFieldValuePicker extends BaseFluxComponent<IWorkItemFieldVa
         FieldType.PicklistString
     ];
 
-    private _fieldAllowedValuesStore = StoreFactory.getInstance<WorkItemTypeFieldAllowedValuesStore>(WorkItemTypeFieldAllowedValuesStore);
+    private _fieldAllowedValuesService: WorkItemTypeFieldAllowedValuesService;
+
+    constructor(props: IWorkItemFieldValuePickerProps, context?: IReactAppContext) {
+        super(props, context);
+        this._fieldAllowedValuesService = this.context.appContext.getService<WorkItemTypeFieldAllowedValuesService>(WorkItemTypeFieldAllowedValuesServiceName);
+    }
 
     public componentDidMount() {
         super.componentDidMount();
@@ -61,9 +64,9 @@ export class WorkItemFieldValuePicker extends BaseFluxComponent<IWorkItemFieldVa
         const {field, workItemType} = this.props;
 
         if (this._fieldSupportsAllowedValues(field)) {
-            const allowedValues = this._fieldAllowedValuesStore.getAllowedValues(workItemType, field.referenceName);
+            const allowedValues = this._fieldAllowedValuesService.getAllowedValues(workItemType, field.referenceName);
             if (allowedValues == null) {
-                WorkItemTypeFieldAllowedValuesActions.initializeAllowedValues(workItemType, field.referenceName);
+                this._fieldAllowedValuesService.initializeAllowedValues(workItemType, field.referenceName);
             }
             else {
                 this.setState({allowedValues: allowedValues});
@@ -71,7 +74,7 @@ export class WorkItemFieldValuePicker extends BaseFluxComponent<IWorkItemFieldVa
         }
     }
 
-    public componentWillReceiveProps(nextProps: IWorkItemFieldValuePickerProps, context?: any) {
+    public componentWillReceiveProps(nextProps: IWorkItemFieldValuePickerProps, context?: IReactAppContext) {
         super.componentWillReceiveProps(nextProps, context);
 
         const {field, workItemType} = nextProps;
@@ -80,11 +83,11 @@ export class WorkItemFieldValuePicker extends BaseFluxComponent<IWorkItemFieldVa
 
         if (!stringEquals(field && field.referenceName, oldField && oldField.referenceName, true) || !stringEquals(oldWorkItemType, workItemType, true)) {
             if (this._fieldSupportsAllowedValues(field)) {
-                const allowedValues = this._fieldAllowedValuesStore.getAllowedValues(workItemType, field.referenceName);
+                const allowedValues = this._fieldAllowedValuesService.getAllowedValues(workItemType, field.referenceName);
                 this.setState({allowedValues: allowedValues, internalValue: nextProps.value});
 
                 if (allowedValues == null) {
-                    WorkItemTypeFieldAllowedValuesActions.initializeAllowedValues(workItemType, field.referenceName);
+                    this._fieldAllowedValuesService.initializeAllowedValues(workItemType, field.referenceName);
                 }
             }
             else {
@@ -237,21 +240,21 @@ export class WorkItemFieldValuePicker extends BaseFluxComponent<IWorkItemFieldVa
         }
     }
 
-    protected initializeState(): void {
-        this.state = {
+    protected getInitialState(props: IWorkItemFieldValuePickerProps): IWorkItemFieldValuePickerState {
+        return {
             allowedValues: null,
-            internalValue: this.props.value
+            internalValue: props.value
         };
     }
 
     protected getDataServiceState(): IWorkItemFieldValuePickerState {
         return {
-            allowedValues: this.props.field ? this._fieldAllowedValuesStore.getAllowedValues(this.props.workItemType, this.props.field.referenceName) : null
+            allowedValues: this.props.field ? this._fieldAllowedValuesService.getAllowedValues(this.props.workItemType, this.props.field.referenceName) : null
         };
     }
 
-    protected getObservableDataServices(): BaseStore<any, any, any>[] {
-        return [this._fieldAllowedValuesStore];
+    protected getObservableDataServices(): BaseDataService<any, any, any>[] {
+        return [this._fieldAllowedValuesService];
     }
 
     private _fieldSupportsAllowedValues(field: WorkItemField): boolean {

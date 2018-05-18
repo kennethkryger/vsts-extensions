@@ -6,15 +6,15 @@ import { InfoLabel } from "Common/Components/InfoLabel";
 import { InputError } from "Common/Components/InputError";
 import { IFocussable } from "Common/Components/Interfaces";
 import {
-    BaseFluxComponent, IBaseFluxComponentProps, IBaseFluxComponentState
-} from "Common/Components/Utilities/BaseFluxComponent";
+    IVssComponentProps, IVssComponentState, VssComponent
+} from "Common/Components/Utilities/VssComponent";
 import { delay, DelayedFunction } from "Common/Utilities/Core";
 import { isNullOrEmpty } from "Common/Utilities/String";
 import { css } from "OfficeFabric/Utilities";
 import { Control } from "VSS/Controls";
 import { Combo, IComboOptions } from "VSS/Controls/Combos";
 
-export interface ISimpleComboProps<T> extends IBaseFluxComponentProps {
+export interface ISimpleComboProps<T> extends IVssComponentProps {
     options?: T[];
     selectedOption?: T;
     selectedValue?: string;
@@ -29,12 +29,12 @@ export interface ISimpleComboProps<T> extends IBaseFluxComponentProps {
     getItemText?(option: T): string;
 }
 
-export interface ISimpleComboState<T> extends IBaseFluxComponentState {
+export interface ISimpleComboState<T> extends IVssComponentState {
     selectedOption?: T;
     selectedValue?: string;
 }
 
-export class SimpleCombo<T> extends BaseFluxComponent<ISimpleComboProps<T>, ISimpleComboState<T>> implements IFocussable {
+export class SimpleCombo<T> extends VssComponent<ISimpleComboProps<T>, ISimpleComboState<T>> implements IFocussable {
     private _control: Combo;
     private _delayedFunction: DelayedFunction;
     private _nameToOptionMap: IDictionaryStringTo<T>;
@@ -109,10 +109,10 @@ export class SimpleCombo<T> extends BaseFluxComponent<ISimpleComboProps<T>, ISim
         }
     }
 
-    protected initializeState(): void {
-        this.state = {
-            selectedOption: this.props.selectedOption,
-            selectedValue: this.props.selectedValue || ""
+    protected getInitialState(props: ISimpleComboProps<T>): ISimpleComboState<T> {
+        return {
+            selectedOption: props.selectedOption,
+            selectedValue: props.selectedValue || ""
         };
     }
 

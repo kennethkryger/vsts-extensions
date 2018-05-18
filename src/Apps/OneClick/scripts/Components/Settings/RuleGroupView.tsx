@@ -6,8 +6,8 @@ import { IdentityView } from "Common/Components/IdentityView";
 import { Loading } from "Common/Components/Loading";
 import { getAsyncLoadedComponent } from "Common/Components/Utilities/AsyncLoadedComponent";
 import {
-    BaseFluxComponent, IBaseFluxComponentProps, IBaseFluxComponentState
-} from "Common/Components/Utilities/BaseFluxComponent";
+    IVssComponentProps, IVssComponentState, VssComponent
+} from "Common/Components/Utilities/VssComponent";
 import { BaseStore } from "Common/Flux/Stores/BaseStore";
 import { confirmAction, delegate } from "Common/Utilities/Core";
 import { getCurrentUser } from "Common/Utilities/Identity";
@@ -46,14 +46,14 @@ const AsyncRuleEditor = getAsyncLoadedComponent(
     (m: typeof RuleEditor_Async) => m.RuleEditor,
     () => <Loading />);
 
-export interface IRuleGroupViewProps extends IBaseFluxComponentProps {
+export interface IRuleGroupViewProps extends IVssComponentProps {
     workItemTypeName: string;
     ruleGroupId: string;
     refresh(): void;
     toggleSubscription(subscribe: boolean, ruleGroup: IRuleGroup): void;
 }
 
-export interface IRuleGroupViewState extends IBaseFluxComponentState {
+export interface IRuleGroupViewState extends IVssComponentState {
     allRuleGroups?: IRuleGroup[];
     ruleGroup?: IRuleGroup;
     isGroupPanelOpen?: boolean;
@@ -65,7 +65,7 @@ export interface IRuleGroupViewState extends IBaseFluxComponentState {
     isMovedToTargetGroup?: boolean;
 }
 
-export class RuleGroupView extends BaseFluxComponent<IRuleGroupViewProps, IRuleGroupViewState> {
+export class RuleGroupView extends VssComponent<IRuleGroupViewProps, IRuleGroupViewState> {
     private _hubViewState: IHubViewState;
 
     constructor(props: IRuleGroupViewProps, context?: any) {
@@ -161,7 +161,7 @@ export class RuleGroupView extends BaseFluxComponent<IRuleGroupViewProps, IRuleG
         );
     }
 
-    protected initializeState() {
+    protected getInitialState() {
         this.state = {
             loading: true
         };

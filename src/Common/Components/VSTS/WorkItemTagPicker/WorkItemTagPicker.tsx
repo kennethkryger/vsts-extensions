@@ -5,12 +5,12 @@ import * as React from "react";
 import { InfoLabel } from "Common/Components/InfoLabel";
 import { InputError } from "Common/Components/InputError";
 import {
-    BaseFluxComponent, IBaseFluxComponentProps, IBaseFluxComponentState
-} from "Common/Components/Utilities/BaseFluxComponent";
-import { WorkItemTagActions } from "Common/Flux/Actions/WorkItemTagActions";
-import { BaseStore, StoreFactory } from "Common/Flux/Stores/BaseStore";
-import { WorkItemTagStore } from "Common/Flux/Stores/WorkItemTagStore";
+    IVssComponentProps, IVssComponentState, VssComponent
+} from "Common/Components/Utilities/VssComponent";
+import { BaseDataService } from "Common/Services/BaseDataService";
+import { WorkItemTagService, WorkItemTagServiceName } from "Common/Services/WorkItemTagService";
 import { findIndex } from "Common/Utilities/Array";
+import { IReactAppContext } from "Common/Utilities/Context";
 import { isNullOrWhiteSpace, stringEquals } from "Common/Utilities/String";
 import { ValidationState } from "OfficeFabric/components/pickers/BasePicker.types";
 import { ITag, TagPicker } from "OfficeFabric/components/pickers/TagPicker/TagPicker";
@@ -18,7 +18,7 @@ import { Spinner, SpinnerSize } from "OfficeFabric/Spinner";
 import { css } from "OfficeFabric/Utilities";
 import { WebApiTagDefinition } from "TFS/Core/Contracts";
 
-export interface IWorkItemTagPickerProps extends IBaseFluxComponentProps {
+export interface IWorkItemTagPickerProps extends IVssComponentProps {
     selectedTags?: string[];
     error?: string;
     label?: string;
@@ -28,27 +28,32 @@ export interface IWorkItemTagPickerProps extends IBaseFluxComponentProps {
     onChange?(tags: string[]): void;
 }
 
-export interface IWorkItemTagPickerState extends IBaseFluxComponentState {
+export interface IWorkItemTagPickerState extends IVssComponentState {
     allTags?: WebApiTagDefinition[];
     internalSelectedTags?: string[];
 }
 
-export class WorkItemTagPicker extends BaseFluxComponent<IWorkItemTagPickerProps, IWorkItemTagPickerState> {
-    private _workItemTagStore = StoreFactory.getInstance<WorkItemTagStore>(WorkItemTagStore);
+export class WorkItemTagPicker extends VssComponent<IWorkItemTagPickerProps, IWorkItemTagPickerState> {
+    private _workItemTagService: WorkItemTagService;
+
+    constructor(props: IWorkItemTagPickerProps, context?: IReactAppContext) {
+        super(props, context);
+        this._workItemTagService = this.context.appContext.getService<WorkItemTagService>(WorkItemTagServiceName);
+    }
 
     public componentDidMount() {
         super.componentDidMount();
-        if (this._workItemTagStore.isLoaded()) {
+        if (this._workItemTagService.isLoaded()) {
             this.setState({
-                allTags: this._workItemTagStore.getAll()
+                allTags: this._workItemTagService.getAll()
             });
         }
         else {
-            WorkItemTagActions.initializeTags();
+            this._workItemTagService.initializeTags();
         }
     }
 
-    public componentWillReceiveProps(nextProps: IWorkItemTagPickerProps, context?: any) {
+    public componentWillReceiveProps(nextProps: IWorkItemTagPickerProps, context?: IReactAppContext) {
         super.componentWillReceiveProps(nextProps, context);
         this.setState({internalSelectedTags: nextProps.selectedTags});
     }
@@ -91,17 +96,17 @@ export class WorkItemTagPicker extends BaseFluxComponent<IWorkItemTagPickerProps
 
     protected getDataServiceState(): IWorkItemTagPickerState {
         return {
-            allTags: this._workItemTagStore.getAll()
+            allTags: this._workItemTagService.getAll()
         };
     }
 
-    protected getObservableDataServices(): BaseStore<any, any, any>[] {
-        return [this._workItemTagStore];
+    protected getObservableDataServices(): BaseDataService<any, any, any>[] {
+        return [this._workItemTagService];
     }
 
-    protected initializeState() {
-        this.state = {
-            internalSelectedTags: this.props.selectedTags
+    protected getInitialState(props: IWorkItemTagPickerProps): IWorkItemTagPickerState {
+        return {
+            internalSelectedTags: props.selectedTags
         };
     }
 

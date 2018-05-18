@@ -9,8 +9,8 @@ import { InfoLabel } from "Common/Components/InfoLabel";
 import { Loading } from "Common/Components/Loading";
 import { getAsyncLoadedComponent } from "Common/Components/Utilities/AsyncLoadedComponent";
 import {
-    BaseFluxComponent, IBaseFluxComponentProps, IBaseFluxComponentState
-} from "Common/Components/Utilities/BaseFluxComponent";
+    IVssComponentProps, IVssComponentState, VssComponent
+} from "Common/Components/Utilities/VssComponent";
 import { WorkItemStateView } from "Common/Components/VSTS/WorkItemStateView";
 import { WorkItemTitleView } from "Common/Components/VSTS/WorkItemTitleView";
 import { BaseStore } from "Common/Flux/Stores/BaseStore";
@@ -55,7 +55,7 @@ const AsyncSettingsPanel = getAsyncLoadedComponent(
     (m: typeof SettingsPanel_Async) => m.SettingsPanel,
     () => <Loading />);
 
-export interface IRelatedWitsState extends IBaseFluxComponentState {
+export interface IRelatedWitsState extends IVssComponentState {
     isWorkItemLoaded?: boolean;
     isNew?: boolean;
     workItems: WorkItem[];
@@ -65,12 +65,12 @@ export interface IRelatedWitsState extends IBaseFluxComponentState {
     relationTypes?: WorkItemRelationType[];
 }
 
-export class RelatedWits extends BaseFluxComponent<IBaseFluxComponentProps, IRelatedWitsState> {
+export class RelatedWits extends VssComponent<IVssComponentProps, IRelatedWitsState> {
     private _hubViewState: IHubViewState;
     private _filterBar: IFilterBar;
     private _selection: ISelection;
 
-    constructor(props: IBaseFluxComponentProps, context?: any) {
+    constructor(props: IVssComponentProps, context?: any) {
         super(props, context);
 
         this._hubViewState = new HubViewState();
@@ -187,7 +187,7 @@ export class RelatedWits extends BaseFluxComponent<IBaseFluxComponentProps, IRel
         }
     }
 
-    protected initializeState(): void {
+    protected getInitialState(): void {
         this.state = {
             isWorkItemLoaded: false,
             workItems: null,

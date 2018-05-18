@@ -5,9 +5,7 @@ import * as React from "react";
 import { InfoLabel } from "Common/Components/InfoLabel";
 import { InputError } from "Common/Components/InputError";
 import { IFocussable } from "Common/Components/Interfaces";
-import {
-    BaseFluxComponent, IBaseFluxComponentState
-} from "Common/Components/Utilities/BaseFluxComponent";
+import { IVssComponentState, VssComponent } from "Common/Components/Utilities/VssComponent";
 import { delay, DelayedFunction } from "Common/Utilities/Core";
 import { isNullOrEmpty } from "Common/Utilities/String";
 import { ITextField, ITextFieldProps, TextField } from "OfficeFabric/TextField";
@@ -19,11 +17,11 @@ export interface IThrottledTextFieldProps extends ITextFieldProps {
     required?: boolean;
 }
 
-export interface IThrottledTextFieldState extends IBaseFluxComponentState {
+export interface IThrottledTextFieldState extends IVssComponentState {
     internalValue?: string;
 }
 
-export class ThrottledTextField extends BaseFluxComponent<IThrottledTextFieldProps, IThrottledTextFieldState> implements IFocussable {
+export class ThrottledTextField extends VssComponent<IThrottledTextFieldProps, IThrottledTextFieldState> implements IFocussable {
     private _delayedFunction: DelayedFunction;
     private _component: ITextField;
 
@@ -75,9 +73,9 @@ export class ThrottledTextField extends BaseFluxComponent<IThrottledTextFieldPro
         }
     }
 
-    protected initializeState(): void {
-        this.state = {
-            internalValue: this.props.value
+    protected getInitialState(props: IThrottledTextFieldProps): IThrottledTextFieldState {
+        return {
+            internalValue: props.value
         };
     }
 

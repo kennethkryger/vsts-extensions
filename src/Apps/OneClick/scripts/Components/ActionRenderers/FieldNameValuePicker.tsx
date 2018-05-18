@@ -2,8 +2,8 @@ import * as React from "react";
 
 import { Loading } from "Common/Components/Loading";
 import {
-    BaseFluxComponent, IBaseFluxComponentProps, IBaseFluxComponentState
-} from "Common/Components/Utilities/BaseFluxComponent";
+    IVssComponentProps, IVssComponentState, VssComponent
+} from "Common/Components/Utilities/VssComponent";
 import { WorkItemFieldPicker } from "Common/Components/VSTS/WorkItemFieldPicker";
 import { WorkItemFieldValuePicker } from "Common/Components/VSTS/WorkItemFieldValuePicker";
 import { WorkItemFieldActions } from "Common/Flux/Actions/WorkItemFieldActions";
@@ -15,7 +15,7 @@ import { ExcludedFields } from "OneClick/Constants";
 import { StoresHub } from "OneClick/Flux/Stores/StoresHub";
 import { WorkItemField } from "TFS/WorkItemTracking/Contracts";
 
-export interface IFieldNameValuePickerProps extends IBaseFluxComponentProps {
+export interface IFieldNameValuePickerProps extends IVssComponentProps {
     fieldRefName: string;
     fieldValue: string;
     workItemType: string;
@@ -24,7 +24,7 @@ export interface IFieldNameValuePickerProps extends IBaseFluxComponentProps {
     onFieldValueChange(value: string): void;
 }
 
-export class FieldNameValuePicker extends BaseFluxComponent<IFieldNameValuePickerProps, IBaseFluxComponentState> {
+export class FieldNameValuePicker extends VssComponent<IFieldNameValuePickerProps, IVssComponentState> {
     public componentDidMount() {
         super.componentDidMount();
         WorkItemFieldActions.initializeWorkItemFields();
@@ -78,13 +78,13 @@ export class FieldNameValuePicker extends BaseFluxComponent<IFieldNameValuePicke
         return [StoresHub.workItemFieldStore];
     }
 
-    protected getDataServiceState(): IBaseFluxComponentState {
+    protected getDataServiceState(): IVssComponentState {
         return {
             loading: StoresHub.workItemFieldStore.isLoading()
         };
     }
 
-    protected initializeState(): void {
+    protected getInitialState(): void {
         this.state = {
             loading: true
         };

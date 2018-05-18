@@ -8,10 +8,10 @@ import { BugBash } from "BugBashPro/ViewModels/BugBash";
 import { InfoLabel } from "Common/Components/InfoLabel";
 import { InputError } from "Common/Components/InputError";
 import { Loading } from "Common/Components/Loading";
-import {
-    BaseFluxComponent, IBaseFluxComponentProps, IBaseFluxComponentState
-} from "Common/Components/Utilities/BaseFluxComponent";
 import { ThrottledTextField } from "Common/Components/Utilities/ThrottledTextField";
+import {
+    IVssComponentProps, IVssComponentState, VssComponent
+} from "Common/Components/Utilities/VssComponent";
 import { TeamPicker } from "Common/Components/VSTS/TeamPicker";
 import { WorkItemFieldPicker } from "Common/Components/VSTS/WorkItemFieldPicker";
 import { WorkItemTypePicker } from "Common/Components/VSTS/WorkItemTypePicker";
@@ -34,16 +34,16 @@ import {
     FieldType, WorkItemField, WorkItemTemplateReference, WorkItemType
 } from "TFS/WorkItemTracking/Contracts";
 
-export interface IBugBashEditorProps extends IBaseFluxComponentProps {
+export interface IBugBashEditorProps extends IVssComponentProps {
     bugBash: BugBash;
 }
 
-export interface IBugBashEditorState extends IBaseFluxComponentState {
+export interface IBugBashEditorState extends IVssComponentState {
     templates: IDropdownOption[];
     error?: string;
 }
 
-export class BugBashEditor extends BaseFluxComponent<IBugBashEditorProps, IBugBashEditorState>  {
+export class BugBashEditor extends VssComponent<IBugBashEditorProps, IBugBashEditorState>  {
     public componentDidMount() {
         super.componentDidMount();
 
@@ -110,7 +110,7 @@ export class BugBashEditor extends BaseFluxComponent<IBugBashEditorProps, IBugBa
         );
     }
 
-    protected initializeState() {
+    protected getInitialState() {
         this.state = {
             loading: true,
             templates: []

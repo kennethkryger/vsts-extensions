@@ -13,8 +13,8 @@ import { BugBash } from "BugBashPro/ViewModels/BugBash";
 import { Loading } from "Common/Components/Loading";
 import { getAsyncLoadedComponent } from "Common/Components/Utilities/AsyncLoadedComponent";
 import {
-    BaseFluxComponent, IBaseFluxComponentProps, IBaseFluxComponentState
-} from "Common/Components/Utilities/BaseFluxComponent";
+    IVssComponentProps, IVssComponentState, VssComponent
+} from "Common/Components/Utilities/VssComponent";
 import { ErrorMessageActions } from "Common/Flux/Actions/ErrorMessageActions";
 import { BaseStore } from "Common/Flux/Stores/BaseStore";
 import { confirmAction, delegate } from "Common/Utilities/Core";
@@ -44,7 +44,7 @@ import { VssDetailsList } from "VSSUI/VssDetailsList";
 import { VssIconType } from "VSSUI/VssIcon";
 import { ZeroData } from "VSSUI/ZeroData";
 
-interface IAllBugBashesViewState extends IBaseFluxComponentState {
+interface IAllBugBashesViewState extends IVssComponentState {
     allBugBashes: BugBash[];
     pastBugBashes: BugBash[];
     ongoingBugBashes: BugBash[];
@@ -58,11 +58,11 @@ const AsyncSettingsPanel = getAsyncLoadedComponent(
     (m: typeof SettingsPanel_Async) => m.SettingsPanel,
     () => <Loading />);
 
-export class AllBugBashesView extends BaseFluxComponent<IBaseFluxComponentProps, IAllBugBashesViewState> {
+export class AllBugBashesView extends VssComponent<IVssComponentProps, IAllBugBashesViewState> {
     private _hubViewState: IHubViewState;
     private _filterBar: IFilterBar;
 
-    constructor(props: IBaseFluxComponentProps, context?: any) {
+    constructor(props: IVssComponentProps, context?: any) {
         super(props, context);
 
         this._hubViewState = new HubViewState();
@@ -191,7 +191,7 @@ export class AllBugBashesView extends BaseFluxComponent<IBaseFluxComponentProps,
         return [StoresHub.bugBashStore, StoresHub.errorMessageStore];
     }
 
-    protected initializeState() {
+    protected getInitialState() {
         this.state = {
             allBugBashes: [],
             pastBugBashes: [],

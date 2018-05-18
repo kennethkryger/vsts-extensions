@@ -9,8 +9,8 @@ import * as ChecklistView_Async from "Checklist/Components/ChecklistView";
 import { Loading } from "Common/Components/Loading";
 import { getAsyncLoadedComponent } from "Common/Components/Utilities/AsyncLoadedComponent";
 import {
-    BaseFluxComponent, IBaseFluxComponentProps, IBaseFluxComponentState
-} from "Common/Components/Utilities/BaseFluxComponent";
+    IVssComponentProps, IVssComponentState, VssComponent
+} from "Common/Components/Utilities/VssComponent";
 import { ErrorMessageActions } from "Common/Flux/Actions/ErrorMessageActions";
 import { getMarketplaceUrl, getWorkItemTypeSettingsUrl } from "Common/Utilities/UrlHelper";
 import { getFormService } from "Common/Utilities/WorkItemFormHelpers";
@@ -30,11 +30,11 @@ const AsyncChecklistView = getAsyncLoadedComponent(
     (m: typeof ChecklistView_Async) => m.ChecklistView,
     () => <Loading />);
 
-interface IChecklistAppState extends IBaseFluxComponentState {
+interface IChecklistAppState extends IVssComponentState {
     workItemId: number;
 }
 
-export class ChecklistApp extends BaseFluxComponent<IBaseFluxComponentProps, IChecklistAppState> {
+export class ChecklistApp extends VssComponent<IVssComponentProps, IChecklistAppState> {
     private _project: TeamProject;
     private _workItemTypeName: string;
 
@@ -149,7 +149,7 @@ export class ChecklistApp extends BaseFluxComponent<IBaseFluxComponentProps, ICh
         }
     }
 
-    protected initializeState() {
+    protected getInitialState() {
         this.state = this._getFreshState();
     }
 

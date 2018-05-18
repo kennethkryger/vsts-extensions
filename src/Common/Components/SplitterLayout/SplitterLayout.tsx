@@ -3,6 +3,9 @@ import "./SplitterLayout.scss";
 import * as React from "react";
 
 import { Pane } from "Common/Components/SplitterLayout/Pane";
+import {
+    IVssComponentProps, IVssComponentState, VssComponent
+} from "Common/Components/Utilities/VssComponent";
 
 function clearSelection() {
     if (window.getSelection) {
@@ -20,7 +23,7 @@ function clearSelection() {
 
 const DEFAULT_SPLITTER_SIZE = 4;
 
-export interface ISplitterLayoutProps {
+export interface ISplitterLayoutProps extends IVssComponentProps {
     customClassName?: string;
     vertical?: boolean;
     percentage?: boolean;
@@ -32,24 +35,18 @@ export interface ISplitterLayoutProps {
     onChange(secondaryPaneSize: number): void;
 }
 
-export interface ISplitterLayoutState {
+export interface ISplitterLayoutState extends IVssComponentState {
     secondaryPaneSize: number;
     resizing: boolean;
 }
 
-export class SplitterLayout extends React.Component<ISplitterLayoutProps, ISplitterLayoutState> {
+export class SplitterLayout extends VssComponent<ISplitterLayoutProps, ISplitterLayoutState> {
     private _splitterElement: HTMLDivElement;
     private _containerElement: HTMLDivElement;
 
-    constructor(props: ISplitterLayoutProps) {
-        super(props);
-        this.state = {
-            secondaryPaneSize: 0,
-            resizing: false
-        };
-    }
-
     public componentDidMount() {
+        super.componentDidMount();
+
         window.addEventListener("resize", this._handleResize);
         document.addEventListener("mouseup", this._handleMouseUp);
         document.addEventListener("mousemove", this._handleMouseMove);
@@ -79,6 +76,8 @@ export class SplitterLayout extends React.Component<ISplitterLayoutProps, ISplit
     }
 
     public componentWillUnmount() {
+        super.componentWillUnmount();
+
         window.removeEventListener("resize", this._handleResize);
         document.removeEventListener("mouseup", this._handleMouseUp);
         document.removeEventListener("mousemove", this._handleMouseMove);
@@ -130,6 +129,13 @@ export class SplitterLayout extends React.Component<ISplitterLayoutProps, ISplit
                 {wrappedChildren.length > 1 && wrappedChildren[1]}
             </div>
         );
+    }
+
+    protected getInitialState(): ISplitterLayoutState {
+        return {
+            secondaryPaneSize: 0,
+            resizing: false
+        };
     }
 
     private _getSecondaryPaneSize(containerRect: ClientRect, splitRect: ClientRect, clientPosition: {left: number, top: number}, offsetMouse: boolean) {

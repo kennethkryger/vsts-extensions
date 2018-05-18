@@ -2,12 +2,12 @@ import "./InputError.scss";
 
 import * as React from "react";
 
-import { IBaseFluxComponentProps } from "Common/Components/Utilities/BaseFluxComponent";
+import { IVssComponentProps } from "Common/Components/Utilities/VssComponent";
 import { Label } from "OfficeFabric/Label";
 import { css } from "OfficeFabric/Utilities";
 import { VssIcon, VssIconType } from "VSSUI/VssIcon";
 
-export interface IInputErrorProps extends IBaseFluxComponentProps {
+export interface IInputErrorProps extends IVssComponentProps {
     error: string;
 }
 

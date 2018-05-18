@@ -4,8 +4,8 @@ import * as React from "react";
 
 import { Color } from "Common/Components/ColorPicker";
 import {
-    BaseFluxComponent, IBaseFluxComponentProps, IBaseFluxComponentState
-} from "Common/Components/Utilities/BaseFluxComponent";
+    IVssComponentProps, IVssComponentState, VssComponent
+} from "Common/Components/Utilities/VssComponent";
 import { getCurrentUserName } from "Common/Utilities/Identity";
 import { css } from "OfficeFabric/Utilities";
 import { RuleFieldNames } from "OneClick/Constants";
@@ -14,16 +14,16 @@ import { trackEvent } from "OneClick/Telemetry";
 import { Rule } from "OneClick/ViewModels/Rule";
 import { VssIcon, VssIconType } from "VSSUI/VssIcon";
 
-export interface IWorkItemFormRuleButtonProps extends IBaseFluxComponentProps {
+export interface IWorkItemFormRuleButtonProps extends IVssComponentProps {
     rule: Rule;
     onExecute(error: IActionError): void;
 }
 
-export interface IWorkItemFormRuleButtonState extends IBaseFluxComponentState {
+export interface IWorkItemFormRuleButtonState extends IVssComponentState {
     disabled?: boolean;
 }
 
-export class WorkItemFormRuleButton extends BaseFluxComponent<IWorkItemFormRuleButtonProps, IWorkItemFormRuleButtonState> {
+export class WorkItemFormRuleButton extends VssComponent<IWorkItemFormRuleButtonProps, IWorkItemFormRuleButtonState> {
     public render(): JSX.Element {
         const {rule} = this.props;
 

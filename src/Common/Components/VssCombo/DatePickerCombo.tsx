@@ -6,15 +6,15 @@ import { InfoLabel } from "Common/Components/InfoLabel";
 import { InputError } from "Common/Components/InputError";
 import { IFocussable } from "Common/Components/Interfaces";
 import {
-    BaseFluxComponent, IBaseFluxComponentProps, IBaseFluxComponentState
-} from "Common/Components/Utilities/BaseFluxComponent";
+    IVssComponentProps, IVssComponentState, VssComponent
+} from "Common/Components/Utilities/VssComponent";
 import { delay, DelayedFunction } from "Common/Utilities/Core";
 import { isNullOrEmpty } from "Common/Utilities/String";
 import { css } from "OfficeFabric/Utilities";
 import { Control } from "VSS/Controls";
 import { Combo, IComboOptions } from "VSS/Controls/Combos";
 
-export interface IDatePickerComboProps extends IBaseFluxComponentProps {
+export interface IDatePickerComboProps extends IVssComponentProps {
     value?: string;
     error?: string;
     label?: string;
@@ -25,11 +25,11 @@ export interface IDatePickerComboProps extends IBaseFluxComponentProps {
     onChange(value: string): void;
 }
 
-export interface IDatePickerComboState extends IBaseFluxComponentState {
+export interface IDatePickerComboState extends IVssComponentState {
     internalValue?: string;
 }
 
-export class DatePickerCombo extends BaseFluxComponent<IDatePickerComboProps, IDatePickerComboState> implements IFocussable {
+export class DatePickerCombo extends VssComponent<IDatePickerComboProps, IDatePickerComboState> implements IFocussable {
     private _control: Combo;
     private _delayedFunction: DelayedFunction;
     private _container: HTMLDivElement;
@@ -88,9 +88,9 @@ export class DatePickerCombo extends BaseFluxComponent<IDatePickerComboProps, ID
         }
     }
 
-    protected initializeState(): void {
-        this.state = {
-            internalValue: this.props.value || ""
+    protected getInitialState(props: IDatePickerComboProps): IDatePickerComboState {
+        return {
+            internalValue: props.value || ""
         };
     }
 

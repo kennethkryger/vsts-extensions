@@ -10,24 +10,24 @@ import { StoresHub } from "BugBashPro/Stores/StoresHub";
 import { LongText } from "BugBashPro/ViewModels/LongText";
 import { Loading } from "Common/Components/Loading";
 import {
-    BaseFluxComponent, IBaseFluxComponentProps, IBaseFluxComponentState
-} from "Common/Components/Utilities/BaseFluxComponent";
+    IVssComponentProps, IVssComponentState, VssComponent
+} from "Common/Components/Utilities/VssComponent";
 import { ErrorMessageActions } from "Common/Flux/Actions/ErrorMessageActions";
 import { BaseStore } from "Common/Flux/Stores/BaseStore";
 import { Label } from "OfficeFabric/Label";
 import { MessageBar, MessageBarType } from "OfficeFabric/MessageBar";
 
-export interface IBugBashDetailsProps extends IBaseFluxComponentProps {
+export interface IBugBashDetailsProps extends IVssComponentProps {
     id: string;
     isEditMode: boolean;
 }
 
-export interface IBugBashDetailsState extends IBaseFluxComponentState {
+export interface IBugBashDetailsState extends IVssComponentState {
     error: string;
     longText: LongText;
 }
 
-export class BugBashDetails extends BaseFluxComponent<IBugBashDetailsProps, IBugBashDetailsState>  {
+export class BugBashDetails extends VssComponent<IBugBashDetailsProps, IBugBashDetailsState>  {
     public componentDidMount() {
         super.componentDidMount();
         LongTextActions.initializeLongText(this.props.id);
@@ -84,7 +84,7 @@ export class BugBashDetails extends BaseFluxComponent<IBugBashDetailsProps, IBug
         );
     }
 
-    protected initializeState() {
+    protected getInitialState() {
         this.state = {
             loading: true,
             longText: null,

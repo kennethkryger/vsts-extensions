@@ -1,32 +1,35 @@
 import * as React from "react";
 
-import {
-    BaseFluxComponent, IBaseFluxComponentState
-} from "Common/Components/Utilities/BaseFluxComponent";
+import { IVssComponentState, VssComponent } from "Common/Components/Utilities/VssComponent";
 import { ISimpleComboProps, SimpleCombo } from "Common/Components/VssCombo/SimpleCombo";
-import { TeamActions } from "Common/Flux/Actions/TeamActions";
-import { BaseStore, StoreFactory } from "Common/Flux/Stores/BaseStore";
-import { TeamStore } from "Common/Flux/Stores/TeamStore";
+import { BaseDataService } from "Common/Services/BaseDataService";
+import { TeamService, TeamServiceName } from "Common/Services/TeamService";
+import { IReactAppContext } from "Common/Utilities/Context";
 import { Spinner, SpinnerSize } from "OfficeFabric/Spinner";
 import { css } from "OfficeFabric/Utilities";
 import { WebApiTeam } from "TFS/Core/Contracts";
 
-export interface ITeamPickerState extends IBaseFluxComponentState {
+export interface ITeamPickerState extends IVssComponentState {
     allTeams?: WebApiTeam[];
 }
 
-export class TeamPicker extends BaseFluxComponent<ISimpleComboProps<WebApiTeam>, ITeamPickerState> {
-    private _teamStore = StoreFactory.getInstance<TeamStore>(TeamStore);
+export class TeamPicker extends VssComponent<ISimpleComboProps<WebApiTeam>, ITeamPickerState> {
+    private _teamService: TeamService;
+
+    constructor(props: ISimpleComboProps<WebApiTeam>, context?: IReactAppContext) {
+        super(props, context);
+        this._teamService = this.context.appContext.getService<TeamService>(TeamServiceName);
+    }
 
     public componentDidMount() {
         super.componentDidMount();
-        if (this._teamStore.isLoaded()) {
+        if (this._teamService.isLoaded()) {
             this.setState({
-                allTeams: this._teamStore.getAll()
+                allTeams: this._teamService.getAll()
             });
         }
         else {
-            TeamActions.initializeTeams();
+            this._teamService.initializeTeams();
         }
     }
 
@@ -46,13 +49,13 @@ export class TeamPicker extends BaseFluxComponent<ISimpleComboProps<WebApiTeam>,
         return <SimpleCombo {...props} />;
     }
 
-    protected getObservableDataServices(): BaseStore<any, any, any>[] {
-        return [this._teamStore];
+    protected getObservableDataServices(): BaseDataService<any, any, any>[] {
+        return [this._teamService];
     }
 
     protected getDataServiceState(): ITeamPickerState {
         return {
-            allTeams: this._teamStore.getAll()
+            allTeams: this._teamService.getAll()
         };
     }
 }

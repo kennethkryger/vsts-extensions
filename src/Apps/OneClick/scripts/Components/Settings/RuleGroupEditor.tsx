@@ -3,10 +3,10 @@ import "./RuleGroupEditor.scss";
 import * as React from "react";
 
 import { Loading } from "Common/Components/Loading";
-import {
-    BaseFluxComponent, IBaseFluxComponentProps, IBaseFluxComponentState
-} from "Common/Components/Utilities/BaseFluxComponent";
 import { ThrottledTextField } from "Common/Components/Utilities/ThrottledTextField";
+import {
+    IVssComponentProps, IVssComponentState, VssComponent
+} from "Common/Components/Utilities/VssComponent";
 import { DefaultButton, PrimaryButton } from "OfficeFabric/Button";
 import { Checkbox } from "OfficeFabric/Checkbox";
 import { MessageBar, MessageBarType } from "OfficeFabric/MessageBar";
@@ -17,19 +17,19 @@ import { RuleGroupActions } from "OneClick/Flux/Actions/RuleGroupActions";
 import { IRuleGroup } from "OneClick/Interfaces";
 import { RuleGroup } from "OneClick/ViewModels/RuleGroup";
 
-export interface IRuleGroupEditorProps extends IBaseFluxComponentProps {
+export interface IRuleGroupEditorProps extends IVssComponentProps {
     workItemTypeName: string;
     ruleGroupModel?: IRuleGroup;
     onDismiss?(): void;
 }
 
-export interface IRuleGroupEditorState extends IBaseFluxComponentState {
+export interface IRuleGroupEditorState extends IVssComponentState {
     ruleGroup: RuleGroup;
     saving?: boolean;
     error?: string;
 }
 
-export class RuleGroupEditor extends BaseFluxComponent<IRuleGroupEditorProps, IRuleGroupEditorState> {
+export class RuleGroupEditor extends VssComponent<IRuleGroupEditorProps, IRuleGroupEditorState> {
     public componentDidMount() {
         super.componentDidMount();
         this.state.ruleGroup.addChangedListener(this._onModelChanged);
@@ -88,7 +88,7 @@ export class RuleGroupEditor extends BaseFluxComponent<IRuleGroupEditorProps, IR
         );
     }
 
-    protected initializeState() {
+    protected getInitialState() {
         this.state = {
             ruleGroup: this.props.ruleGroupModel ? new RuleGroup(this.props.ruleGroupModel) : RuleGroup.getNewRuleGroup(this.props.workItemTypeName)
         };

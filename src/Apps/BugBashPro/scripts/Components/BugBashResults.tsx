@@ -14,8 +14,8 @@ import { BugBashItem } from "BugBashPro/ViewModels/BugBashItem";
 import { Loading } from "Common/Components/Loading";
 import { SplitterLayout } from "Common/Components/SplitterLayout";
 import {
-    BaseFluxComponent, IBaseFluxComponentProps, IBaseFluxComponentState
-} from "Common/Components/Utilities/BaseFluxComponent";
+    IVssComponentProps, IVssComponentState, VssComponent
+} from "Common/Components/Utilities/VssComponent";
 import { TeamActions } from "Common/Flux/Actions/TeamActions";
 import { WorkItemActions } from "Common/Flux/Actions/WorkItemActions";
 import { BaseStore } from "Common/Flux/Stores/BaseStore";
@@ -35,7 +35,7 @@ import { ISelection, Selection, SelectionMode } from "OfficeFabric/utilities/sel
 import { VssDetailsList } from "VSSUI/VssDetailsList";
 import { ZeroData } from "VSSUI/ZeroData";
 
-interface IBugBashResultsState extends IBaseFluxComponentState {
+interface IBugBashResultsState extends IVssComponentState {
     bugBashItems: BugBashItem[];
     pendingBugBashItems: BugBashItem[];
     rejectedBugBashItems: BugBashItem[];
@@ -44,13 +44,13 @@ interface IBugBashResultsState extends IBaseFluxComponentState {
     gridKeyCounter: number;
 }
 
-interface IBugBashResultsProps extends IBaseFluxComponentProps {
+interface IBugBashResultsProps extends IVssComponentProps {
     bugBash: BugBash;
     bugBashItemId?: string;
     view?: string;
 }
 
-export class BugBashResults extends BaseFluxComponent<IBugBashResultsProps, IBugBashResultsState> {
+export class BugBashResults extends VssComponent<IBugBashResultsProps, IBugBashResultsState> {
     private _itemInvokedDelayedFunction: DelayedFunction;
     private _selection: ISelection;
 
@@ -125,7 +125,7 @@ export class BugBashResults extends BaseFluxComponent<IBugBashResultsProps, IBug
         );
     }
 
-    protected initializeState() {
+    protected getInitialState() {
         this.state = {
             bugBashItems: null,
             pendingBugBashItems: null,

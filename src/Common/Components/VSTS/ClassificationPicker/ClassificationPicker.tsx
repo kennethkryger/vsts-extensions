@@ -1,14 +1,12 @@
 import * as React from "react";
 
-import {
-    BaseFluxComponent, IBaseFluxComponentState
-} from "Common/Components/Utilities/BaseFluxComponent";
+import { IVssComponentState, VssComponent } from "Common/Components/Utilities/VssComponent";
 import { ITreeComboProps, TreeCombo } from "Common/Components/VssCombo/TreeCombo";
-import { ClassificationNodeActions } from "Common/Flux/Actions/ClassificationNodeActions";
-import { BaseStore, StoreFactory } from "Common/Flux/Stores/BaseStore";
+import { BaseDataService } from "Common/Services/BaseDataService";
 import {
-    ClassificationNodeKey, ClassificationNodeStore
-} from "Common/Flux/Stores/ClassificationNodeStore";
+    ClassificationNodeKey, ClassificationNodeService, ClassificationNodeServiceName
+} from "Common/Services/ClassificationNodeService";
+import { IReactAppContext } from "Common/Utilities/Context";
 import { isNullOrEmpty } from "Common/Utilities/String";
 import { Spinner, SpinnerSize } from "OfficeFabric/Spinner";
 import { css } from "OfficeFabric/Utilities";
@@ -19,13 +17,18 @@ export interface IClassificationPickerProps extends ITreeComboProps {
     keyType: ClassificationNodeKey;
 }
 
-export interface IClassificationPickerState extends IBaseFluxComponentState {
+export interface IClassificationPickerState extends IVssComponentState {
     treeNode?: TreeNode;
     value?: string;
 }
 
-export class ClassificationPicker extends BaseFluxComponent<IClassificationPickerProps, IClassificationPickerState> {
-    private _classificationNodeStore = StoreFactory.getInstance<ClassificationNodeStore>(ClassificationNodeStore);
+export class ClassificationPicker extends VssComponent<IClassificationPickerProps, IClassificationPickerState> {
+    private _classificationNodeService: ClassificationNodeService;
+
+    constructor(props: IClassificationPickerProps, context?: IReactAppContext) {
+        super(props, context);
+        this._classificationNodeService = this.context.appContext.getService<ClassificationNodeService>(ClassificationNodeServiceName);
+    }
 
     public componentDidMount() {
         super.componentDidMount();
@@ -66,31 +69,31 @@ export class ClassificationPicker extends BaseFluxComponent<IClassificationPicke
 
     protected getDataServiceState(): IClassificationPickerState {
         return {
-            treeNode: this._getTreeNode(this._classificationNodeStore.getItem(this.props.keyType), null, 1)
+            treeNode: this._getTreeNode(this._classificationNodeService.getItem(this.props.keyType), null, 1)
         };
     }
 
-    protected initializeState(): void {
-        this.state = {
-            value: this.props.value || ""
+    protected getInitialState(props: IClassificationPickerProps): IClassificationPickerState {
+        return {
+            value: props.value || ""
         };
     }
 
-    protected getObservableDataServices(): BaseStore<any, any, any>[] {
-        return [this._classificationNodeStore];
+    protected getObservableDataServices(): BaseDataService<any, any, any>[] {
+        return [this._classificationNodeService];
     }
 
     private _initializeNodes(keyType: ClassificationNodeKey) {
-        if (this._classificationNodeStore.isLoaded(keyType)) {
+        if (this._classificationNodeService.isLoaded(keyType)) {
             this.setState({
-                treeNode: this._getTreeNode(this._classificationNodeStore.getItem(keyType), null, 1)
+                treeNode: this._getTreeNode(this._classificationNodeService.getItem(keyType), null, 1)
             });
         }
         else if (keyType === ClassificationNodeKey.Area) {
-            ClassificationNodeActions.initializeAreaPaths();
+            this._classificationNodeService.initializeAreaPaths();
         }
         else {
-            ClassificationNodeActions.initializeIterationPaths();
+            this._classificationNodeService.initializeIterationPaths();
         }
     }
 
@@ -103,13 +106,16 @@ export class ClassificationPicker extends BaseFluxComponent<IClassificationPicke
         let newUINode: TreeNode;
         const nodeName = node.name;
 
+        // tslint:disable-next-line:no-parameter-reassignment
         level = level || 1;
         if (uiNode) {
             newUINode = TreeNode.create(nodeName);
             uiNode.add(newUINode);
+            // tslint:disable-next-line:no-parameter-reassignment
             uiNode = newUINode;
         }
         else {
+            // tslint:disable-next-line:no-parameter-reassignment
             uiNode = TreeNode.create(nodeName);
         }
         uiNode.expanded = level < 2;
@@ -127,10 +133,10 @@ export class ClassificationPicker extends BaseFluxComponent<IClassificationPicke
             return this.props.required ? "A value is required." : null;
         }
         else if (this.props.keyType === ClassificationNodeKey.Area) {
-            return !this._classificationNodeStore.getAreaPathNode(nodePath) ? "This area path doesn't exist in the current project" : null;
+            return !this._classificationNodeService.getAreaPathNode(nodePath) ? "This area path doesn't exist in the current project" : null;
         }
         else if (this.props.keyType === ClassificationNodeKey.Iteration) {
-            return !this._classificationNodeStore.getIterationPathNode(nodePath) ? "This iteration path doesn't exist in the current project" : null;
+            return !this._classificationNodeService.getIterationPathNode(nodePath) ? "This iteration path doesn't exist in the current project" : null;
         }
 
         return null;

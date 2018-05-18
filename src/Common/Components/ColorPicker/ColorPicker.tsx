@@ -5,26 +5,26 @@ import * as React from "react";
 import { AccessibilityColor } from "Common/Components/ColorPicker/Color";
 import { InfoLabel } from "Common/Components/InfoLabel";
 import {
-    BaseFluxComponent, IBaseFluxComponentProps, IBaseFluxComponentState
-} from "Common/Components/Utilities/BaseFluxComponent";
+    IVssComponentProps, IVssComponentState, VssComponent
+} from "Common/Components/Utilities/VssComponent";
 import { stringEquals } from "Common/Utilities/String";
 import { DefaultButton } from "OfficeFabric/Button";
 import { Callout } from "OfficeFabric/Callout";
 import { css } from "OfficeFabric/Utilities";
 
-export interface IColorPickerProps extends IBaseFluxComponentProps {
+export interface IColorPickerProps extends IVssComponentProps {
     selectedColor?: string;
     label?: string;
     info?: string;
     onChange(newColor: string): void;
 }
 
-export interface IColorPickerState extends IBaseFluxComponentState {
+export interface IColorPickerState extends IVssComponentState {
     selectedColor?: string;
     isCalloutOpen?: boolean;
 }
 
-export class ColorPicker extends BaseFluxComponent<IColorPickerProps, IColorPickerState> {
+export class ColorPicker extends VssComponent<IColorPickerProps, IColorPickerState> {
     private _targetElement: HTMLElement;
 
     public componentWillReceiveProps(nextProps: IColorPickerProps, context?: any) {
@@ -62,9 +62,9 @@ export class ColorPicker extends BaseFluxComponent<IColorPickerProps, IColorPick
         );
     }
 
-    protected initializeState() {
-        this.state = {
-            selectedColor: this.props.selectedColor || "#FFFFFF",
+    protected getInitialState(props: IColorPickerProps): IColorPickerState {
+        return {
+            selectedColor: props.selectedColor || "#FFFFFF",
             isCalloutOpen: false
         };
     }

@@ -1,18 +1,30 @@
 import { BaseDataService } from "Common/Services/BaseDataService";
+import { IReactAppContext } from "Common/Utilities/Context";
 import { BaseComponent, IBaseProps } from "OfficeFabric/Utilities";
+import * as PropTypes from "prop-types";
 
-export interface IBaseFluxComponentProps extends IBaseProps {
+export interface IVssComponentProps extends IBaseProps {
     className?: string;
 }
 
-export interface IBaseFluxComponentState {
+export interface IVssComponentState {
     loading?: boolean;
 }
 
-export class BaseFluxComponent<TProps extends IBaseFluxComponentProps, TState extends IBaseFluxComponentState> extends BaseComponent<TProps, TState> {
-    constructor(props: TProps, context?: any) {
+export class VssComponent<TProps extends IVssComponentProps, TState extends IVssComponentState> extends BaseComponent<TProps, TState> {
+    public static defaultProps = {};
+    public static contextTypes = {
+        appContext: PropTypes.object
+    };
+
+    public context: IReactAppContext;
+
+    constructor(props: TProps, context?: IReactAppContext) {
         super(props, context);
-        this.initializeState();
+        if (context) {
+            this.context = context;
+        }
+        this.state = this.getInitialState(props, context);
     }
 
     public componentDidMount() {
@@ -37,8 +49,8 @@ export class BaseFluxComponent<TProps extends IBaseFluxComponentProps, TState ex
         return {} as TState;
     }
 
-    protected initializeState(): void {
-        this.state = {} as TState;
+    protected getInitialState(_props: TProps, _context?: IReactAppContext): TState {
+        return {} as TState;
     }
 
     private _onDataChanged = () => {

@@ -5,10 +5,10 @@ import * as React from "react";
 import { ColorPicker } from "Common/Components/ColorPicker";
 import { InfoLabel } from "Common/Components/InfoLabel";
 import { Loading } from "Common/Components/Loading";
-import {
-    BaseFluxComponent, IBaseFluxComponentProps, IBaseFluxComponentState
-} from "Common/Components/Utilities/BaseFluxComponent";
 import { ThrottledTextField } from "Common/Components/Utilities/ThrottledTextField";
+import {
+    IVssComponentProps, IVssComponentState, VssComponent
+} from "Common/Components/Utilities/VssComponent";
 import { CommandBarButton, DefaultButton, PrimaryButton } from "OfficeFabric/Button";
 import { Checkbox } from "OfficeFabric/Checkbox";
 import { Label } from "OfficeFabric/Label";
@@ -25,21 +25,21 @@ import { BaseTrigger } from "OneClick/RuleTriggers/BaseTrigger";
 import { Rule } from "OneClick/ViewModels/Rule";
 import { ZeroData } from "VSSUI/ZeroData";
 
-export interface IRuleEditorProps extends IBaseFluxComponentProps {
+export interface IRuleEditorProps extends IVssComponentProps {
     ruleModel?: IRule;
     workItemTypeName: string;
     ruleGroupId: string;
     onDismiss?(): void;
 }
 
-export interface IRuleEditorState extends IBaseFluxComponentState {
+export interface IRuleEditorState extends IVssComponentState {
     rule: Rule;
     saving?: boolean;
     error?: string;
     showTriggers?: boolean;
 }
 
-export class RuleEditor extends BaseFluxComponent<IRuleEditorProps, IRuleEditorState> {
+export class RuleEditor extends VssComponent<IRuleEditorProps, IRuleEditorState> {
     public componentDidMount() {
         super.componentDidMount();
         this.state.rule.addChangedListener(this._onModelChanged);
@@ -125,7 +125,7 @@ export class RuleEditor extends BaseFluxComponent<IRuleEditorProps, IRuleEditorS
         );
     }
 
-    protected initializeState() {
+    protected getInitialState() {
         this.state = {
             rule: this.props.ruleModel ? new Rule(this.props.ruleModel) : Rule.getNewRule(this.props.workItemTypeName),
             showTriggers: false

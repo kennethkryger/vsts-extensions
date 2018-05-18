@@ -1,10 +1,10 @@
 import * as React from "react";
 
 import { Loading } from "Common/Components/Loading";
-import {
-    BaseFluxComponent, IBaseFluxComponentProps, IBaseFluxComponentState
-} from "Common/Components/Utilities/BaseFluxComponent";
 import { ThrottledTextField } from "Common/Components/Utilities/ThrottledTextField";
+import {
+    IVssComponentProps, IVssComponentState, VssComponent
+} from "Common/Components/Utilities/VssComponent";
 import { WorkItemRelationTypePicker } from "Common/Components/VSTS/WorkItemRelationTypePicker";
 import { WorkItemRelationTypeActions } from "Common/Flux/Actions/WorkItemRelationTypeActions";
 import { BaseStore } from "Common/Flux/Stores/BaseStore";
@@ -12,7 +12,7 @@ import { css } from "OfficeFabric/Utilities";
 import { StoresHub } from "OneClick/Flux/Stores/StoresHub";
 import { WorkItemRelationType } from "TFS/WorkItemTracking/Contracts";
 
-export interface IAddExistingRelationActionRendererProps extends IBaseFluxComponentProps {
+export interface IAddExistingRelationActionRendererProps extends IVssComponentProps {
     workItemId: string;
     relationType: string;
     valueError?: string;
@@ -20,7 +20,7 @@ export interface IAddExistingRelationActionRendererProps extends IBaseFluxCompon
     onRelationTypeChange(value: string): void;
 }
 
-export class AddExistingRelationActionRenderer extends BaseFluxComponent<IAddExistingRelationActionRendererProps, IBaseFluxComponentState> {
+export class AddExistingRelationActionRenderer extends VssComponent<IAddExistingRelationActionRendererProps, IVssComponentState> {
     public componentDidMount() {
         super.componentDidMount();
         WorkItemRelationTypeActions.initializeWorkItemRelationTypes();
@@ -63,13 +63,13 @@ export class AddExistingRelationActionRenderer extends BaseFluxComponent<IAddExi
         return [StoresHub.workItemRelationTypeStore];
     }
 
-    protected getDataServiceState(): IBaseFluxComponentState {
+    protected getDataServiceState(): IVssComponentState {
         return {
             loading: StoresHub.workItemRelationTypeStore.isLoading(),
         };
     }
 
-    protected initializeState(): void {
+    protected getInitialState(): void {
         this.state = {
             loading: true
         };

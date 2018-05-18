@@ -3,24 +3,24 @@ import "./Badge.scss";
 import * as React from "react";
 
 import {
-    BaseFluxComponent, IBaseFluxComponentProps, IBaseFluxComponentState
-} from "Common/Components/Utilities/BaseFluxComponent";
+    IVssComponentProps, IVssComponentState, VssComponent
+} from "Common/Components/Utilities/VssComponent";
 import { Callout, DirectionalHint } from "OfficeFabric/Callout";
 import { Label } from "OfficeFabric/Label";
 import { css } from "OfficeFabric/Utilities";
 import { VssIcon, VssIconType } from "VSSUI/VssIcon";
 
-export interface IBadgeProps extends IBaseFluxComponentProps {
+export interface IBadgeProps extends IVssComponentProps {
     notificationCount: number;
     showCalloutOnHover?: boolean;
     directionalHint?: DirectionalHint;
 }
 
-export interface IBadgeState extends IBaseFluxComponentState {
+export interface IBadgeState extends IVssComponentState {
     isCalloutVisible: boolean;
 }
 
-export class Badge extends BaseFluxComponent<IBadgeProps, IBadgeState> {
+export class Badge extends VssComponent<IBadgeProps, IBadgeState> {
     private _calloutTargetElement: HTMLElement;
 
     public render(): JSX.Element {
@@ -57,8 +57,8 @@ export class Badge extends BaseFluxComponent<IBadgeProps, IBadgeState> {
         );
     }
 
-    protected initializeState() {
-        this.state = {
+    protected getInitialState(): IBadgeState {
+        return {
             isCalloutVisible: false
         };
     }

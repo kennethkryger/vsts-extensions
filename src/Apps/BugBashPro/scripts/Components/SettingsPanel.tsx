@@ -9,8 +9,8 @@ import { StoresHub } from "BugBashPro/Stores/StoresHub";
 import { InfoLabel } from "Common/Components/InfoLabel";
 import { Loading } from "Common/Components/Loading";
 import {
-    BaseFluxComponent, IBaseFluxComponentProps, IBaseFluxComponentState
-} from "Common/Components/Utilities/BaseFluxComponent";
+    IVssComponentProps, IVssComponentState, VssComponent
+} from "Common/Components/Utilities/VssComponent";
 import { ErrorMessageActions } from "Common/Flux/Actions/ErrorMessageActions";
 import { GitRepoActions } from "Common/Flux/Actions/GitRepoActions";
 import { TeamActions } from "Common/Flux/Actions/TeamActions";
@@ -22,7 +22,7 @@ import { MessageBar, MessageBarType } from "OfficeFabric/MessageBar";
 import { WebApiTeam } from "TFS/Core/Contracts";
 import { GitRepository } from "TFS/VersionControl/Contracts";
 
-interface ISettingsPanelState extends IBaseFluxComponentState {
+interface ISettingsPanelState extends IVssComponentState {
     origBugBashSettings: IBugBashSettings;
     newBugBashSettings: IBugBashSettings;
     origUserSettings: IUserSettings;
@@ -32,7 +32,7 @@ interface ISettingsPanelState extends IBaseFluxComponentState {
     error?: string;
 }
 
-export class SettingsPanel extends BaseFluxComponent<IBaseFluxComponentProps, ISettingsPanelState> {
+export class SettingsPanel extends VssComponent<IVssComponentProps, ISettingsPanelState> {
     public componentDidMount() {
         super.componentDidMount();
         SettingsActions.initializeBugBashSettings();
@@ -106,7 +106,7 @@ export class SettingsPanel extends BaseFluxComponent<IBaseFluxComponentProps, IS
         return [StoresHub.bugBashSettingsStore, StoresHub.gitRepoStore, StoresHub.teamStore, StoresHub.userSettingsStore, StoresHub.errorMessageStore];
     }
 
-    protected initializeState() {
+    protected getInitialState() {
         this.state = {
             loading: true,
         } as ISettingsPanelState;
