@@ -6,7 +6,8 @@ const config = {
         "OneClick/scripts/SettingsApp": "./src/Apps/OneClick/scripts/Components/Settings/SettingsApp.tsx",
         "OneClick/scripts/RuleEditor": "./src/Apps/OneClick/scripts/Components/Settings/RuleEditor.tsx",
         "OneClick/scripts/WorkItemRulesGroup": "./src/Apps/OneClick/scripts/Components/FormGroup/WorkItemRulesGroup.tsx",
-        "OneClick/scripts/ActionRenderers": "./src/Apps/OneClick/scripts/Components/ActionRenderers/index.ts"
+        "OneClick/scripts/ActionRenderers": "./src/Apps/OneClick/scripts/Components/ActionRenderers/index.ts",
+        "OneClick/scripts/Context": "./src/Common/Utilities/Context.ts"
     },
     plugins: [
         new webpack.optimize.CommonsChunkPlugin(

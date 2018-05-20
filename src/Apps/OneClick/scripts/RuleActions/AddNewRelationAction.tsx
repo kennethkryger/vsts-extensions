@@ -2,8 +2,6 @@ import * as React from "react";
 
 import { Loading } from "Common/Components/Loading";
 import { getAsyncLoadedComponent } from "Common/Components/Utilities/AsyncLoadedComponent";
-import { WorkItemActions } from "Common/Flux/Actions/WorkItemActions";
-import { WorkItemTemplateItemActions } from "Common/Flux/Actions/WorkItemTemplateItemActions";
 import { isNullOrEmpty, stringEquals } from "Common/Utilities/String";
 import { getFormNavigationService, getFormService } from "Common/Utilities/WorkItemFormHelpers";
 import { IIconProps } from "OfficeFabric/Icon";

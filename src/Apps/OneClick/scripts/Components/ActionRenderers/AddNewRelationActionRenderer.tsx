@@ -11,17 +11,11 @@ import {
 import { TeamPicker } from "Common/Components/VSTS/TeamPicker";
 import { WorkItemRelationTypePicker } from "Common/Components/VSTS/WorkItemRelationTypePicker";
 import { WorkItemTypePicker } from "Common/Components/VSTS/WorkItemTypePicker";
-import { TeamActions } from "Common/Flux/Actions/TeamActions";
-import { WorkItemRelationTypeActions } from "Common/Flux/Actions/WorkItemRelationTypeActions";
-import { WorkItemTemplateActions } from "Common/Flux/Actions/WorkItemTemplateActions";
-import { WorkItemTypeActions } from "Common/Flux/Actions/WorkItemTypeActions";
-import { BaseStore } from "Common/Flux/Stores/BaseStore";
 import { isNullOrWhiteSpace, stringEquals } from "Common/Utilities/String";
 import { Checkbox } from "OfficeFabric/Checkbox";
 import { Dropdown, IDropdownOption, IDropdownProps } from "OfficeFabric/Dropdown";
 import { Link } from "OfficeFabric/Link";
 import { css } from "OfficeFabric/Utilities";
-import { StoresHub } from "OneClick/Flux/Stores/StoresHub";
 import { WebApiTeam } from "TFS/Core/Contracts";
 import {
     WorkItemRelationType, WorkItemTemplateReference, WorkItemType

@@ -6,13 +6,10 @@ import {
 } from "Common/Components/Utilities/VssComponent";
 import { WorkItemFieldPicker } from "Common/Components/VSTS/WorkItemFieldPicker";
 import { WorkItemFieldValuePicker } from "Common/Components/VSTS/WorkItemFieldValuePicker";
-import { WorkItemFieldActions } from "Common/Flux/Actions/WorkItemFieldActions";
-import { BaseStore } from "Common/Flux/Stores/BaseStore";
 import { contains } from "Common/Utilities/Array";
 import { stringEquals } from "Common/Utilities/String";
 import { css } from "OfficeFabric/Utilities";
 import { ExcludedFields } from "OneClick/Constants";
-import { StoresHub } from "OneClick/Flux/Stores/StoresHub";
 import { WorkItemField } from "TFS/WorkItemTracking/Contracts";
 
 export interface IFieldChangedPickerProps extends IVssComponentProps {

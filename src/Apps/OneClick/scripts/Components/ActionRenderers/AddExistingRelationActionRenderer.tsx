@@ -6,10 +6,7 @@ import {
     IVssComponentProps, IVssComponentState, VssComponent
 } from "Common/Components/Utilities/VssComponent";
 import { WorkItemRelationTypePicker } from "Common/Components/VSTS/WorkItemRelationTypePicker";
-import { WorkItemRelationTypeActions } from "Common/Flux/Actions/WorkItemRelationTypeActions";
-import { BaseStore } from "Common/Flux/Stores/BaseStore";
 import { css } from "OfficeFabric/Utilities";
-import { StoresHub } from "OneClick/Flux/Stores/StoresHub";
 import { WorkItemRelationType } from "TFS/WorkItemTracking/Contracts";
 
 export interface IAddExistingRelationActionRendererProps extends IVssComponentProps {

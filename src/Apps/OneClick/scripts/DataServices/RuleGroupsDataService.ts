@@ -5,7 +5,7 @@ import { IRuleGroup } from "OneClick/Interfaces";
 
 export namespace RuleGroupsDataService {
     export async function loadRuleGroups(workItemTypeName: string, projectId: string): Promise<IRuleGroup[]> {
-        return await ExtensionDataManager.readDocuments<IRuleGroup>(getCollectionKey(workItemTypeName, projectId), false);
+        return ExtensionDataManager.readDocuments<IRuleGroup>(getCollectionKey(workItemTypeName, projectId), false);
     }
 
     export async function createRuleGroup(workItemTypeName: string, ruleGroup: IRuleGroup, projectId: string): Promise<IRuleGroup> {

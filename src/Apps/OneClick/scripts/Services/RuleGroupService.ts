@@ -1,14 +1,15 @@
-import { BaseStore } from "Common/Flux/Stores/BaseStore";
+import { BaseDataService } from "Common/Services/BaseDataService";
 import { findIndex } from "Common/Utilities/Array";
+import { Services } from "Common/Utilities/Context";
 import { stringEquals } from "Common/Utilities/String";
 import { Constants, GlobalRuleGroup, PersonalRuleGroup } from "OneClick/Constants";
-import { RuleGroupActionsHub } from "OneClick/Flux/Actions/ActionsHub";
+import { RuleGroupsDataService } from "OneClick/DataServices/RuleGroupsDataService";
+import { SettingsDataService } from "OneClick/DataServices/SettingsDataService";
 import { IRuleGroup } from "OneClick/Interfaces";
 
-/*
-*  Store rule groups for a work item type in current project
-*/
-export class RuleGroupStore extends BaseStore<IRuleGroup[], IRuleGroup, string> {
+export const RuleGroupServiceName = "RuleGroupService";
+
+export class RuleGroupService extends BaseDataService<IRuleGroup[], IRuleGroup, string> {
     private _idToGroupMap: IDictionaryStringTo<IRuleGroup>;
     private _workItemTypeName: string;
 
@@ -61,34 +62,68 @@ export class RuleGroupStore extends BaseStore<IRuleGroup[], IRuleGroup, string> 
     }
 
     public getKey(): string {
-        return "RuleGroupStore";
+        return RuleGroupServiceName;
     }
 
-    protected initializeActionListeners() {
-        RuleGroupActionsHub.InitializeRuleGroups.addListener(ruleGroups => {
-            this._initializeItems(ruleGroups);
-            this.emitChanged();
-        });
+    public async initializeRuleGroups(workItemTypeName: string) {
+        if (!this.isLoading(workItemTypeName)) {
+            this.setLoading(true, workItemTypeName);
 
-        RuleGroupActionsHub.RefreshRuleGroups.addListener(ruleGroups => {
-            this._initializeItems(ruleGroups);
-            this.emitChanged();
-        });
+            const ruleGroups = await RuleGroupsDataService.loadRuleGroups(workItemTypeName, VSS.getWebContext().project.id);
 
-        RuleGroupActionsHub.CreateRuleGroup.addListener(ruleGroup => {
-            this._addOrUpdateItem(ruleGroup);
-            this.emitChanged();
-        });
+            if (this.checkCurrentWorkItemType(workItemTypeName)) {
+                this._initializeItems(ruleGroups);
+            }
 
-        RuleGroupActionsHub.UpdateRuleGroup.addListener(ruleGroup => {
-            this._addOrUpdateItem(ruleGroup);
-            this.emitChanged();
-        });
+            this.setLoading(false, workItemTypeName);
+        }
+    }
 
-        RuleGroupActionsHub.DeleteRuleGroup.addListener(ruleGroup => {
-            this._removeItem(ruleGroup);
-            this.emitChanged();
-        });
+    public async createRuleGroup(workItemTypeName: string, ruleGroup: IRuleGroup) {
+        if (!this.isLoading(workItemTypeName)) {
+            const createdRuleGroup = await RuleGroupsDataService.createRuleGroup(workItemTypeName, ruleGroup, VSS.getWebContext().project.id);
+
+            if (this.checkCurrentWorkItemType(workItemTypeName)) {
+                this._addOrUpdateItem(createdRuleGroup);
+            }
+
+            SettingsDataService.updateCacheStamp(workItemTypeName, VSS.getWebContext().project.id);
+        }
+    }
+
+    public async updateRuleGroup(workItemTypeName: string, ruleGroup: IRuleGroup) {
+        if (!this.isLoading(ruleGroup.id)) {
+            this.setLoading(true, ruleGroup.id);
+
+            try {
+                const updatedRuleGroup = await RuleGroupsDataService.updateRuleGroup(workItemTypeName, ruleGroup, VSS.getWebContext().project.id);
+
+                if (this.checkCurrentWorkItemType(workItemTypeName)) {
+                    this._addOrUpdateItem(updatedRuleGroup);
+                }
+                this.setLoading(false, ruleGroup.id);
+
+                SettingsDataService.updateCacheStamp(workItemTypeName, VSS.getWebContext().project.id);
+            }
+            catch (e) {
+                this.setLoading(false, ruleGroup.id);
+                throw e;
+            }
+        }
+    }
+
+    public async deleteRuleGroup(workItemTypeName: string, ruleGroup: IRuleGroup) {
+        if (!this.isLoading(ruleGroup.id)) {
+            this.setLoading(true, ruleGroup.id);
+            await RuleGroupsDataService.deleteRuleGroup(workItemTypeName, ruleGroup.id, VSS.getWebContext().project.id);
+
+            if (this.checkCurrentWorkItemType(workItemTypeName)) {
+                this._removeItem(ruleGroup);
+            }
+
+            this.setLoading(false, ruleGroup.id);
+            SettingsDataService.updateCacheStamp(workItemTypeName, VSS.getWebContext().project.id);
+        }
     }
 
     protected convertItemKeyToString(key: string): string {
@@ -103,6 +138,8 @@ export class RuleGroupStore extends BaseStore<IRuleGroup[], IRuleGroup, string> 
                 this._idToGroupMap[ruleGroup.id.toLowerCase()] = ruleGroup;
             }
         }
+
+        this._notifyChanged();
     }
 
     private _addOrUpdateItem(ruleGroup: IRuleGroup) {
@@ -123,6 +160,7 @@ export class RuleGroupStore extends BaseStore<IRuleGroup[], IRuleGroup, string> 
         }
 
         this._idToGroupMap[ruleGroup.id.toLowerCase()] = ruleGroup;
+        this._notifyChanged();
     }
 
     private _removeItem(ruleGroup: IRuleGroup) {
@@ -139,5 +177,8 @@ export class RuleGroupStore extends BaseStore<IRuleGroup[], IRuleGroup, string> 
         if (this._idToGroupMap && this._idToGroupMap[ruleGroup.id.toLowerCase()]) {
             delete this._idToGroupMap[ruleGroup.id.toLowerCase()];
         }
+        this._notifyChanged();
     }
 }
+
+Services.add(RuleGroupServiceName, { serviceFactory: RuleGroupService });

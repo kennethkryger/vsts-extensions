@@ -1,8 +1,8 @@
+import { Observable } from "Common/Utilities/Context";
 import { getCurrentUser } from "Common/Utilities/Identity";
 import { isNullOrEmpty, stringEquals } from "Common/Utilities/String";
 import { RuleGroupFieldNames, SizeLimits } from "OneClick/Constants";
 import { IRuleGroup } from "OneClick/Interfaces";
-import { Observable } from "VSSUI/Utilities/Observable";
 
 export class RuleGroup extends Observable<void> {
     public static getNewRuleGroup(workItemTypeName: string): RuleGroup {

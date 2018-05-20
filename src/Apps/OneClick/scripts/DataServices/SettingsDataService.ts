@@ -3,7 +3,7 @@ import { hashCode } from "Common/Utilities/String";
 
 export namespace SettingsDataService {
     export async function loadSetting<T>(key: string, defaultValue: T, workItemTypeName: string, projectId: string, isPrivate: boolean): Promise<T> {
-        return await ExtensionDataManager.readSetting<T>(
+        return ExtensionDataManager.readSetting<T>(
             getSettingCollectionKey(key, workItemTypeName, projectId),
             defaultValue,
             isPrivate);
@@ -23,7 +23,7 @@ export namespace SettingsDataService {
     }
 
     export async function readCacheStamp(workItemTypeName: string, projectId: string): Promise<number> {
-        return await loadSetting<number>("cs", 0, workItemTypeName, projectId, false);
+        return loadSetting<number>("cs", 0, workItemTypeName, projectId, false);
     }
 
     function getSettingCollectionKey(settingKey: string, workItemTypeName: string, projectId: string): string {

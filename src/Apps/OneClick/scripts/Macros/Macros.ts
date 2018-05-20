@@ -66,13 +66,13 @@ export class MacroToday extends BaseMacro {
         if (operatorAndOperand) {
             switch (operatorAndOperand[0]) {
                 case "-":
-                    returnValue = addDays(returnValue, -1 * operatorAndOperand[1]);
+                    returnValue = addDays(returnValue, operatorAndOperand[1] * -1);
                     break;
                 case "+":
                     returnValue = addDays(returnValue, operatorAndOperand[1]);
                     break;
                 default:
-                    break;
+                    // no op
             }
         }
 

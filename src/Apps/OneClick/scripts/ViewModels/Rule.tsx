@@ -1,5 +1,6 @@
 import * as React from "react";
 
+import { Observable } from "Common/Utilities/Context";
 import { getCurrentUser } from "Common/Utilities/Identity";
 import { isNullOrEmpty, stringEquals } from "Common/Utilities/String";
 import { IconButton } from "OfficeFabric/Button";
@@ -8,7 +9,6 @@ import { getActionType, getTriggerType } from "OneClick/ImportRegisteredArtifact
 import { IAction, IActionError, IRule, ITrigger } from "OneClick/Interfaces";
 import { BaseAction } from "OneClick/RuleActions/BaseAction";
 import { BaseTrigger } from "OneClick/RuleTriggers/BaseTrigger";
-import { Observable } from "VSSUI/Utilities/Observable";
 
 export class Rule extends Observable<void> {
     public static getNewRule(workItemTypeName: string): Rule {
@@ -221,7 +221,7 @@ export class Rule extends Observable<void> {
             return false;
         }
 
-        return await trigger.shouldTrigger(triggerArgs);
+        return trigger.shouldTrigger(triggerArgs);
     }
 
     private _removeAction(action: BaseAction) {
