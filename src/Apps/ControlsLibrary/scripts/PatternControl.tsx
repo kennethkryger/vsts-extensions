@@ -4,9 +4,11 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 
 import { initializeIcons } from "@uifabric/icons";
+import { ReactRootComponent } from "Common/Components/Utilities/ReactRootComponent";
 import {
     IWorkItemFieldControlProps, IWorkItemFieldControlState, WorkItemFieldControl
 } from "Common/Components/VSTS/WorkItemFieldControl";
+import { AppContext } from "Common/Utilities/Context";
 import { getFormService } from "Common/Utilities/WorkItemFormHelpers";
 import { Fabric } from "OfficeFabric/Fabric";
 import { TextField } from "OfficeFabric/TextField";
@@ -103,10 +105,12 @@ export function init() {
     const inputs = WorkItemFieldControl.getInputs<IPatternControlInputs>();
 
     ReactDOM.render(
-        <PatternControl
-            fieldName={inputs.FieldName}
-            pattern={inputs.Pattern}
-            errorMessage={inputs.ErrorMessage && inputs.ErrorMessage.trim() || "The entered value does not match the control's pattern."}
-        />,
+        <ReactRootComponent appContext={AppContext}>
+            <PatternControl
+                fieldName={inputs.FieldName}
+                pattern={inputs.Pattern}
+                errorMessage={inputs.ErrorMessage && inputs.ErrorMessage.trim() || "The entered value does not match the control's pattern."}
+            />
+        </ReactRootComponent>,
         document.getElementById("ext-container"));
 }

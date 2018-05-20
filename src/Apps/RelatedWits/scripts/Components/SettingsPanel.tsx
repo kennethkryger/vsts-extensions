@@ -5,6 +5,7 @@ import * as React from "react";
 import { InfoLabel } from "Common/Components/InfoLabel";
 import { Loading } from "Common/Components/Loading";
 import { arrayEquals, contains, findIndex, first } from "Common/Utilities/Array";
+import { IReactAppContext } from "Common/Utilities/Context";
 import * as ExtensionDataManager from "Common/Utilities/ExtensionDataManager";
 import { stringEquals } from "Common/Utilities/String";
 import { getFormService } from "Common/Utilities/WorkItemFormHelpers";
@@ -31,7 +32,7 @@ export interface ISettingsPanelState {
 }
 
 export class SettingsPanel extends React.Component<ISettingsPanelProps, ISettingsPanelState> {
-    constructor(props: ISettingsPanelProps, context?: any) {
+    constructor(props: ISettingsPanelProps, context?: IReactAppContext) {
         super(props, context);
 
         this.state = {

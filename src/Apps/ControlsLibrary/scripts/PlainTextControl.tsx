@@ -4,7 +4,9 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 
 import { AutoResizableComponent } from "Common/Components/Utilities/AutoResizableComponent";
+import { ReactRootComponent } from "Common/Components/Utilities/ReactRootComponent";
 import { first } from "Common/Utilities/Array";
+import { AppContext, IReactAppContext } from "Common/Utilities/Context";
 import { isNullOrWhiteSpace, stringEquals } from "Common/Utilities/String";
 import { getFormService } from "Common/Utilities/WorkItemFormHelpers";
 import * as MarkdownIt from "markdown-it";
@@ -62,7 +64,7 @@ async function processString(str: string): Promise<string> {
 async function getFieldValue(fieldName: string): Promise<any> {
     const formService = await getFormService();
     if (stringEquals(fieldName, "id", true)) {
-        return await formService.getId();
+        return formService.getId();
     }
     try {
         const fields = await formService.getFields();
@@ -85,9 +87,9 @@ async function getFieldValue(fieldName: string): Promise<any> {
 export class PlainTextControl extends AutoResizableComponent<IPlainTextControlProps, IPlainTextControlState> {
     private _markdown: MarkdownIt.MarkdownIt;
 
-    constructor(props: IPlainTextControlProps, context?: any) {
+    constructor(props: IPlainTextControlProps, context?: IReactAppContext) {
         super(props, context);
-        this.state = {translatedText: null};
+
         this._markdown = new MarkdownIt({
             linkify: true
         });
@@ -123,6 +125,8 @@ export class PlainTextControl extends AutoResizableComponent<IPlainTextControlPr
     }
 
     public componentDidMount() {
+        super.componentDidMount();
+
         VSS.register(VSS.getContribution().id, {
             onLoaded: (_args: IWorkItemLoadedArgs) => {
                 this._setText();
@@ -134,7 +138,14 @@ export class PlainTextControl extends AutoResizableComponent<IPlainTextControlPr
     }
 
     public componentWillUnmount() {
+        super.componentWillUnmount();
         VSS.unregister(VSS.getContribution().id);
+    }
+
+    protected getInitialState(): IPlainTextControlState {
+        return  {
+            translatedText: null
+        };
     }
 
     private async _setText() {
@@ -147,9 +158,11 @@ export function init() {
     const inputs = VSS.getConfiguration().witInputs as IPlainTextControlInputs;
 
     ReactDOM.render(
-        <PlainTextControl
-            text={inputs.Text}
-            maxHeight={inputs.MaxHeight || 350}
-        />,
+        <ReactRootComponent appContext={AppContext}>
+            <PlainTextControl
+                text={inputs.Text}
+                maxHeight={inputs.MaxHeight || 350}
+            />
+        </ReactRootComponent>,
         document.getElementById("ext-container"));
 }

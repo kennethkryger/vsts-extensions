@@ -5,9 +5,11 @@ import * as ReactDOM from "react-dom";
 
 import { initializeIcons } from "@uifabric/icons";
 import { DateTimePicker } from "Common/Components/DateTimePicker";
+import { ReactRootComponent } from "Common/Components/Utilities/ReactRootComponent";
 import {
     IWorkItemFieldControlProps, IWorkItemFieldControlState, WorkItemFieldControl
 } from "Common/Components/VSTS/WorkItemFieldControl";
+import { AppContext } from "Common/Utilities/Context";
 import { getFormService } from "Common/Utilities/WorkItemFormHelpers";
 import * as format from "date-fns/format";
 import { IconButton } from "OfficeFabric/Button";
@@ -25,14 +27,6 @@ interface IDateTimeControlState extends IWorkItemFieldControlState<Date> {
 }
 
 export class DateTimeControl extends WorkItemFieldControl<Date, IWorkItemFieldControlProps, IDateTimeControlState> {
-    constructor(props: IWorkItemFieldControlProps) {
-        super(props);
-
-        this.state = {
-            expanded: false
-        };
-    }
-
     public render(): JSX.Element {
         const today = new Date();
         today.setHours(0, 0, 0, 0);
@@ -88,6 +82,12 @@ export class DateTimeControl extends WorkItemFieldControl<Date, IWorkItemFieldCo
         );
     }
 
+    protected getInitialState(): IDateTimeControlState {
+        return  {
+            expanded: false
+        };
+    }
+
     private _onInputKeyDown = async (e: React.KeyboardEvent<any>) => {
         if (e.ctrlKey && e.keyCode === 83) {
             e.preventDefault();
@@ -128,10 +128,11 @@ export class DateTimeControl extends WorkItemFieldControl<Date, IWorkItemFieldCo
 export function init() {
     initializeIcons();
     const inputs = WorkItemFieldControl.getInputs<IDateTimeControlInputs>();
-
     ReactDOM.render(
-        <DateTimeControl
-            fieldName={inputs.FieldName}
-        />,
+        <ReactRootComponent appContext={AppContext}>
+            <DateTimeControl
+                fieldName={inputs.FieldName}
+            />
+        </ReactRootComponent>,
         document.getElementById("ext-container"));
 }

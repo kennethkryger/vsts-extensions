@@ -4,9 +4,11 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 
 import { initializeIcons } from "@uifabric/icons";
+import { ReactRootComponent } from "Common/Components/Utilities/ReactRootComponent";
 import {
     IWorkItemFieldControlProps, IWorkItemFieldControlState, WorkItemFieldControl
 } from "Common/Components/VSTS/WorkItemFieldControl";
+import { AppContext } from "Common/Utilities/Context";
 import { Fabric } from "OfficeFabric/Fabric";
 import { Slider } from "OfficeFabric/Slider";
 
@@ -53,11 +55,13 @@ export function init() {
     const inputs = WorkItemFieldControl.getInputs<ISliderControlInputs>();
 
     ReactDOM.render(
-        <SliderControl
-            fieldName={inputs.FieldName}
-            minValue={parseFloat(inputs.MinValue)}
-            maxValue={parseFloat(inputs.MaxValue)}
-            stepSize={parseFloat(inputs.StepSize)}
-        />,
+        <ReactRootComponent appContext={AppContext}>
+            <SliderControl
+                fieldName={inputs.FieldName}
+                minValue={parseFloat(inputs.MinValue)}
+                maxValue={parseFloat(inputs.MaxValue)}
+                stepSize={parseFloat(inputs.StepSize)}
+            />
+        </ReactRootComponent>,
         document.getElementById("ext-container"));
 }

@@ -5,13 +5,14 @@ import * as ReactDOM from "react-dom";
 
 import { initializeIcons } from "@uifabric/icons";
 import { WorkItemTypeView } from "Checklist/Components/Settings/WorkItemTypeView";
-import { StoresHub } from "Checklist/Stores/StoresHub";
 import { Loading } from "Common/Components/Loading";
+import { ReactRootComponent } from "Common/Components/Utilities/ReactRootComponent";
 import {
     IVssComponentProps, IVssComponentState, VssComponent
 } from "Common/Components/Utilities/VssComponent";
-import { WorkItemTypeActions } from "Common/Flux/Actions/WorkItemTypeActions";
-import { BaseStore } from "Common/Flux/Stores/BaseStore";
+import { BaseDataService } from "Common/Services/BaseDataService";
+import { WorkItemTypeService, WorkItemTypeServiceName } from "Common/Services/WorkItemTypeService";
+import { AppContext, IReactAppContext } from "Common/Utilities/Context";
 import { getHostNavigationService, navigate } from "Common/Utilities/Navigation";
 import { getMarketplaceUrl, getWorkItemTypeSettingsUrl } from "Common/Utilities/UrlHelper";
 import { IconButton } from "OfficeFabric/Button";
@@ -26,12 +27,19 @@ export interface IAppState extends IVssComponentState {
 
 export class SettingsApp extends VssComponent<IVssComponentProps, IAppState> {
     private _navigationService: HostNavigationService;
+    private _workItemTypeService: WorkItemTypeService;
+
+    constructor(props: IVssComponentProps, context?: IReactAppContext) {
+        super(props, context);
+
+        this._workItemTypeService = this.context.appContext.getService<WorkItemTypeService>(WorkItemTypeServiceName);
+    }
 
     public componentDidMount() {
         super.componentDidMount();
 
         this._attachNavigate();
-        WorkItemTypeActions.initializeWorkItemTypes();
+        this._workItemTypeService.initializeWorkItemTypes();
     }
 
     public componentWillUnmount() {
@@ -85,20 +93,20 @@ export class SettingsApp extends VssComponent<IVssComponentProps, IAppState> {
         );
     }
 
-    protected getInitialState() {
-        this.state = {
+    protected getInitialState(): IAppState {
+        return {
             loading: true
         };
     }
 
-    protected getObservableDataServices(): BaseStore<any, any, any>[] {
-        return [StoresHub.workItemTypeStore];
+    protected getObservableDataServices(): BaseDataService<any, any, any>[] {
+        return [this._workItemTypeService];
     }
 
     protected getDataServiceState(): IAppState {
-        const workItemTypes = StoresHub.workItemTypeStore.getAll();
+        const workItemTypes = this._workItemTypeService.getAll();
         let newState = {
-            loading: StoresHub.workItemTypeStore.isLoading()
+            loading: this._workItemTypeService.isLoading()
         } as IAppState;
 
         if (workItemTypes) {
@@ -109,7 +117,7 @@ export class SettingsApp extends VssComponent<IVssComponentProps, IAppState> {
             }
             else {
                 // check the correct witName for current selected wit
-                const wit = StoresHub.workItemTypeStore.getItem(this.state.selectedWit);
+                const wit = this._workItemTypeService.getItem(this.state.selectedWit);
                 if (!wit) {
                     // if its an invalid wit, route to the 1st workitemtype page
                     navigate({ witName: workItemTypes[0].name }, true, false, null, true);
@@ -136,7 +144,7 @@ export class SettingsApp extends VssComponent<IVssComponentProps, IAppState> {
     }
 
     private _getWITNavGroups(): INavLink[] {
-        return StoresHub.workItemTypeStore.getAll().map(wit => ({
+        return this._workItemTypeService.getAll().map(wit => ({
             name: wit.name,
             key: wit.name,
             url: getWorkItemTypeSettingsUrl(wit.name)
@@ -152,14 +160,14 @@ export class SettingsApp extends VssComponent<IVssComponentProps, IAppState> {
 
     private _onNavigate = async () => {
         if (this._navigationService) {
-            const workItemTypes = StoresHub.workItemTypeStore.getAll();
+            const workItemTypes = this._workItemTypeService.getAll();
             const state = await this._navigationService.getCurrentState();
             let witName = state && state.witName;
 
             if (witName && workItemTypes) {
                 // if wit store is loaded, check the store for witName
                 // if it doesnt exist in store, get the 1st work item type from store.
-                const wit = StoresHub.workItemTypeStore.getItem(witName);
+                const wit = this._workItemTypeService.getItem(witName);
                 if (!wit) {
                     // if its an invalid wit, route to the 1st workitemtype page
                     navigate({ witName: workItemTypes[0].name }, true);
@@ -187,5 +195,5 @@ export function init() {
     const spinner = document.getElementById("spinner");
     container.removeChild(spinner);
 
-    ReactDOM.render(<SettingsApp />, container);
+    ReactDOM.render(<ReactRootComponent appContext={AppContext}><SettingsApp /></ReactRootComponent>, container);
 }

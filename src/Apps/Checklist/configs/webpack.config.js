@@ -6,6 +6,7 @@ const config = {
         "Checklist/scripts/App": "./src/Apps/Checklist/scripts/Components/App.tsx",
         "Checklist/scripts/ChecklistView": "./src/Apps/Checklist/scripts/Components/ChecklistView.tsx",
         "Checklist/scripts/SettingsApp": "./src/Apps/Checklist/scripts/Components/Settings/SettingsApp.tsx",
+        "Checklist/scripts/Context": "./src/Common/Utilities/Context.ts"
     },
     plugins: [
         new webpack.optimize.CommonsChunkPlugin(

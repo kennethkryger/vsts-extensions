@@ -50,7 +50,7 @@ export class RelatedWorkItemsService extends BaseDataService<WorkItem[], WorkIte
     }
 
     public getKey(): string {
-        return "RelatedWorkItemsStore";
+        return RelatedWorkItemsServiceName;
     }
 
     public applyFilter(filterState: IFilterState) {

@@ -4,14 +4,16 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 
 import { initializeIcons } from "@uifabric/icons";
-import { ChecklistActions } from "Checklist/Actions/ChecklistActions";
 import * as ChecklistView_Async from "Checklist/Components/ChecklistView";
+import { ChecklistService, ChecklistServiceName } from "Checklist/Services/ChecklistService";
 import { Loading } from "Common/Components/Loading";
 import { getAsyncLoadedComponent } from "Common/Components/Utilities/AsyncLoadedComponent";
+import { ReactRootComponent } from "Common/Components/Utilities/ReactRootComponent";
 import {
     IVssComponentProps, IVssComponentState, VssComponent
 } from "Common/Components/Utilities/VssComponent";
-import { ErrorMessageActions } from "Common/Flux/Actions/ErrorMessageActions";
+import { ErrorMessageService, ErrorMessageServiceName } from "Common/Services/ErrorMessageService";
+import { AppContext, IReactAppContext } from "Common/Utilities/Context";
 import { getMarketplaceUrl, getWorkItemTypeSettingsUrl } from "Common/Utilities/UrlHelper";
 import { getFormService } from "Common/Utilities/WorkItemFormHelpers";
 import { IconButton } from "OfficeFabric/Button";
@@ -37,6 +39,15 @@ interface IChecklistAppState extends IVssComponentState {
 export class ChecklistApp extends VssComponent<IVssComponentProps, IChecklistAppState> {
     private _project: TeamProject;
     private _workItemTypeName: string;
+    private _errorMessageService: ErrorMessageService;
+    private _checklistService: ChecklistService;
+
+    constructor(props: IVssComponentProps, context?: IReactAppContext) {
+        super(props, context);
+
+        this._errorMessageService = this.context.appContext.getService<ErrorMessageService>(ErrorMessageServiceName);
+        this._checklistService = this.context.appContext.getService<ChecklistService>(ChecklistServiceName);
+    }
 
     public componentDidMount() {
         super.componentDidMount();
@@ -46,7 +57,7 @@ export class ChecklistApp extends VssComponent<IVssComponentProps, IChecklistApp
                 this._onWorkItemLoad(args.id, args.isNew);
             },
             onUnloaded: (_args: IWorkItemChangedArgs) => {
-                ErrorMessageActions.dismissErrorMessage("ChecklistError");
+                this._errorMessageService.dismissErrorMessage("ChecklistError");
                 this.setState({workItemId: null});
             },
             onSaved: (args: IWorkItemChangedArgs) => {
@@ -149,11 +160,7 @@ export class ChecklistApp extends VssComponent<IVssComponentProps, IChecklistApp
         }
     }
 
-    protected getInitialState() {
-        this.state = this._getFreshState();
-    }
-
-    private _getFreshState(): IChecklistAppState {
+    protected getInitialState(): IChecklistAppState {
         return {
             workItemId: null
         };
@@ -161,7 +168,7 @@ export class ChecklistApp extends VssComponent<IVssComponentProps, IChecklistApp
 
     private _refreshChecklist(workItemId: number) {
         if (workItemId != null && workItemId !== 0 && this._project) {
-            ChecklistActions.refreshChecklists(workItemId, this._workItemTypeName, this._project.id);
+            this._checklistService.refreshChecklists(workItemId, this._workItemTypeName, this._project.id);
         }
     }
 
@@ -184,5 +191,5 @@ export class ChecklistApp extends VssComponent<IVssComponentProps, IChecklistApp
 
 export function init() {
     initializeIcons();
-    ReactDOM.render(<ChecklistApp />, document.getElementById("ext-container"));
+    ReactDOM.render(<ReactRootComponent appContext={AppContext}><ChecklistApp /></ReactRootComponent>, document.getElementById("ext-container"));
 }

@@ -3,17 +3,18 @@ import "../ChecklistView.scss";
 import * as React from "react";
 import { arrayMove, SortableContainer, SortableElement, SortableHandle } from "react-sortable-hoc";
 
-import { ChecklistActions } from "Checklist/Actions/ChecklistActions";
 import { ChecklistItem } from "Checklist/Components/ChecklistItem";
 import { ChecklistItemEditor } from "Checklist/Components/ChecklistItemEditor";
 import { IChecklistItem, IWorkItemChecklist } from "Checklist/Interfaces";
-import { StoresHub } from "Checklist/Stores/StoresHub";
+import { ChecklistService, ChecklistServiceName } from "Checklist/Services/ChecklistService";
 import { Loading } from "Common/Components/Loading";
 import {
     IVssComponentProps, IVssComponentState, VssComponent
 } from "Common/Components/Utilities/VssComponent";
-import { BaseStore } from "Common/Flux/Stores/BaseStore";
+import { BaseDataService } from "Common/Services/BaseDataService";
+import { ErrorMessageService, ErrorMessageServiceName } from "Common/Services/ErrorMessageService";
 import { findIndex } from "Common/Utilities/Array";
+import { IReactAppContext } from "Common/Utilities/Context";
 import { isNullOrWhiteSpace, stringEquals } from "Common/Utilities/String";
 import { MessageBar, MessageBarType } from "OfficeFabric/MessageBar";
 import { Modal } from "OfficeFabric/Modal";
@@ -57,11 +58,15 @@ export interface IWorkItemTypeViewState extends IVssComponentState {
 
 export class WorkItemTypeView extends VssComponent<IWorkItemTypeViewProps, IWorkItemTypeViewState> {
     private _hubViewState: IHubViewState;
+    private _checklistService: ChecklistService;
+    private _errorMessageService: ErrorMessageService;
 
-    constructor(props: IWorkItemTypeViewProps, context?: any) {
+    constructor(props: IWorkItemTypeViewProps, context?: IReactAppContext) {
         super(props, context);
         this._hubViewState = new HubViewState();
         this._hubViewState.selectedPivot.value = "Default";
+        this._errorMessageService = this.context.appContext.getService<ErrorMessageService>(ErrorMessageServiceName);
+        this._checklistService = this.context.appContext.getService<ChecklistService>(ChecklistServiceName);
     }
 
     public componentDidMount() {
@@ -74,7 +79,7 @@ export class WorkItemTypeView extends VssComponent<IWorkItemTypeViewProps, IWork
         this._clearStores();
     }
 
-    public componentWillReceiveProps(nextProps: IWorkItemTypeViewProps, context?: any) {
+    public componentWillReceiveProps(nextProps: IWorkItemTypeViewProps, context?: IReactAppContext) {
         super.componentWillReceiveProps(nextProps, context);
 
         if (!stringEquals(this.props.workItemType, nextProps.workItemType, true)) {
@@ -99,8 +104,8 @@ export class WorkItemTypeView extends VssComponent<IWorkItemTypeViewProps, IWork
         );
     }
 
-    protected getInitialState() {
-        this.state = {
+    protected getInitialState(): IWorkItemTypeViewState {
+        return {
             checklist: null,
             disabled: false,
             error: null,
@@ -108,21 +113,21 @@ export class WorkItemTypeView extends VssComponent<IWorkItemTypeViewProps, IWork
         };
     }
 
-    protected getObservableDataServices(): BaseStore<any, any, any>[] {
-        return [StoresHub.checklistStore, StoresHub.errorMessageStore];
+    protected getObservableDataServices(): BaseDataService<any, any, any>[] {
+        return [this._checklistService, this._errorMessageService];
     }
 
     protected getDataServiceState(): IWorkItemTypeViewState {
         const {workItemType} = this.props;
         const checklist = this._getChecklist(workItemType);
-        const error = StoresHub.errorMessageStore.getItem("ChecklistError");
+        const error = this._errorMessageService.getItem("ChecklistError");
 
         let newState: IWorkItemTypeViewState = {
-            disabled: StoresHub.checklistStore.isLoading(workItemType) || !isNullOrWhiteSpace(error),
+            disabled: this._checklistService.isLoading(workItemType) || !isNullOrWhiteSpace(error),
             error: error
         } as IWorkItemTypeViewState;
 
-        if (!StoresHub.checklistStore.isLoading(workItemType)) {
+        if (!this._checklistService.isLoading(workItemType)) {
             newState = {...newState, checklist: checklist};
         }
         return newState;
@@ -231,12 +236,12 @@ export class WorkItemTypeView extends VssComponent<IWorkItemTypeViewProps, IWork
         this._clearStores(workItemTypeName);
 
         this.setState({checklist: null, editItem: null, error: null, disabled: false});
-        ChecklistActions.initializeChecklistForWorkItemType(workItemTypeName);
+        this._checklistService.initializeChecklistForWorkItemType(workItemTypeName);
     }
 
     private _clearStores(currentWorkItemType?: string) {
-        StoresHub.checklistStore.clear();
-        StoresHub.checklistStore.setCurrentWorkItemType(currentWorkItemType);
+        this._checklistService.clear();
+        this._checklistService.setCurrentWorkItemType(currentWorkItemType);
     }
 
     private _updateChecklist(checklistItems: IChecklistItem[]) {
@@ -244,7 +249,7 @@ export class WorkItemTypeView extends VssComponent<IWorkItemTypeViewProps, IWork
         checklist.checklistItems = checklistItems;
 
         this.setState({checklist: checklist});
-        ChecklistActions.updateChecklistForWorkItemType(checklist);
+        this._checklistService.updateChecklistForWorkItemType(checklist);
     }
 
     private _getChecklist(workItemType: string): IWorkItemChecklist {
@@ -252,7 +257,7 @@ export class WorkItemTypeView extends VssComponent<IWorkItemTypeViewProps, IWork
             return null;
         }
 
-        const checklists = StoresHub.checklistStore.getItem(this.props.workItemType);
+        const checklists = this._checklistService.getItem(this.props.workItemType);
         return checklists == null ? null : checklists.witDefault;
     }
 

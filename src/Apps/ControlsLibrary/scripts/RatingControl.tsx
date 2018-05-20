@@ -4,9 +4,11 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 
 import { initializeIcons } from "@uifabric/icons";
+import { ReactRootComponent } from "Common/Components/Utilities/ReactRootComponent";
 import {
     IWorkItemFieldControlProps, IWorkItemFieldControlState, WorkItemFieldControl
 } from "Common/Components/VSTS/WorkItemFieldControl";
+import { AppContext } from "Common/Utilities/Context";
 import { Fabric } from "OfficeFabric/Fabric";
 import { Rating, RatingSize } from "OfficeFabric/Rating";
 
@@ -50,10 +52,12 @@ export function init() {
     const inputs = WorkItemFieldControl.getInputs<IRatingControlInputs>();
 
     ReactDOM.render(
-        <RatingControl
-            fieldName={inputs.FieldName}
-            minValue={parseInt(inputs.MinValue, 10)}
-            maxValue={parseInt(inputs.MaxValue, 10)}
-        />,
+        <ReactRootComponent appContext={AppContext}>
+            <RatingControl
+                fieldName={inputs.FieldName}
+                minValue={parseInt(inputs.MinValue, 10)}
+                maxValue={parseInt(inputs.MaxValue, 10)}
+            />
+        </ReactRootComponent>,
         document.getElementById("ext-container"));
 }

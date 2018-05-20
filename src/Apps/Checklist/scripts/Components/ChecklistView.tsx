@@ -3,18 +3,19 @@ import "./ChecklistView.scss";
 import * as React from "react";
 import { arrayMove, SortableContainer, SortableElement, SortableHandle } from "react-sortable-hoc";
 
-import { ChecklistActions } from "Checklist/Actions/ChecklistActions";
 import { ChecklistItem } from "Checklist/Components/ChecklistItem";
 import { ChecklistItemEditor } from "Checklist/Components/ChecklistItemEditor";
 import {
     ChecklistItemState, ChecklistType, IChecklistItem, IWorkItemChecklist, IWorkItemChecklists
 } from "Checklist/Interfaces";
-import { StoresHub } from "Checklist/Stores/StoresHub";
+import { ChecklistService, ChecklistServiceName } from "Checklist/Services/ChecklistService";
 import { Loading } from "Common/Components/Loading";
 import { AutoResizableComponent } from "Common/Components/Utilities/AutoResizableComponent";
 import { IVssComponentProps, IVssComponentState } from "Common/Components/Utilities/VssComponent";
-import { BaseStore } from "Common/Flux/Stores/BaseStore";
+import { BaseDataService } from "Common/Services/BaseDataService";
+import { ErrorMessageService, ErrorMessageServiceName } from "Common/Services/ErrorMessageService";
 import { findIndex } from "Common/Utilities/Array";
+import { IReactAppContext } from "Common/Utilities/Context";
 import { delegate } from "Common/Utilities/Core";
 import { isNullOrWhiteSpace, stringEquals } from "Common/Utilities/String";
 import { MessageBar, MessageBarType } from "OfficeFabric/MessageBar";
@@ -59,14 +60,24 @@ export interface IChecklistViewState extends IVssComponentState {
 }
 
 export class ChecklistView extends AutoResizableComponent<IChecklistViewProps, IChecklistViewState> {
+    private _checklistService: ChecklistService;
+    private _errorMessageService: ErrorMessageService;
+
+    constructor(props: IChecklistViewProps, context?: IReactAppContext) {
+        super(props, context);
+
+        this._errorMessageService = this.context.appContext.getService<ErrorMessageService>(ErrorMessageServiceName);
+        this._checklistService = this.context.appContext.getService<ChecklistService>(ChecklistServiceName);
+    }
+
     public componentDidMount() {
         super.componentDidMount();
         if (this.state.checklists == null) {
-            ChecklistActions.initializeChecklists(this.props.workItemId, this.props.workItemType, this.props.projectId);
+            this._checklistService.initializeChecklists(this.props.workItemId, this.props.workItemType, this.props.projectId);
         }
     }
 
-    public componentWillReceiveProps(nextProps: IChecklistViewProps, context?: any) {
+    public componentWillReceiveProps(nextProps: IChecklistViewProps, context?: IReactAppContext) {
         super.componentWillReceiveProps(nextProps, context);
         if (this.props.workItemId !== nextProps.workItemId) {
             const checklist = this._getChecklists(nextProps.workItemId);
@@ -75,7 +86,7 @@ export class ChecklistView extends AutoResizableComponent<IChecklistViewProps, I
             }
             else {
                 this.setState({checklists: null, editChecklistItem: null, error: null, disabled: false});
-                ChecklistActions.initializeChecklists(nextProps.workItemId, nextProps.workItemType, nextProps.projectId);
+                this._checklistService.initializeChecklists(nextProps.workItemId, nextProps.workItemType, nextProps.projectId);
             }
         }
     }
@@ -103,33 +114,33 @@ export class ChecklistView extends AutoResizableComponent<IChecklistViewProps, I
         }
     }
 
-    protected getInitialState() {
-        const {workItemId} = this.props;
-        const error = StoresHub.errorMessageStore.getItem("ChecklistError");
+    protected getInitialState(props: IChecklistViewProps): IChecklistViewState {
+        const {workItemId} = props;
+        const error = this._errorMessageService.getItem("ChecklistError");
 
-        this.state = {
+        return {
             checklists: this._getChecklists(workItemId),
-            disabled: StoresHub.checklistStore.isLoading(`${workItemId}`) || !isNullOrWhiteSpace(error),
+            disabled: this._checklistService.isLoading(`${workItemId}`) || !isNullOrWhiteSpace(error),
             error: error,
             editChecklistItem: null
         };
     }
 
-    protected getObservableDataServices(): BaseStore<any, any, any>[] {
-        return [StoresHub.checklistStore, StoresHub.errorMessageStore];
+    protected getObservableDataServices(): BaseDataService<any, any, any>[] {
+        return [this._checklistService, this._errorMessageService];
     }
 
     protected getDataServiceState(): IChecklistViewState {
         const {workItemId} = this.props;
         const checklists = this._getChecklists(workItemId);
-        const error = StoresHub.errorMessageStore.getItem("ChecklistError");
+        const error = this._errorMessageService.getItem("ChecklistError");
 
         let newState: IChecklistViewState = {
-            disabled: StoresHub.checklistStore.isLoading(`${workItemId}`) || !isNullOrWhiteSpace(error),
+            disabled: this._checklistService.isLoading(`${workItemId}`) || !isNullOrWhiteSpace(error),
             error: error
         } as IChecklistViewState;
 
-        if (!StoresHub.checklistStore.isLoading(`${workItemId}`)) {
+        if (!this._checklistService.isLoading(`${workItemId}`)) {
             newState = {...newState, checklists: checklists};
         }
         return newState;
@@ -239,11 +250,10 @@ export class ChecklistView extends AutoResizableComponent<IChecklistViewProps, I
                 break;
             default:
                 newChecklistsState.witDefault = checklist;
-                break;
         }
 
         this.setState({checklists: newChecklistsState});
-        ChecklistActions.updateChecklist(checklist, checklistType);
+        this._checklistService.updateChecklist(checklist, checklistType);
     }
 
     private _getChecklists(workItemId: number): IWorkItemChecklists {
@@ -251,7 +261,7 @@ export class ChecklistView extends AutoResizableComponent<IChecklistViewProps, I
             return null;
         }
 
-        return StoresHub.checklistStore.getItem(this.props.workItemId.toString());
+        return this._checklistService.getItem(this.props.workItemId.toString());
     }
 
     private _getWorkItemChecklistFromType(checklistType: ChecklistType): IWorkItemChecklist {

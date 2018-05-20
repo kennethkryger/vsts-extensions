@@ -6,6 +6,7 @@ import { ChecklistItemState, ChecklistItemStates, IChecklistItem } from "Checkli
 import {
     IVssComponentProps, IVssComponentState, VssComponent
 } from "Common/Components/Utilities/VssComponent";
+import { IReactAppContext } from "Common/Utilities/Context";
 import { isNullOrWhiteSpace } from "Common/Utilities/String";
 import { DefaultButton, IconButton } from "OfficeFabric/Button";
 import { Checkbox } from "OfficeFabric/Checkbox";
@@ -29,7 +30,7 @@ export interface IChecklistItemEditorState extends IVssComponentState {
 }
 
 export class ChecklistItemEditor extends VssComponent<IChecklistItemEditorProps, IChecklistItemEditorState> {
-    public componentWillReceiveProps(nextProps: IChecklistItemEditorProps, context?: any) {
+    public componentWillReceiveProps(nextProps: IChecklistItemEditorProps, context?: IReactAppContext) {
         super.componentWillReceiveProps(nextProps, context);
         this.setState({
             checklistItem: nextProps.checklistItem ? {...nextProps.checklistItem} : this._getDefaultItem()
@@ -124,8 +125,8 @@ export class ChecklistItemEditor extends VssComponent<IChecklistItemEditorProps,
         );
     }
 
-    protected getInitialState() {
-        this.state = {
+    protected getInitialState(): IChecklistItemEditorState {
+        return {
             checklistItem: this.props.checklistItem ? {...this.props.checklistItem} : this._getDefaultItem()
         };
     }

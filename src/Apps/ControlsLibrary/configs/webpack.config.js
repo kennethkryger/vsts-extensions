@@ -9,6 +9,7 @@ const config = {
         "ControlsLibrary/scripts/SliderControl": "./src/Apps/ControlsLibrary/scripts/SliderControl.tsx",
         "ControlsLibrary/scripts/RatingControl": "./src/Apps/ControlsLibrary/scripts/RatingControl.tsx",
         "ControlsLibrary/scripts/DateTimeControl": "./src/Apps/ControlsLibrary/scripts/DateTimeControl.tsx",
+        "ControlsLibrary/scripts/Context": "./src/Common/Utilities/Context.ts"
     },
     plugins: [
         new CopyWebpackPlugin([

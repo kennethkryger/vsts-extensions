@@ -4,10 +4,12 @@ import * as React from "react";
 import * as ReactDOM from "react-dom";
 
 import { initializeIcons } from "@uifabric/icons";
+import { ReactRootComponent } from "Common/Components/Utilities/ReactRootComponent";
 import {
     IWorkItemFieldControlProps, IWorkItemFieldControlState, WorkItemFieldControl
 } from "Common/Components/VSTS/WorkItemFieldControl";
 import { findIndex } from "Common/Utilities/Array";
+import { AppContext } from "Common/Utilities/Context";
 import { isNullOrWhiteSpace, stringEquals } from "Common/Utilities/String";
 import { getFormService } from "Common/Utilities/WorkItemFormHelpers";
 import { ValidationState } from "OfficeFabric/components/pickers/BasePicker.types";
@@ -173,9 +175,11 @@ export function init() {
     }
 
     ReactDOM.render(
-        <MultiValueControl
-            fieldName={inputs.FieldName}
-            suggestedValues={suggestedValues}
-        />,
+        <ReactRootComponent appContext={AppContext}>
+            <MultiValueControl
+                fieldName={inputs.FieldName}
+                suggestedValues={suggestedValues}
+            />
+        </ReactRootComponent>,
         document.getElementById("ext-container"));
 }
