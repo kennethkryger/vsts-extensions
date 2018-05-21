@@ -7,14 +7,15 @@ import { ThrottledTextField } from "Common/Components/Utilities/ThrottledTextFie
 import {
     IVssComponentProps, IVssComponentState, VssComponent
 } from "Common/Components/Utilities/VssComponent";
+import { IReactAppContext } from "Common/Utilities/Context";
 import { DefaultButton, PrimaryButton } from "OfficeFabric/Button";
 import { Checkbox } from "OfficeFabric/Checkbox";
 import { MessageBar, MessageBarType } from "OfficeFabric/MessageBar";
 import { Overlay } from "OfficeFabric/Overlay";
 import { Panel, PanelType } from "OfficeFabric/Panel";
 import { RuleGroupFieldNames, SizeLimits } from "OneClick/Constants";
-import { RuleGroupActions } from "OneClick/Flux/Actions/RuleGroupActions";
 import { IRuleGroup } from "OneClick/Interfaces";
+import { RuleGroupService, RuleGroupServiceName } from "OneClick/Services/RuleGroupService";
 import { RuleGroup } from "OneClick/ViewModels/RuleGroup";
 
 export interface IRuleGroupEditorProps extends IVssComponentProps {
@@ -30,6 +31,13 @@ export interface IRuleGroupEditorState extends IVssComponentState {
 }
 
 export class RuleGroupEditor extends VssComponent<IRuleGroupEditorProps, IRuleGroupEditorState> {
+    private _ruleGroupService: RuleGroupService;
+
+    constructor(props: IRuleGroupEditorProps, context?: IReactAppContext) {
+        super(props, context);
+        this._ruleGroupService = this.context.appContext.getService<RuleGroupService>(RuleGroupServiceName);
+    }
+
     public componentDidMount() {
         super.componentDidMount();
         this.state.ruleGroup.addChangedListener(this._onModelChanged);
@@ -88,9 +96,9 @@ export class RuleGroupEditor extends VssComponent<IRuleGroupEditorProps, IRuleGr
         );
     }
 
-    protected getInitialState() {
-        this.state = {
-            ruleGroup: this.props.ruleGroupModel ? new RuleGroup(this.props.ruleGroupModel) : RuleGroup.getNewRuleGroup(this.props.workItemTypeName)
+    protected getInitialState(props: IRuleGroupEditorProps): IRuleGroupEditorState {
+        return {
+            ruleGroup: props.ruleGroupModel ? new RuleGroup(props.ruleGroupModel) : RuleGroup.getNewRuleGroup(props.workItemTypeName)
         };
     }
 
@@ -141,10 +149,10 @@ export class RuleGroupEditor extends VssComponent<IRuleGroupEditorProps, IRuleGr
         try {
             this.setState({saving: true});
             if (this.state.ruleGroup.isNew) {
-                await RuleGroupActions.createRuleGroup(this.props.workItemTypeName, this.state.ruleGroup.updatedModel);
+                await this._ruleGroupService.createRuleGroup(this.props.workItemTypeName, this.state.ruleGroup.updatedModel);
             }
             else {
-                await RuleGroupActions.updateRuleGroup(this.props.workItemTypeName, this.state.ruleGroup.updatedModel);
+                await this._ruleGroupService.updateRuleGroup(this.props.workItemTypeName, this.state.ruleGroup.updatedModel);
             }
 
             this.setState({saving: false});

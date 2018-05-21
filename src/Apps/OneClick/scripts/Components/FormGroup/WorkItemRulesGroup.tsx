@@ -7,8 +7,10 @@ import { arrayMove, SortableContainer, SortableElement } from "react-sortable-ho
 import { initializeIcons } from "@uifabric/icons";
 import { Loading } from "Common/Components/Loading";
 import { AutoResizableComponent } from "Common/Components/Utilities/AutoResizableComponent";
+import { ReactRootComponent } from "Common/Components/Utilities/ReactRootComponent";
 import { IVssComponentProps, IVssComponentState } from "Common/Components/Utilities/VssComponent";
 import { contains, subtract } from "Common/Utilities/Array";
+import { AppContext } from "Common/Utilities/Context";
 import { getCurrentUserName } from "Common/Utilities/Identity";
 import {
     readLocalSetting, WebSettingsScope, writeLocalSetting
@@ -162,8 +164,8 @@ export class WorkItemRulesGroup extends AutoResizableComponent<IVssComponentProp
         );
     }
 
-    protected getInitialState() {
-        this.state = {
+    protected getInitialState(): IWorkItemRulesGroupState {
+        return {
             loading: false,
             workItemTypeEnabled: true,
             ruleExecutionError: null
@@ -290,7 +292,7 @@ export class WorkItemRulesGroup extends AutoResizableComponent<IVssComponentProp
                 }
             });
         }
-        const rules = ruleModels.map(r => new Rule(r));
+        const rules = ruleModels.map(r => new Rule(this.context.appContext, r));
         this.setState({loading: false, rules: rules});
 
         return rules;
@@ -401,7 +403,7 @@ export class WorkItemRulesGroup extends AutoResizableComponent<IVssComponentProp
     }
 
     private _refresh = async () => {
-        this._cacheStamp = await SettingsDataService.readCacheStamp(this._workItemTypeName, this._project.id),
+        this._cacheStamp = await SettingsDataService.readCacheStamp(this._workItemTypeName, this._project.id);
         this._initializeRules(true);
     }
 
@@ -471,5 +473,5 @@ export function init() {
     initializeIcons();
 
     const container = document.getElementById("ext-container");
-    ReactDOM.render(<WorkItemRulesGroup />, container);
+    ReactDOM.render(<ReactRootComponent appContext={AppContext}><WorkItemRulesGroup /></ReactRootComponent>, container);
 }

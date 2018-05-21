@@ -2,7 +2,12 @@ import * as React from "react";
 
 import { Loading } from "Common/Components/Loading";
 import { getAsyncLoadedComponent } from "Common/Components/Utilities/AsyncLoadedComponent";
+import {
+    WorkItemFieldService, WorkItemFieldServiceName
+} from "Common/Services/WorkItemFieldService";
+import { WorkItemTypeService, WorkItemTypeServiceName } from "Common/Services/WorkItemTypeService";
 import { contains } from "Common/Utilities/Array";
+import { IAppPageContext } from "Common/Utilities/Context";
 import { isDate } from "Common/Utilities/Date";
 import { isInteger, isNumeric } from "Common/Utilities/Number";
 import { isNullOrEmpty, stringEquals } from "Common/Utilities/String";
@@ -10,8 +15,8 @@ import { getFormService, getWorkItemField } from "Common/Utilities/WorkItemFormH
 import { IIconProps } from "OfficeFabric/Icon";
 import * as ActionRenderers_Async from "OneClick/Components/ActionRenderers";
 import { ExcludedFields } from "OneClick/Constants";
-import { StoresHub } from "OneClick/Flux/Stores/StoresHub";
 import { translateToFieldValue } from "OneClick/Helpers";
+import { IAction } from "OneClick/Interfaces";
 import { BaseMacro } from "OneClick/Macros/Macros";
 import { BaseAction } from "OneClick/RuleActions/BaseAction";
 import { FieldType } from "TFS/WorkItemTracking/Contracts";
@@ -23,6 +28,15 @@ const AsyncFieldNameValuePicker = getAsyncLoadedComponent(
 
 export class SetFieldValueAction extends BaseAction {
     private _workItemType: string;
+
+    private _fieldService: WorkItemFieldService;
+    private _workItemTypeService: WorkItemTypeService;
+
+    constructor(appContext: IAppPageContext, model: IAction) {
+        super(appContext, model);
+        this._fieldService = appContext.getService<WorkItemFieldService>(WorkItemFieldServiceName);
+        this._workItemTypeService = appContext.getService<WorkItemTypeService>(WorkItemTypeServiceName);
+    }
 
     public async run() {
         const fieldName = this.getAttribute<string>("fieldName", true);
@@ -52,13 +66,13 @@ export class SetFieldValueAction extends BaseAction {
         const fieldName = this.getAttribute<string>("fieldName");
         const fieldValue = this.getAttribute<string>("fieldValue");
 
-        if (isNullOrEmpty(fieldName) || !StoresHub.workItemFieldStore.isLoaded() || !this._workItemType) {
+        if (isNullOrEmpty(fieldName) || !this._fieldService.isLoaded() || !this._workItemType) {
             return false;
         }
 
-        const workItemType = StoresHub.workItemTypeStore.getItem(this._workItemType);
+        const workItemType = this._workItemTypeService.getItem(this._workItemType);
         const witFields = workItemType.fields.map(f => f.referenceName);
-        const field = StoresHub.workItemFieldStore.getItem(fieldName);
+        const field = this._fieldService.getItem(fieldName);
 
         if (field) {
             return !contains(ExcludedFields, field.referenceName, (s1, s2) => stringEquals(s1, s2, true))
@@ -83,7 +97,7 @@ export class SetFieldValueAction extends BaseAction {
 
         const fieldName = this.getAttribute<string>("fieldName");
         const fieldValue = this.getAttribute<string>("fieldValue");
-        const field = StoresHub.workItemFieldStore.getItem(fieldName);
+        const field = this._fieldService.getItem(fieldName);
         let valueError = "";
         if (field) {
             valueError = this._getFieldValueError(field.type, fieldValue);

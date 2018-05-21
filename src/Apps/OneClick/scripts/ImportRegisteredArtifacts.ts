@@ -1,3 +1,4 @@
+import { IAppPageContext } from "Common/Utilities/Context";
 import { IAction, ITrigger } from "OneClick/Interfaces";
 import { AddCommentAction } from "OneClick/RuleActions/AddCommentAction";
 import { AddExistingRelationAction } from "OneClick/RuleActions/AddExistingRelationAction";
@@ -12,22 +13,22 @@ import { BaseTrigger } from "OneClick/RuleTriggers/BaseTrigger";
 import { FieldChangedTrigger } from "OneClick/RuleTriggers/FieldChangedTrigger";
 import { NewWorkItemOpenedTrigger } from "OneClick/RuleTriggers/NewWorkItemOpenedTrigger";
 
-export const registeredActions: IDictionaryStringTo<new(model: IAction) => BaseAction> = {};
-export const registeredTriggers: IDictionaryStringTo<new(model: ITrigger) => BaseTrigger> = {};
+export const registeredActions: IDictionaryStringTo<new(appContext: IAppPageContext, model: IAction) => BaseAction> = {};
+export const registeredTriggers: IDictionaryStringTo<new(appContext: IAppPageContext, model: ITrigger) => BaseTrigger> = {};
 
-export function registerAction(actionName: string, actionType: new(model: IAction) => BaseAction): void {
+export function registerAction(actionName: string, actionType: new(appContext: IAppPageContext, model: IAction) => BaseAction): void {
     registeredActions[actionName.toUpperCase()] = actionType;
 }
 
-export function getActionType(actionName: string): new(model: IAction) => BaseAction {
+export function getActionType(actionName: string): new(appContext: IAppPageContext, model: IAction) => BaseAction {
     return registeredActions[actionName.toUpperCase()];
 }
 
-export function registerTrigger(triggerName: string, triggerType: new(model: ITrigger) => BaseTrigger): void {
+export function registerTrigger(triggerName: string, triggerType: new(appContext: IAppPageContext, model: ITrigger) => BaseTrigger): void {
     registeredTriggers[triggerName.toUpperCase()] = triggerType;
 }
 
-export function getTriggerType(triggerName: string): new(model: ITrigger) => BaseTrigger {
+export function getTriggerType(triggerName: string): new(appContext: IAppPageContext, model: ITrigger) => BaseTrigger {
     return registeredTriggers[triggerName.toUpperCase()];
 }
 

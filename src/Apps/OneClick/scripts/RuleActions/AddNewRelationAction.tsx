@@ -2,13 +2,26 @@ import * as React from "react";
 
 import { Loading } from "Common/Components/Loading";
 import { getAsyncLoadedComponent } from "Common/Components/Utilities/AsyncLoadedComponent";
+import { TeamService, TeamServiceName } from "Common/Services/TeamService";
+import {
+    WorkItemRelationTypeService, WorkItemRelationTypeServiceName
+} from "Common/Services/WorkItemRelationTypeService";
+import { WorkItemService, WorkItemServiceName } from "Common/Services/WorkItemService";
+import {
+    WorkItemTemplateItemService, WorkItemTemplateItemServiceName
+} from "Common/Services/WorkItemTemplateItemService";
+import {
+    WorkItemTemplateService, WorkItemTemplateServiceName
+} from "Common/Services/WorkItemTemplateService";
+import { WorkItemTypeService, WorkItemTypeServiceName } from "Common/Services/WorkItemTypeService";
+import { IAppPageContext } from "Common/Utilities/Context";
 import { isNullOrEmpty, stringEquals } from "Common/Utilities/String";
 import { getFormNavigationService, getFormService } from "Common/Utilities/WorkItemFormHelpers";
 import { IIconProps } from "OfficeFabric/Icon";
 import * as ActionRenderers_Async from "OneClick/Components/ActionRenderers";
 import { CoreFieldRefNames } from "OneClick/Constants";
-import { StoresHub } from "OneClick/Flux/Stores/StoresHub";
 import { translateToFieldValue } from "OneClick/Helpers";
+import { IAction } from "OneClick/Interfaces";
 import { BaseAction } from "OneClick/RuleActions/BaseAction";
 import { WorkItem } from "TFS/WorkItemTracking/Contracts";
 
@@ -18,6 +31,24 @@ const AsyncAddNewRelationRenderer = getAsyncLoadedComponent(
     () => <Loading />);
 
 export class AddNewRelationAction extends BaseAction {
+    private _workItemTemplateItemService: WorkItemTemplateItemService;
+    private _workItemService: WorkItemService;
+    private _teamService: TeamService;
+    private _workItemTypeService: WorkItemTypeService;
+    private _workItemRelationTypeService: WorkItemRelationTypeService;
+    private _workItemTemplateService: WorkItemTemplateService;
+
+    constructor(appContext: IAppPageContext, model: IAction) {
+        super(appContext, model);
+
+        this._workItemTemplateItemService = appContext.getService<WorkItemTemplateItemService>(WorkItemTemplateItemServiceName);
+        this._workItemService = appContext.getService<WorkItemService>(WorkItemServiceName);
+        this._teamService = appContext.getService<TeamService>(TeamServiceName);
+        this._workItemTypeService = appContext.getService<WorkItemTypeService>(WorkItemTypeServiceName);
+        this._workItemRelationTypeService = appContext.getService<WorkItemRelationTypeService>(WorkItemRelationTypeServiceName);
+        this._workItemTemplateService = appContext.getService<WorkItemTemplateService>(WorkItemTemplateServiceName);
+    }
+
     public async run() {
         // read attributes
         const workItemType = this.getAttribute<string>("workItemType", true);
@@ -31,8 +62,8 @@ export class AddNewRelationAction extends BaseAction {
         const project = await workItemFormService.getFieldValue(CoreFieldRefNames.TeamProject) as string;
 
         // read template
-        await WorkItemTemplateItemActions.initializeWorkItemTemplateItem(teamId, templateId, project);
-        const template = StoresHub.workItemTemplateItemStore.getItem(templateId);
+        await this._workItemTemplateItemService.initializeWorkItemTemplateItem(teamId, templateId, project);
+        const template = this._workItemTemplateItemService.getItem(templateId);
 
         // read fields from template
         const templateMap = {...template.fields};
@@ -53,7 +84,7 @@ export class AddNewRelationAction extends BaseAction {
         if (autoCreate) {
             try {
                 // create work item
-                savedWorkItem = await WorkItemActions.createWorkItem(workItemType, translatedFieldValuesMap, project);
+                savedWorkItem = await this._workItemService.createWorkItem(workItemType, translatedFieldValuesMap, project);
             }
             catch (e) {
                 throw `Could not create work item. Error: ${e}. Please check the template used in this action.`;
@@ -96,17 +127,17 @@ export class AddNewRelationAction extends BaseAction {
         const teamId = this.getAttribute<string>("teamId");
         const templateId = this.getAttribute<string>("templateId");
 
-        return StoresHub.workItemTypeStore.isLoaded()
-            && StoresHub.teamStore.isLoaded()
-            && StoresHub.workItemRelationTypeStore.isLoaded()
+        return this._workItemTypeService.isLoaded()
+            && this._teamService.isLoaded()
+            && this._workItemRelationTypeService.isLoaded()
             && !isNullOrEmpty(workItemType)
-            && StoresHub.workItemTypeStore.itemExists(workItemType)
+            && this._workItemTypeService.itemExists(workItemType)
             && !isNullOrEmpty(relationType)
-            && StoresHub.workItemRelationTypeStore.itemExists(relationType)
+            && this._workItemRelationTypeService.itemExists(relationType)
             && !isNullOrEmpty(teamId)
-            && StoresHub.teamStore.itemExists(teamId)
+            && this._teamService.itemExists(teamId)
             && !isNullOrEmpty(templateId)
-            && StoresHub.workItemTemplateStore.getTemplate(templateId) != null;
+            && this._workItemTemplateService.getTemplate(templateId) != null;
     }
 
     public isDirty(): boolean {

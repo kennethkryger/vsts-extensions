@@ -1,6 +1,6 @@
 import * as React from "react";
 
-import { Observable } from "Common/Utilities/Context";
+import { IAppPageContext, Observable } from "Common/Utilities/Context";
 import { getCurrentUser } from "Common/Utilities/Identity";
 import { isNullOrEmpty, stringEquals } from "Common/Utilities/String";
 import { IconButton } from "OfficeFabric/Button";
@@ -11,8 +11,8 @@ import { BaseAction } from "OneClick/RuleActions/BaseAction";
 import { BaseTrigger } from "OneClick/RuleTriggers/BaseTrigger";
 
 export class Rule extends Observable<void> {
-    public static getNewRule(workItemTypeName: string): Rule {
-        return new Rule({
+    public static getNewRule(appContext: IAppPageContext, workItemTypeName: string): Rule {
+        return new Rule(appContext, {
             name: "New rule",
             description: "",
             disabled: false,
@@ -27,13 +27,15 @@ export class Rule extends Observable<void> {
         });
     }
 
+    private _appContext: IAppPageContext;
     private _originalModel: IRule;
     private _updates: IRule;
     private _actions: BaseAction[];
     private _triggers: BaseTrigger[];
 
-    constructor(model: IRule) {
+    constructor(appContext: IAppPageContext, model: IRule) {
         super();
+        this._appContext = appContext;
         this._originalModel = {...model};
         this._updates = {} as IRule;
 
@@ -243,7 +245,7 @@ export class Rule extends Observable<void> {
                 return null;
             }
 
-            const action = new actionType(model);
+            const action = new actionType(this._appContext, model);
             this._subscribeToAction(action);
             return action;
         }).filter(a => a != null);
@@ -256,7 +258,7 @@ export class Rule extends Observable<void> {
                 return null;
             }
 
-            const trigger = new triggerType(model);
+            const trigger = new triggerType(this._appContext, model);
             this._subscribeToTrigger(trigger);
             return trigger;
         }).filter(t => t != null);

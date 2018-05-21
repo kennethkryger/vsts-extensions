@@ -2,12 +2,14 @@ import * as React from "react";
 
 import { Loading } from "Common/Components/Loading";
 import { getAsyncLoadedComponent } from "Common/Components/Utilities/AsyncLoadedComponent";
+import {
+    WorkItemRelationTypeService, WorkItemRelationTypeServiceName
+} from "Common/Services/WorkItemRelationTypeService";
 import { isInteger } from "Common/Utilities/Number";
 import { isNullOrEmpty, stringEquals } from "Common/Utilities/String";
 import { getFormService } from "Common/Utilities/WorkItemFormHelpers";
 import { IIconProps } from "OfficeFabric/Icon";
 import * as ActionRenderers_Async from "OneClick/Components/ActionRenderers";
-import { StoresHub } from "OneClick/Flux/Stores/StoresHub";
 import { translateToFieldValue } from "OneClick/Helpers";
 import { BaseMacro } from "OneClick/Macros/Macros";
 import { BaseAction } from "OneClick/RuleActions/BaseAction";
@@ -58,10 +60,11 @@ export class AddExistingRelationAction extends BaseAction {
     public isValid(): boolean {
         const relationType = this.getAttribute<string>("relationType");
         const workItemId = this.getAttribute<string>("workItemId");
+        const relationTypeService = this.appContext.getService<WorkItemRelationTypeService>(WorkItemRelationTypeServiceName);
 
-        return StoresHub.workItemRelationTypeStore.isLoaded()
+        return relationTypeService.isLoaded()
             && !isNullOrEmpty(relationType)
-            && StoresHub.workItemRelationTypeStore.itemExists(relationType)
+            && relationTypeService.itemExists(relationType)
             && !isNullOrEmpty(workItemId)
             && isNullOrEmpty(this._getWorkItemIdError(workItemId));
     }

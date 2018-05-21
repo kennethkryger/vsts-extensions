@@ -7,7 +7,8 @@ import { Loading } from "Common/Components/Loading";
 import {
     IVssComponentProps, IVssComponentState, VssComponent
 } from "Common/Components/Utilities/VssComponent";
-import { BaseStore } from "Common/Flux/Stores/BaseStore";
+import { BaseDataService } from "Common/Services/BaseDataService";
+import { IReactAppContext } from "Common/Utilities/Context";
 import { confirmAction, delegate } from "Common/Utilities/Core";
 import { getDistinctNameFromIdentityRef } from "Common/Utilities/Identity";
 import { navigate } from "Common/Utilities/Navigation";
@@ -26,11 +27,10 @@ import {
 import { css } from "OfficeFabric/Utilities";
 import { RuleGroupEditor } from "OneClick/Components/Settings/RuleGroupEditor";
 import { SettingKey } from "OneClick/Constants";
-import { RuleGroupActions } from "OneClick/Flux/Actions/RuleGroupActions";
-import { SettingsActions } from "OneClick/Flux/Actions/SettingsActions";
-import { StoresHub } from "OneClick/Flux/Stores/StoresHub";
 import { getRuleGroupUrl, isPersonalOrGlobalRuleGroup } from "OneClick/Helpers";
 import { IRuleGroup } from "OneClick/Interfaces";
+import { RuleGroupService, RuleGroupServiceName } from "OneClick/Services/RuleGroupService";
+import { SettingsService, SettingsServiceName } from "OneClick/Services/SettingsService";
 import { FilterBar, IFilterBar, KeywordFilterBarItem } from "VSSUI/Components/FilterBar";
 import { Hub } from "VSSUI/Components/Hub";
 import { HubHeader } from "VSSUI/Components/HubHeader";
@@ -63,11 +63,15 @@ export interface IRuleGroupListState extends IVssComponentState {
 export class RuleGroupList extends VssComponent<IRuleGroupListProps, IRuleGroupListState> {
     private _hubViewState: IHubViewState;
     private _filterBar: IFilterBar;
+    private _ruleGroupService: RuleGroupService;
+    private _settingsService: SettingsService;
 
-    constructor(props: IRuleGroupListProps, context?: any) {
+    constructor(props: IRuleGroupListProps, context?: IReactAppContext) {
         super(props, context);
         this._hubViewState = new HubViewState();
         this._hubViewState.selectedPivot.value = "Favorites";
+        this._ruleGroupService = this.context.appContext.getService<RuleGroupService>(RuleGroupServiceName);
+        this._settingsService = this.context.appContext.getService<SettingsService>(SettingsServiceName);
     }
 
     public componentDidMount() {
@@ -156,12 +160,12 @@ export class RuleGroupList extends VssComponent<IRuleGroupListProps, IRuleGroupL
         );
     }
 
-    protected getInitialState() {
-        this.state = this._getNewState();
+    protected getInitialState(): IRuleGroupListState {
+        return this._getNewState();
     }
 
-    protected getObservableDataServices(): BaseStore<any, any, any>[] {
-        return [StoresHub.ruleGroupStore, StoresHub.settingsStore];
+    protected getObservableDataServices(): BaseDataService<any, any, any>[] {
+        return [this._ruleGroupService, this._settingsService];
     }
 
     protected getDataServiceState(): IRuleGroupListState {
@@ -169,16 +173,16 @@ export class RuleGroupList extends VssComponent<IRuleGroupListProps, IRuleGroupL
     }
 
     private _getNewState(): IRuleGroupListState {
-        const userSubscriptions = StoresHub.settingsStore.getItem<string[]>(SettingKey.UserSubscriptions);
-        const personalRulesEnabled = StoresHub.settingsStore.getItem<boolean>(SettingKey.PersonalRulesEnabled);
-        const globalRulesEnabled = StoresHub.settingsStore.getItem<boolean>(SettingKey.GlobalRulesEnabled);
-        const workItemTypeEnabled = StoresHub.settingsStore.getItem<boolean>(SettingKey.WorkItemTypeEnabled);
+        const userSubscriptions = this._settingsService.getItem<string[]>(SettingKey.UserSubscriptions);
+        const personalRulesEnabled = this._settingsService.getItem<boolean>(SettingKey.PersonalRulesEnabled);
+        const globalRulesEnabled = this._settingsService.getItem<boolean>(SettingKey.GlobalRulesEnabled);
+        const workItemTypeEnabled = this._settingsService.getItem<boolean>(SettingKey.WorkItemTypeEnabled);
 
         const loading = userSubscriptions == null
             || personalRulesEnabled == null
             || globalRulesEnabled == null
             || workItemTypeEnabled == null
-            || StoresHub.ruleGroupStore.isLoading(this.props.workItemTypeName);
+            || this._ruleGroupService.isLoading(this.props.workItemTypeName);
 
         return {
             loading: loading,
@@ -369,7 +373,7 @@ export class RuleGroupList extends VssComponent<IRuleGroupListProps, IRuleGroupL
     private async _deleteRuleGroup(ruleGroup: IRuleGroup) {
         const confirm = await confirmAction(true, "Are you sure you want to delete this shared rule group?");
         if (confirm) {
-            RuleGroupActions.deleteRuleGroup(this.props.workItemTypeName, ruleGroup);
+            this._ruleGroupService.deleteRuleGroup(this.props.workItemTypeName, ruleGroup);
         }
     }
 
@@ -394,7 +398,7 @@ export class RuleGroupList extends VssComponent<IRuleGroupListProps, IRuleGroupL
     }
 
     private _filterGroups(filterText: string, personalRulesEnabled: boolean, globalRulesEnabled: boolean): IRuleGroup[] {
-        const ruleGroups = StoresHub.ruleGroupStore.getAll(personalRulesEnabled, globalRulesEnabled);
+        const ruleGroups = this._ruleGroupService.getAll(personalRulesEnabled, globalRulesEnabled);
         if (ruleGroups && !isNullOrEmpty(filterText)) {
             return ruleGroups.filter(rg =>
                 caseInsensitiveContains(rg.name, filterText)
@@ -525,15 +529,15 @@ export class RuleGroupList extends VssComponent<IRuleGroupListProps, IRuleGroupL
     }
 
     private _togglePersonalRules = (enabled: boolean) => {
-        SettingsActions.updateSetting<boolean>(this.props.workItemTypeName, SettingKey.PersonalRulesEnabled, enabled, false);
+        this._settingsService.updateSetting<boolean>(this.props.workItemTypeName, SettingKey.PersonalRulesEnabled, enabled, false);
     }
 
     private _toggleGlobalRules = (enabled: boolean) => {
-        SettingsActions.updateSetting<boolean>(this.props.workItemTypeName, SettingKey.GlobalRulesEnabled, enabled, false);
+        this._settingsService.updateSetting<boolean>(this.props.workItemTypeName, SettingKey.GlobalRulesEnabled, enabled, false);
     }
 
     private _toggleWorkItemType = (enabled: boolean) => {
-        SettingsActions.updateSetting<boolean>(this.props.workItemTypeName, SettingKey.WorkItemTypeEnabled, enabled, false);
+        this._settingsService.updateSetting<boolean>(this.props.workItemTypeName, SettingKey.WorkItemTypeEnabled, enabled, false);
     }
 
     private _onFilterChange = (filterState: IFilterState) => {

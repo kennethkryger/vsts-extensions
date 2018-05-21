@@ -9,6 +9,7 @@ import { ThrottledTextField } from "Common/Components/Utilities/ThrottledTextFie
 import {
     IVssComponentProps, IVssComponentState, VssComponent
 } from "Common/Components/Utilities/VssComponent";
+import { IReactAppContext } from "Common/Utilities/Context";
 import { CommandBarButton, DefaultButton, PrimaryButton } from "OfficeFabric/Button";
 import { Checkbox } from "OfficeFabric/Checkbox";
 import { Label } from "OfficeFabric/Label";
@@ -17,11 +18,11 @@ import { Overlay } from "OfficeFabric/Overlay";
 import { Panel, PanelType } from "OfficeFabric/Panel";
 import { css } from "OfficeFabric/Utilities";
 import { RuleFieldNames, SizeLimits } from "OneClick/Constants";
-import { RuleActions } from "OneClick/Flux/Actions/RuleActions";
 import { registeredActions, registeredTriggers } from "OneClick/ImportRegisteredArtifacts";
 import { IRule } from "OneClick/Interfaces";
 import { BaseAction } from "OneClick/RuleActions/BaseAction";
 import { BaseTrigger } from "OneClick/RuleTriggers/BaseTrigger";
+import { RuleService, RuleServiceName } from "OneClick/Services/RuleService";
 import { Rule } from "OneClick/ViewModels/Rule";
 import { ZeroData } from "VSSUI/ZeroData";
 
@@ -40,6 +41,13 @@ export interface IRuleEditorState extends IVssComponentState {
 }
 
 export class RuleEditor extends VssComponent<IRuleEditorProps, IRuleEditorState> {
+    private _ruleService: RuleService;
+
+    constructor(props: IRuleEditorProps, context?: IReactAppContext) {
+        super(props, context);
+        this._ruleService = this.context.appContext.getService<RuleService>(RuleServiceName);
+    }
+
     public componentDidMount() {
         super.componentDidMount();
         this.state.rule.addChangedListener(this._onModelChanged);
@@ -125,9 +133,9 @@ export class RuleEditor extends VssComponent<IRuleEditorProps, IRuleEditorState>
         );
     }
 
-    protected getInitialState() {
-        this.state = {
-            rule: this.props.ruleModel ? new Rule(this.props.ruleModel) : Rule.getNewRule(this.props.workItemTypeName),
+    protected getInitialState(props: IRuleEditorProps): IRuleEditorState {
+        return {
+            rule: props.ruleModel ? new Rule(this.context.appContext, props.ruleModel) : Rule.getNewRule(this.context.appContext, props.workItemTypeName),
             showTriggers: false
         };
     }
@@ -185,14 +193,14 @@ export class RuleEditor extends VssComponent<IRuleEditorProps, IRuleEditorState>
                         menuProps={{
                             items: Object.keys(registeredActions).map(actionName => {
                                 const actionType = registeredActions[actionName];
-                                const action = BaseAction.getNewAction(actionType, actionName);
+                                const action = BaseAction.getNewAction(actionType, this.context.appContext, actionName);
                                 return {
                                     key: action.getFriendlyName(),
                                     name: action.getFriendlyName(),
                                     title: action.getDescription(),
                                     iconProps: action.getIcon(),
                                     disabled: action.isDisabled(),
-                                    onClick: () => this.state.rule.addAction(BaseAction.getNewAction(actionType, actionName))
+                                    onClick: () => this.state.rule.addAction(BaseAction.getNewAction(actionType, this.context.appContext, actionName))
                                 };
                             })
                         }}
@@ -207,13 +215,13 @@ export class RuleEditor extends VssComponent<IRuleEditorProps, IRuleEditorState>
                         menuProps={{
                             items: Object.keys(registeredTriggers).map(triggerName => {
                                 const triggerType = registeredTriggers[triggerName];
-                                const trigger = BaseTrigger.getNewTrigger(triggerType, triggerName);
+                                const trigger = BaseTrigger.getNewTrigger(triggerType, this.context.appContext, triggerName);
                                 return {
                                     key: trigger.getFriendlyName(),
                                     name: trigger.getFriendlyName(),
                                     title: trigger.getDescription(),
                                     iconProps: trigger.getIcon(),
-                                    onClick: () => this.state.rule.addTrigger(BaseTrigger.getNewTrigger(triggerType, triggerName))
+                                    onClick: () => this.state.rule.addTrigger(BaseTrigger.getNewTrigger(triggerType, this.context.appContext, triggerName))
                                 };
                             })
                         }}
@@ -290,10 +298,10 @@ export class RuleEditor extends VssComponent<IRuleEditorProps, IRuleEditorState>
         try {
             this.setState({saving: true});
             if (this.state.rule.isNew) {
-                await RuleActions.createRule(this.props.ruleGroupId, this.state.rule.updatedModel);
+                await this._ruleService.createRule(this.props.ruleGroupId, this.state.rule.updatedModel);
             }
             else {
-                await RuleActions.updateRule(this.props.ruleGroupId, this.state.rule.updatedModel);
+                await this._ruleService.updateRule(this.props.ruleGroupId, this.state.rule.updatedModel);
             }
 
             this.setState({saving: false});

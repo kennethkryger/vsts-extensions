@@ -6,7 +6,13 @@ import {
 } from "Common/Components/Utilities/VssComponent";
 import { WorkItemFieldPicker } from "Common/Components/VSTS/WorkItemFieldPicker";
 import { WorkItemFieldValuePicker } from "Common/Components/VSTS/WorkItemFieldValuePicker";
+import { BaseDataService } from "Common/Services/BaseDataService";
+import {
+    WorkItemFieldService, WorkItemFieldServiceName
+} from "Common/Services/WorkItemFieldService";
+import { WorkItemTypeService, WorkItemTypeServiceName } from "Common/Services/WorkItemTypeService";
 import { contains } from "Common/Utilities/Array";
+import { IReactAppContext } from "Common/Utilities/Context";
 import { stringEquals } from "Common/Utilities/String";
 import { css } from "OfficeFabric/Utilities";
 import { ExcludedFields } from "OneClick/Constants";
@@ -22,9 +28,18 @@ export interface IFieldNameValuePickerProps extends IVssComponentProps {
 }
 
 export class FieldNameValuePicker extends VssComponent<IFieldNameValuePickerProps, IVssComponentState> {
+    private _workItemTypeService: WorkItemTypeService;
+    private _fieldService: WorkItemFieldService;
+
+    constructor(props: IFieldNameValuePickerProps, context?: IReactAppContext) {
+        super(props, context);
+        this._fieldService = this.context.appContext.getService<WorkItemFieldService>(WorkItemFieldServiceName);
+        this._workItemTypeService = this.context.appContext.getService<WorkItemTypeService>(WorkItemTypeServiceName);
+    }
+
     public componentDidMount() {
         super.componentDidMount();
-        WorkItemFieldActions.initializeWorkItemFields();
+        this._fieldService.initializeWorkItemFields();
     }
 
     public render(): JSX.Element {
@@ -32,9 +47,9 @@ export class FieldNameValuePicker extends VssComponent<IFieldNameValuePickerProp
             return <Loading />;
         }
 
-        const workItemType = StoresHub.workItemTypeStore.getItem(this.props.workItemType);
+        const workItemType = this._workItemTypeService.getItem(this.props.workItemType);
         const witFields = workItemType.fields.map(f => f.referenceName);
-        let selectedField: WorkItemField = StoresHub.workItemFieldStore.getItem(this.props.fieldRefName);
+        let selectedField: WorkItemField = this._fieldService.getItem(this.props.fieldRefName);
 
         if (selectedField == null
             || !contains(witFields, this.props.fieldRefName, (s1, s2) => stringEquals(s1, s2, true))
@@ -71,18 +86,18 @@ export class FieldNameValuePicker extends VssComponent<IFieldNameValuePickerProp
         );
     }
 
-    protected getObservableDataServices(): BaseStore<any, any, any>[] {
-        return [StoresHub.workItemFieldStore];
+    protected getObservableDataServices(): BaseDataService<any, any, any>[] {
+        return [this._fieldService];
     }
 
     protected getDataServiceState(): IVssComponentState {
         return {
-            loading: StoresHub.workItemFieldStore.isLoading()
+            loading: this._fieldService.isLoading()
         };
     }
 
-    protected getInitialState(): void {
-        this.state = {
+    protected getInitialState(): IVssComponentState {
+        return {
             loading: true
         };
     }

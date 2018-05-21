@@ -4,18 +4,19 @@ import { Loading } from "Common/Components/Loading";
 import {
     IVssComponentProps, IVssComponentState, VssComponent
 } from "Common/Components/Utilities/VssComponent";
-import { BaseStore } from "Common/Flux/Stores/BaseStore";
+import { BaseDataService } from "Common/Services/BaseDataService";
+import { IReactAppContext } from "Common/Utilities/Context";
 import { confirmAction } from "Common/Utilities/Core";
 import { getCurrentUserName } from "Common/Utilities/Identity";
 import { stringEquals } from "Common/Utilities/String";
 import { RuleGroupList } from "OneClick/Components/Settings/RuleGroupList";
 import { RuleGroupView } from "OneClick/Components/Settings/RuleGroupView";
 import { SettingKey } from "OneClick/Constants";
-import { RuleGroupActions } from "OneClick/Flux/Actions/RuleGroupActions";
-import { SettingsActions } from "OneClick/Flux/Actions/SettingsActions";
-import { StoresHub } from "OneClick/Flux/Stores/StoresHub";
 import { isPersonalOrGlobalRuleGroup } from "OneClick/Helpers";
 import { IRuleGroup } from "OneClick/Interfaces";
+import { RuleGroupService, RuleGroupServiceName } from "OneClick/Services/RuleGroupService";
+import { RuleService, RuleServiceName } from "OneClick/Services/RuleService";
+import { SettingsService, SettingsServiceName } from "OneClick/Services/SettingsService";
 import { trackEvent } from "OneClick/Telemetry";
 import { ZeroData, ZeroDataActionType } from "VSSUI/ZeroData";
 
@@ -29,6 +30,17 @@ export interface IWorkItemTypeViewState extends IVssComponentState {
 }
 
 export class WorkItemTypeView extends VssComponent<IWorkItemTypeViewProps, IWorkItemTypeViewState> {
+    private _ruleGroupService: RuleGroupService;
+    private _ruleService: RuleService;
+    private _settingsService: SettingsService;
+
+    constructor(props: IWorkItemTypeViewProps, context?: IReactAppContext) {
+        super(props, context);
+        this._ruleGroupService = this.context.appContext.getService<RuleGroupService>(RuleGroupServiceName);
+        this._ruleService = this.context.appContext.getService<RuleService>(RuleServiceName);
+        this._settingsService = this.context.appContext.getService<SettingsService>(SettingsServiceName);
+    }
+
     public componentDidMount() {
         super.componentDidMount();
         this._refresh();
@@ -39,7 +51,7 @@ export class WorkItemTypeView extends VssComponent<IWorkItemTypeViewProps, IWork
         this._clearStores();
     }
 
-    public componentWillReceiveProps(nextProps: IWorkItemTypeViewProps, context?: any) {
+    public componentWillReceiveProps(nextProps: IWorkItemTypeViewProps, context?: IReactAppContext) {
         super.componentWillReceiveProps(nextProps, context);
 
         if (!stringEquals(this.props.workItemTypeName, nextProps.workItemTypeName, true)) {
@@ -86,31 +98,31 @@ export class WorkItemTypeView extends VssComponent<IWorkItemTypeViewProps, IWork
     }
 
     protected getDataServiceState(): IWorkItemTypeViewState {
-        const workItemTypeEnabled = StoresHub.settingsStore.getItem<boolean>(SettingKey.WorkItemTypeEnabled);
+        const workItemTypeEnabled = this._settingsService.getItem<boolean>(SettingKey.WorkItemTypeEnabled);
         return {
             loading: workItemTypeEnabled == null,
             workItemTypeEnabled: workItemTypeEnabled
         } as IWorkItemTypeViewState;
     }
 
-    protected getObservableDataServices(): BaseStore<any, any, any>[] {
-        return [StoresHub.settingsStore];
+    protected getObservableDataServices(): BaseDataService<any, any, any>[] {
+        return [this._settingsService];
     }
 
-    protected getInitialState() {
-        this.state = {
+    protected getInitialState(): IWorkItemTypeViewState {
+        return {
             loading: true,
             workItemTypeEnabled: null
         };
     }
 
     private _clearStores(currentWorkItemType?: string) {
-        StoresHub.ruleGroupStore.clear();
-        StoresHub.settingsStore.clear();
-        StoresHub.ruleStore.clear();
+        this._ruleGroupService.clear();
+        this._settingsService.clear();
+        this._ruleService.clear();
 
-        StoresHub.ruleGroupStore.setCurrentWorkItemType(currentWorkItemType);
-        StoresHub.settingsStore.setCurrentWorkItemType(currentWorkItemType);
+        this._ruleGroupService.setCurrentWorkItemType(currentWorkItemType);
+        this._settingsService.setCurrentWorkItemType(currentWorkItemType);
     }
 
     private _toggleWorkItemType = async () => {
@@ -118,7 +130,7 @@ export class WorkItemTypeView extends VssComponent<IWorkItemTypeViewProps, IWork
         Are you sure you still want to enable this work item type? If you are unsure, please consult your administrator first.`);
 
         if (confirm) {
-            SettingsActions.updateSetting<boolean>(this.props.workItemTypeName, SettingKey.WorkItemTypeEnabled, true, false);
+            this._settingsService.updateSetting<boolean>(this.props.workItemTypeName, SettingKey.WorkItemTypeEnabled, true, false);
         }
     }
 
@@ -126,11 +138,11 @@ export class WorkItemTypeView extends VssComponent<IWorkItemTypeViewProps, IWork
         const workItemTypeName = workItemType || this.props.workItemTypeName;
         this._clearStores(workItemTypeName);
 
-        RuleGroupActions.initializeRuleGroups(workItemTypeName);
-        SettingsActions.initializeSetting<string[]>(workItemTypeName, SettingKey.UserSubscriptions, true, []);
-        SettingsActions.initializeSetting<boolean>(workItemTypeName, SettingKey.PersonalRulesEnabled, false, true);
-        SettingsActions.initializeSetting<boolean>(workItemTypeName, SettingKey.GlobalRulesEnabled, false, true);
-        SettingsActions.initializeSetting<boolean>(workItemTypeName, SettingKey.WorkItemTypeEnabled, false, true);
+        this._ruleGroupService.initializeRuleGroups(workItemTypeName);
+        this._settingsService.initializeSetting<string[]>(workItemTypeName, SettingKey.UserSubscriptions, true, []);
+        this._settingsService.initializeSetting<boolean>(workItemTypeName, SettingKey.PersonalRulesEnabled, false, true);
+        this._settingsService.initializeSetting<boolean>(workItemTypeName, SettingKey.GlobalRulesEnabled, false, true);
+        this._settingsService.initializeSetting<boolean>(workItemTypeName, SettingKey.WorkItemTypeEnabled, false, true);
     }
 
     private _toggleSubscription = (subscribe: boolean, ruleGroup: IRuleGroup) => {
@@ -138,7 +150,7 @@ export class WorkItemTypeView extends VssComponent<IWorkItemTypeViewProps, IWork
             return;
         }
 
-        const currentSubscriptions = StoresHub.settingsStore.getItem<string[]>(SettingKey.UserSubscriptions);
+        const currentSubscriptions = this._settingsService.getItem<string[]>(SettingKey.UserSubscriptions);
         if (currentSubscriptions) {
             let updatedSubscriptions = [...currentSubscriptions];
 
@@ -151,7 +163,7 @@ export class WorkItemTypeView extends VssComponent<IWorkItemTypeViewProps, IWork
                 updatedSubscriptions = updatedSubscriptions.filter(srgId => !stringEquals(srgId, ruleGroup.id, true));
             }
 
-            SettingsActions.updateSetting<string[]>(this.props.workItemTypeName, SettingKey.UserSubscriptions, updatedSubscriptions, true);
+            this._settingsService.updateSetting<string[]>(this.props.workItemTypeName, SettingKey.UserSubscriptions, updatedSubscriptions, true);
 
             // log event
             if (subscribe) {

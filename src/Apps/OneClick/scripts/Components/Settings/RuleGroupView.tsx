@@ -8,7 +8,9 @@ import { getAsyncLoadedComponent } from "Common/Components/Utilities/AsyncLoaded
 import {
     IVssComponentProps, IVssComponentState, VssComponent
 } from "Common/Components/Utilities/VssComponent";
-import { BaseStore } from "Common/Flux/Stores/BaseStore";
+import { BaseDataService } from "Common/Services/BaseDataService";
+import { WorkItemTypeService, WorkItemTypeServiceName } from "Common/Services/WorkItemTypeService";
+import { IReactAppContext } from "Common/Utilities/Context";
 import { confirmAction, delegate } from "Common/Utilities/Core";
 import { getCurrentUser } from "Common/Utilities/Identity";
 import { navigate } from "Common/Utilities/Navigation";
@@ -27,11 +29,11 @@ import { css } from "OfficeFabric/Utilities";
 import * as RuleEditor_Async from "OneClick/Components/Settings/RuleEditor";
 import { RuleGroupEditor } from "OneClick/Components/Settings/RuleGroupEditor";
 import { Constants, SettingKey } from "OneClick/Constants";
-import { RuleActions } from "OneClick/Flux/Actions/RuleActions";
-import { RuleGroupActions } from "OneClick/Flux/Actions/RuleGroupActions";
-import { StoresHub } from "OneClick/Flux/Stores/StoresHub";
 import { getRuleGroupUrl, isPersonalOrGlobalRuleGroup } from "OneClick/Helpers";
 import { IRule, IRuleGroup } from "OneClick/Interfaces";
+import { RuleGroupService, RuleGroupServiceName } from "OneClick/Services/RuleGroupService";
+import { RuleService, RuleServiceName } from "OneClick/Services/RuleService";
+import { SettingsService, SettingsServiceName } from "OneClick/Services/SettingsService";
 import { Hub } from "VSSUI/Components/Hub";
 import { HubHeader } from "VSSUI/Components/HubHeader";
 import { IPivotBarViewAction, PivotBarItem } from "VSSUI/Components/PivotBar";
@@ -67,35 +69,43 @@ export interface IRuleGroupViewState extends IVssComponentState {
 
 export class RuleGroupView extends VssComponent<IRuleGroupViewProps, IRuleGroupViewState> {
     private _hubViewState: IHubViewState;
+    private _ruleGroupService: RuleGroupService;
+    private _ruleService: RuleService;
+    private _settingsService: SettingsService;
+    private _workItemTypeService: WorkItemTypeService;
 
-    constructor(props: IRuleGroupViewProps, context?: any) {
+    constructor(props: IRuleGroupViewProps, context?: IReactAppContext) {
         super(props, context);
         this._hubViewState = new HubViewState();
         this._hubViewState.selectedPivot.value = "RuleGroup";
+        this._ruleGroupService = this.context.appContext.getService<RuleGroupService>(RuleGroupServiceName);
+        this._ruleService = this.context.appContext.getService<RuleService>(RuleServiceName);
+        this._settingsService = this.context.appContext.getService<SettingsService>(SettingsServiceName);
+        this._workItemTypeService = this.context.appContext.getService<WorkItemTypeService>(WorkItemTypeServiceName);
     }
 
     public componentDidMount() {
         super.componentDidMount();
-        RuleActions.initializeRules(this.props.ruleGroupId);
+        this._ruleService.initializeRules(this.props.ruleGroupId);
     }
 
     public componentWillUnmount() {
         super.componentWillUnmount();
-        StoresHub.ruleStore.clear();
+        this._ruleService.clear();
     }
 
     public componentWillReceiveProps(nextProps: IRuleGroupViewProps, context?: any) {
         super.componentWillReceiveProps(nextProps, context);
 
         if (!stringEquals(this.props.ruleGroupId, nextProps.ruleGroupId, true)) {
-            StoresHub.ruleStore.clear();
-            RuleActions.initializeRules(nextProps.ruleGroupId);
+            this._ruleService.clear();
+            this._ruleService.initializeRules(nextProps.ruleGroupId);
             this.setState({loading: true});
         }
     }
 
     public render(): JSX.Element {
-        const wit = StoresHub.workItemTypeStore.getItem(this.props.workItemTypeName);
+        const wit = this._workItemTypeService.getItem(this.props.workItemTypeName);
         const witIconUrl = wit.icon && wit.icon.url;
 
         return (
@@ -161,41 +171,41 @@ export class RuleGroupView extends VssComponent<IRuleGroupViewProps, IRuleGroupV
         );
     }
 
-    protected getInitialState() {
-        this.state = {
+    protected getInitialState(): IRuleGroupViewState {
+        return {
             loading: true
         };
     }
 
-    protected getObservableDataServices(): BaseStore<any, any, any>[] {
-        return [StoresHub.ruleGroupStore, StoresHub.settingsStore, StoresHub.ruleStore];
+    protected getObservableDataServices(): BaseDataService<any, any, any>[] {
+        return [this._ruleGroupService, this._settingsService, this._ruleService];
     }
 
     protected getDataServiceState(): IRuleGroupViewState {
-        const userSubscriptions = StoresHub.settingsStore.getItem<string[]>(SettingKey.UserSubscriptions);
-        const personalRulesEnabled = StoresHub.settingsStore.getItem<boolean>(SettingKey.PersonalRulesEnabled);
-        const globalRulesEnabled = StoresHub.settingsStore.getItem<boolean>(SettingKey.GlobalRulesEnabled);
+        const userSubscriptions = this._settingsService.getItem<string[]>(SettingKey.UserSubscriptions);
+        const personalRulesEnabled = this._settingsService.getItem<boolean>(SettingKey.PersonalRulesEnabled);
+        const globalRulesEnabled = this._settingsService.getItem<boolean>(SettingKey.GlobalRulesEnabled);
 
         const loading = userSubscriptions == null
             || personalRulesEnabled == null
             || globalRulesEnabled == null
-            || StoresHub.ruleGroupStore.isLoading(this.props.workItemTypeName)
-            || StoresHub.ruleStore.isLoading(this.props.ruleGroupId);
+            || this._ruleGroupService.isLoading(this.props.workItemTypeName)
+            || this._ruleService.isLoading(this.props.ruleGroupId);
 
         let isSubscribed = false;
         if (userSubscriptions) {
             isSubscribed = userSubscriptions.some(sgid => stringEquals(sgid, this.props.ruleGroupId, true));
         }
 
-        const rules = StoresHub.ruleStore.getRules(this.props.ruleGroupId, this.props.workItemTypeName);
-        const ruleGroup = StoresHub.ruleGroupStore.getItem(this.props.ruleGroupId, personalRulesEnabled, globalRulesEnabled);
+        const rules = this._ruleService.getRules(this.props.ruleGroupId, this.props.workItemTypeName);
+        const ruleGroup = this._ruleGroupService.getItem(this.props.ruleGroupId, personalRulesEnabled, globalRulesEnabled);
 
         return {
             loading: loading,
             ruleGroup: ruleGroup,
             isSubscribed: isSubscribed,
             rules: rules,
-            allRuleGroups: StoresHub.ruleGroupStore.getAll(personalRulesEnabled, globalRulesEnabled)
+            allRuleGroups: this._ruleGroupService.getAll(personalRulesEnabled, globalRulesEnabled)
         } as IRuleGroupViewState;
     }
 
@@ -429,7 +439,7 @@ export class RuleGroupView extends VssComponent<IRuleGroupViewProps, IRuleGroupV
     private async _deleteRule(rule: IRule) {
         const confirm = await confirmAction(true, "Are you sure you want to delete this rule?");
         if (confirm) {
-            RuleActions.deleteRule(this.props.ruleGroupId, rule);
+            this._ruleService.deleteRule(this.props.ruleGroupId, rule);
         }
     }
 
@@ -509,11 +519,11 @@ export class RuleGroupView extends VssComponent<IRuleGroupViewProps, IRuleGroupV
         delete ruleModel.__etag;
         ruleModel.createdBy = getCurrentUser();
         ruleModel.lastUpdatedBy = getCurrentUser();
-        await RuleActions.createRule(item.key, ruleModel);
+        await this._ruleService.createRule(item.key, ruleModel);
         this.setState({targetRuleGroupId: item.key, isMovedToTargetGroup: true});
 
         // delete from current rule group
-        RuleActions.deleteRule(this.props.ruleGroupId, item.data as IRule);
+        this._ruleService.deleteRule(this.props.ruleGroupId, item.data as IRule);
     }
 
     private _copyToRuleGroup = async (_ev: React.MouseEvent<HTMLElement>, item: IContextualMenuItem) => {
@@ -527,7 +537,7 @@ export class RuleGroupView extends VssComponent<IRuleGroupViewProps, IRuleGroupV
             ruleModel.name = `${ruleModel.name} - Copy`;
         }
 
-        await RuleActions.createRule(targetRuleGroupId, ruleModel);
+        await this._ruleService.createRule(targetRuleGroupId, ruleModel);
         this.setState({targetRuleGroupId: targetRuleGroupId, isMovedToTargetGroup: false});
     }
 
@@ -543,7 +553,7 @@ export class RuleGroupView extends VssComponent<IRuleGroupViewProps, IRuleGroupV
         const confirm = await confirmAction(true, "Are you sure you want to delete this shared rule group?");
 
         if (confirm) {
-            RuleGroupActions.deleteRuleGroup(this.props.workItemTypeName, this.state.ruleGroup);
+            this._ruleGroupService.deleteRuleGroup(this.props.workItemTypeName, this.state.ruleGroup);
             this._goBack();
         }
     }
@@ -562,7 +572,7 @@ export class RuleGroupView extends VssComponent<IRuleGroupViewProps, IRuleGroupV
 
     private _refresh = () => {
         this.props.refresh();
-        RuleActions.refreshRules(this.state.ruleGroup.id);
+        this._ruleService.refreshRules(this.state.ruleGroup.id);
     }
 
     private _goBack = () => {

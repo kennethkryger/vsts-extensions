@@ -6,6 +6,11 @@ import {
     IVssComponentProps, IVssComponentState, VssComponent
 } from "Common/Components/Utilities/VssComponent";
 import { WorkItemRelationTypePicker } from "Common/Components/VSTS/WorkItemRelationTypePicker";
+import { BaseDataService } from "Common/Services/BaseDataService";
+import {
+    WorkItemRelationTypeService, WorkItemRelationTypeServiceName
+} from "Common/Services/WorkItemRelationTypeService";
+import { IReactAppContext } from "Common/Utilities/Context";
 import { css } from "OfficeFabric/Utilities";
 import { WorkItemRelationType } from "TFS/WorkItemTracking/Contracts";
 
@@ -18,9 +23,16 @@ export interface IAddExistingRelationActionRendererProps extends IVssComponentPr
 }
 
 export class AddExistingRelationActionRenderer extends VssComponent<IAddExistingRelationActionRendererProps, IVssComponentState> {
+    private _workItemRelationTypeService: WorkItemRelationTypeService;
+
+    constructor(props: IAddExistingRelationActionRendererProps, context?: IReactAppContext) {
+        super(props, context);
+        this._workItemRelationTypeService = this.context.appContext.getService<WorkItemRelationTypeService>(WorkItemRelationTypeServiceName);
+    }
+
     public componentDidMount() {
         super.componentDidMount();
-        WorkItemRelationTypeActions.initializeWorkItemRelationTypes();
+        this._workItemRelationTypeService.initializeWorkItemRelationTypes();
     }
 
     public render(): JSX.Element {
@@ -28,7 +40,7 @@ export class AddExistingRelationActionRenderer extends VssComponent<IAddExisting
             return <Loading />;
         }
 
-        const selectedRelationType: WorkItemRelationType = StoresHub.workItemRelationTypeStore.getItem(this.props.relationType);
+        const selectedRelationType: WorkItemRelationType = this._workItemRelationTypeService.getItem(this.props.relationType);
 
         return (
             <div className={css("add-existing-relation-picker", this.props.className)}>
@@ -56,18 +68,18 @@ export class AddExistingRelationActionRenderer extends VssComponent<IAddExisting
         );
     }
 
-    protected getObservableDataServices(): BaseStore<any, any, any>[] {
-        return [StoresHub.workItemRelationTypeStore];
+    protected getObservableDataServices(): BaseDataService<any, any, any>[] {
+        return [this._workItemRelationTypeService];
     }
 
     protected getDataServiceState(): IVssComponentState {
         return {
-            loading: StoresHub.workItemRelationTypeStore.isLoading(),
+            loading: this._workItemRelationTypeService.isLoading(),
         };
     }
 
-    protected getInitialState(): void {
-        this.state = {
+    protected getInitialState(): IVssComponentState {
+        return {
             loading: true
         };
     }

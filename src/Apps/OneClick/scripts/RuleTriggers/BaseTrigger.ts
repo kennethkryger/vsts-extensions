@@ -1,5 +1,6 @@
 import * as React from "react";
 
+import { IAppPageContext } from "Common/Utilities/Context";
 import { newGuid } from "Common/Utilities/Guid";
 import { IIconProps } from "OfficeFabric/Icon";
 import { FormEvents } from "OneClick/Constants";
@@ -7,21 +8,23 @@ import { ITrigger } from "OneClick/Interfaces";
 import { Observable } from "VSSUI/Utilities/Observable";
 
 export abstract class BaseTrigger extends Observable<void> {
-    public static getNewTrigger<TTrigger extends BaseTrigger>(triggerType: new(model: ITrigger) => TTrigger, triggerName: string): BaseTrigger {
-        return new triggerType({
+    public static getNewTrigger<TTrigger extends BaseTrigger>(triggerType: new(appContext: IAppPageContext, model: ITrigger) => TTrigger, appContext: IAppPageContext, triggerName: string): BaseTrigger {
+        return new triggerType(appContext, {
             name: triggerName,
             attributes: null
         });
     }
 
+    protected appContext: IAppPageContext;
     private _originalAttributes: IDictionaryStringTo<any>;
     private _updates: IDictionaryStringTo<any>;
     private _id: string;
     private _name: string;
 
-    constructor(model: ITrigger) {
+    constructor(appContext: IAppPageContext, model: ITrigger) {
         super();
         this._name = model.name;
+        this.appContext = appContext;
         this._originalAttributes = model.attributes ? {...model.attributes} : null;  // for new models, origina would be null
         this._updates = model.attributes ? {} : this.defaultAttributes();  // if its a new trigger, initialize updates with defaults
         this._id = newGuid();

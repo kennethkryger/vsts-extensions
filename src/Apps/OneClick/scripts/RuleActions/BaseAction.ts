@@ -1,27 +1,30 @@
 import * as React from "react";
 
+import { IAppPageContext } from "Common/Utilities/Context";
 import { newGuid } from "Common/Utilities/Guid";
 import { IIconProps } from "OfficeFabric/Icon";
 import { IAction } from "OneClick/Interfaces";
 import { Observable } from "VSSUI/Utilities/Observable";
 
 export abstract class BaseAction extends Observable<void> {
-    public static getNewAction<TAction extends BaseAction>(actionType: new(model: IAction) => TAction, actionName: string): BaseAction {
-        return new actionType({
+    public static getNewAction<TAction extends BaseAction>(actionType: new(appContext: IAppPageContext, model: IAction) => TAction, pageContext: IAppPageContext, actionName: string): BaseAction {
+        return new actionType(pageContext, {
             name: actionName,
             attributes: null
         });
     }
 
+    protected appContext: IAppPageContext;
     private _originalAttributes: IDictionaryStringTo<any>;
     private _updates: IDictionaryStringTo<any>;
     private _id: string;
     private _name: string;
 
-    constructor(model: IAction) {
+    constructor(appContext: IAppPageContext, model: IAction) {
         super();
         this._name = model.name;
         this._id = newGuid();
+        this.appContext = appContext;
 
         if (model.attributes) {
             // existing action

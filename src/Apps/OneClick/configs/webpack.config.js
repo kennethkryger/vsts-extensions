@@ -30,7 +30,7 @@ const config = {
             { from: "./node_modules/es6-promise/dist/es6-promise.min.js", to: "OneClick/3rdParty/es6-promise.min.js" },
             { from: "./node_modules/office-ui-fabric-react/dist/css/fabric.min.css", to: "OneClick/3rdParty/fabric.min.css" },
             
-            { from: "./src/Apps/Common/ES5-Polyfills", to: "OneClick/Polyfills" },
+            { from: "./src/Common/ES5-Polyfills", to: "OneClick/Polyfills" },
 
             { from: "./src/Apps/OneClick/configs", to: "OneClick/configs" },
             { from: "./src/Apps/OneClick/images", to: "OneClick/images" },

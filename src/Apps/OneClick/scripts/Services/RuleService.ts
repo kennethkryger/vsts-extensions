@@ -2,10 +2,10 @@ import { BaseDataService } from "Common/Services/BaseDataService";
 import { findIndex, first } from "Common/Utilities/Array";
 import { Services } from "Common/Utilities/Context";
 import { stringEquals } from "Common/Utilities/String";
-import { Constants, GlobalRuleGroup, PersonalRuleGroup } from "OneClick/Constants";
+import { Constants } from "OneClick/Constants";
 import { RulesDataService } from "OneClick/DataServices/RulesDataService";
 import { SettingsDataService } from "OneClick/DataServices/SettingsDataService";
-import { IRule, IRuleGroup } from "OneClick/Interfaces";
+import { IRule } from "OneClick/Interfaces";
 
 export const RuleServiceName = "RuleService";
 

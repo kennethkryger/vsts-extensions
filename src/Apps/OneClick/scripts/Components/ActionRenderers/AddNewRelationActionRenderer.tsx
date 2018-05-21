@@ -11,6 +11,16 @@ import {
 import { TeamPicker } from "Common/Components/VSTS/TeamPicker";
 import { WorkItemRelationTypePicker } from "Common/Components/VSTS/WorkItemRelationTypePicker";
 import { WorkItemTypePicker } from "Common/Components/VSTS/WorkItemTypePicker";
+import { BaseDataService } from "Common/Services/BaseDataService";
+import { TeamService, TeamServiceName } from "Common/Services/TeamService";
+import {
+    WorkItemRelationTypeService, WorkItemRelationTypeServiceName
+} from "Common/Services/WorkItemRelationTypeService";
+import {
+    WorkItemTemplateService, WorkItemTemplateServiceName
+} from "Common/Services/WorkItemTemplateService";
+import { WorkItemTypeService, WorkItemTypeServiceName } from "Common/Services/WorkItemTypeService";
+import { IReactAppContext } from "Common/Utilities/Context";
 import { isNullOrWhiteSpace, stringEquals } from "Common/Utilities/String";
 import { Checkbox } from "OfficeFabric/Checkbox";
 import { Dropdown, IDropdownOption, IDropdownProps } from "OfficeFabric/Dropdown";
@@ -39,24 +49,37 @@ export interface IAddNewRelationActionRendererState extends IVssComponentState {
 }
 
 export class AddNewRelationActionRenderer extends VssComponent<IAddNewRelationActionRendererProps, IAddNewRelationActionRendererState> {
+    private _workItemRelationTypeService: WorkItemRelationTypeService;
+    private _workItemTypeService: WorkItemTypeService;
+    private _teamService: TeamService;
+    private _workItemTemplateService: WorkItemTemplateService;
+
+    constructor(props: IAddNewRelationActionRendererProps, context?: IReactAppContext) {
+        super(props, context);
+        this._workItemRelationTypeService = this.context.appContext.getService<WorkItemRelationTypeService>(WorkItemRelationTypeServiceName);
+        this._workItemTypeService = this.context.appContext.getService<WorkItemTypeService>(WorkItemTypeServiceName);
+        this._teamService = this.context.appContext.getService<TeamService>(TeamServiceName);
+        this._workItemTemplateService = this.context.appContext.getService<WorkItemTemplateService>(WorkItemTemplateServiceName);
+    }
+
     public componentDidMount() {
         super.componentDidMount();
-        WorkItemTypeActions.initializeWorkItemTypes();
-        WorkItemRelationTypeActions.initializeWorkItemRelationTypes();
-        TeamActions.initializeTeams();
+        this._workItemTypeService.initializeWorkItemTypes();
+        this._workItemRelationTypeService.initializeWorkItemRelationTypes();
+        this._teamService.initializeTeams();
 
         if (!isNullOrWhiteSpace(this.props.teamId)) {
             this._loadTemplates(this.props.teamId);
         }
     }
 
-    public componentWillReceiveProps(nextProps: IAddNewRelationActionRendererProps, context?: any) {
+    public componentWillReceiveProps(nextProps: IAddNewRelationActionRendererProps, context?: IReactAppContext) {
         super.componentWillReceiveProps(nextProps, context);
 
         if (!isNullOrWhiteSpace(nextProps.teamId)) {
             if (!stringEquals(nextProps.teamId, this.props.teamId, true)) {
-                if (StoresHub.workItemTemplateStore.isLoaded(nextProps.teamId)) {
-                    this.setState({templates: StoresHub.workItemTemplateStore.getItem(nextProps.teamId)});
+                if (this._workItemTemplateService.isLoaded(nextProps.teamId)) {
+                    this.setState({templates: this._workItemTemplateService.getItem(nextProps.teamId)});
                 }
                 else {
                     this._loadTemplates(nextProps.teamId);
@@ -73,10 +96,10 @@ export class AddNewRelationActionRenderer extends VssComponent<IAddNewRelationAc
             return <Loading />;
         }
 
-        const selectedWit: WorkItemType = StoresHub.workItemTypeStore.getItem(this.props.workItemType);
-        const selectedRelationType: WorkItemRelationType = StoresHub.workItemRelationTypeStore.getItem(this.props.relationType);
-        const selectedTeam: WebApiTeam = StoresHub.teamStore.getItem(this.props.teamId);
-        const selectedTemplate: WorkItemTemplateReference = StoresHub.workItemTemplateStore.getTemplate(this.props.templateId);
+        const selectedWit: WorkItemType = this._workItemTypeService.getItem(this.props.workItemType);
+        const selectedRelationType: WorkItemRelationType = this._workItemRelationTypeService.getItem(this.props.relationType);
+        const selectedTeam: WebApiTeam = this._teamService.getItem(this.props.teamId);
+        const selectedTemplate: WorkItemTemplateReference = this._workItemTemplateService.getTemplate(this.props.templateId);
 
         const templateDropdownOptions = this.state.templates
             .filter(t => isNullOrWhiteSpace(this.props.workItemType) || stringEquals(t.workItemTypeName, this.props.workItemType, true))
@@ -153,19 +176,19 @@ export class AddNewRelationActionRenderer extends VssComponent<IAddNewRelationAc
         );
     }
 
-    protected getObservableDataServices(): BaseStore<any, any, any>[] {
-        return [StoresHub.teamStore, StoresHub.workItemTypeStore, StoresHub.workItemRelationTypeStore, StoresHub.workItemTemplateStore];
+    protected getObservableDataServices(): BaseDataService<any, any, any>[] {
+        return [this._teamService, this._workItemTypeService, this._workItemRelationTypeService, this._workItemTemplateService];
     }
 
     protected getDataServiceState(): IAddNewRelationActionRendererState {
         return {
-            loading: StoresHub.workItemTypeStore.isLoading() || StoresHub.teamStore.isLoading() || StoresHub.workItemRelationTypeStore.isLoading(),
-            templates: StoresHub.workItemTemplateStore.getItem(this.props.teamId || "") || []
+            loading: this._workItemTypeService.isLoading() || this._teamService.isLoading() || this._workItemRelationTypeService.isLoading(),
+            templates: this._workItemTemplateService.getItem(this.props.teamId || "") || []
         };
     }
 
-    protected getInitialState(): void {
-        this.state = {
+    protected getInitialState(): IAddNewRelationActionRendererState {
+        return {
             loading: true,
             templates: []
         };
@@ -183,7 +206,7 @@ export class AddNewRelationActionRenderer extends VssComponent<IAddNewRelationAc
 
     private async _loadTemplates(teamId: string) {
         try {
-            await WorkItemTemplateActions.initializeWorkItemTemplates(teamId);
+            await this._workItemTemplateService.initializeWorkItemTemplates(teamId);
         }
         catch {
             // eat
