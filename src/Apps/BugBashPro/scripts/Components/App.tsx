@@ -13,10 +13,12 @@ import { StoresHub } from "BugBashPro/Stores/StoresHub";
 import { Badge } from "Common/Components/Badge";
 import { Loading } from "Common/Components/Loading";
 import { getAsyncLoadedComponent } from "Common/Components/Utilities/AsyncLoadedComponent";
+import { ReactRootComponent } from "Common/Components/Utilities/ReactRootComponent";
 import {
     IVssComponentProps, IVssComponentState, VssComponent
 } from "Common/Components/Utilities/VssComponent";
 import { BaseStore } from "Common/Flux/Stores/BaseStore";
+import { AppContext } from "Common/Utilities/Context";
 import { getHostNavigationService, navigate } from "Common/Utilities/Navigation";
 import { Fabric } from "OfficeFabric/Fabric";
 import { Link } from "OfficeFabric/Link";
@@ -225,7 +227,6 @@ export class App extends VssComponent<IVssComponentProps, IAppState> {
                     break;
                 default:
                     navigate({ view: UrlActions.ACTION_ALL }, true);
-                    break;
             }
         }
     }
@@ -238,5 +239,5 @@ export function init() {
     const spinner = document.getElementById("spinner");
     container.removeChild(spinner);
 
-    ReactDOM.render(<App />, container);
+    ReactDOM.render(<ReactRootComponent appContext={AppContext}><App /></ReactRootComponent>, container);
 }

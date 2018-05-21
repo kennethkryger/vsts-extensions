@@ -19,7 +19,7 @@ import { Fabric } from "OfficeFabric/Fabric";
 import { INavLink, Nav } from "OfficeFabric/Nav";
 import { DirectionalHint, TooltipDelay, TooltipHost } from "OfficeFabric/Tooltip";
 import { WorkItemTypeView } from "OneClick/Components/Settings/WorkItemTypeView";
-import { initTelemetry, resetSession } from "OneClick/Telemetry";
+import { resetSession } from "OneClick/Telemetry";
 import { HostNavigationService } from "VSS/SDK/Services/Navigation";
 
 export interface IAppState extends IVssComponentState {
@@ -40,7 +40,6 @@ export class SettingsApp extends VssComponent<IVssComponentProps, IAppState> {
         super.componentDidMount();
 
         resetSession();
-        initTelemetry(this.context.appContext);
         this._attachNavigate();
         this._workItemTypeService.initializeWorkItemTypes();
     }

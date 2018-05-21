@@ -6,6 +6,7 @@ import { Constants } from "OneClick/Constants";
 import { RulesDataService } from "OneClick/DataServices/RulesDataService";
 import { SettingsDataService } from "OneClick/DataServices/SettingsDataService";
 import { IRule } from "OneClick/Interfaces";
+import { publishTelemetry, TelemetryEvent } from "OneClick/Telemetry";
 
 export const RuleServiceName = "RuleService";
 
@@ -64,6 +65,7 @@ export class RuleService extends BaseDataService<IDictionaryStringTo<IRule[]>, I
             this._addOrUpdateItem(ruleGroupId, createdRule);
 
             SettingsDataService.updateCacheStamp(rule.workItemType, rule.projectId);
+            publishTelemetry(TelemetryEvent.CreateRule, rule, ruleGroupId, null);
         }
     }
 
@@ -75,6 +77,7 @@ export class RuleService extends BaseDataService<IDictionaryStringTo<IRule[]>, I
                 this._addOrUpdateItem(ruleGroupId, updatedRule);
 
                 SettingsDataService.updateCacheStamp(rule.workItemType, rule.projectId);
+                publishTelemetry(TelemetryEvent.UpdateRule, rule, ruleGroupId, null);
             }
             catch (e) {
                 this.setLoading(false, rule.id);
@@ -88,6 +91,7 @@ export class RuleService extends BaseDataService<IDictionaryStringTo<IRule[]>, I
             await RulesDataService.deleteRule(ruleGroupId, rule.id);
             this._removeItem(ruleGroupId, rule);
             SettingsDataService.updateCacheStamp(rule.workItemType, rule.projectId);
+            publishTelemetry(TelemetryEvent.DeleteRule, rule, ruleGroupId, null);
         }
     }
 

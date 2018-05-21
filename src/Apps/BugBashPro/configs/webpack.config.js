@@ -10,7 +10,8 @@ const config = {
         "BugBashPro/scripts/BugBashDetails": "./src/Apps/BugBashPro/scripts/Components/BugBashDetails.tsx",
         "BugBashPro/scripts/BugBashCharts": "./src/Apps/BugBashPro/scripts/Components/BugBashCharts.tsx",
         "BugBashPro/scripts/SettingsPanel": "./src/Apps/BugBashPro/scripts/Components/SettingsPanel.tsx",
-        "BugBashPro/scripts/FileUploadDialog": "./src/Common/Components/FileUploadDialog/FileUploadDialog.tsx"
+        "BugBashPro/scripts/FileUploadDialog": "./src/Common/Components/FileUploadDialog/FileUploadDialog.tsx",
+        "BugBashPro/scripts/Context": "./src/Common/Utilities/Context.ts"
     },
     plugins: [
         new webpack.optimize.CommonsChunkPlugin(

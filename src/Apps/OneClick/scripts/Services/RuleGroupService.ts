@@ -6,6 +6,7 @@ import { Constants, GlobalRuleGroup, PersonalRuleGroup } from "OneClick/Constant
 import { RuleGroupsDataService } from "OneClick/DataServices/RuleGroupsDataService";
 import { SettingsDataService } from "OneClick/DataServices/SettingsDataService";
 import { IRuleGroup } from "OneClick/Interfaces";
+import { publishTelemetry, TelemetryEvent } from "OneClick/Telemetry";
 
 export const RuleGroupServiceName = "RuleGroupService";
 
@@ -88,6 +89,7 @@ export class RuleGroupService extends BaseDataService<IRuleGroup[], IRuleGroup, 
             }
 
             SettingsDataService.updateCacheStamp(workItemTypeName, VSS.getWebContext().project.id);
+            publishTelemetry(TelemetryEvent.CreateRuleGroup, null, null, ruleGroup);
         }
     }
 
@@ -104,6 +106,7 @@ export class RuleGroupService extends BaseDataService<IRuleGroup[], IRuleGroup, 
                 this.setLoading(false, ruleGroup.id);
 
                 SettingsDataService.updateCacheStamp(workItemTypeName, VSS.getWebContext().project.id);
+                publishTelemetry(TelemetryEvent.UpdateRuleGroup, null, null, ruleGroup);
             }
             catch (e) {
                 this.setLoading(false, ruleGroup.id);
@@ -123,6 +126,7 @@ export class RuleGroupService extends BaseDataService<IRuleGroup[], IRuleGroup, 
 
             this.setLoading(false, ruleGroup.id);
             SettingsDataService.updateCacheStamp(workItemTypeName, VSS.getWebContext().project.id);
+            publishTelemetry(TelemetryEvent.DeleteRuleGroup, null, null, ruleGroup);
         }
     }
 
