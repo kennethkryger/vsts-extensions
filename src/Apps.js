@@ -1,5 +1,5 @@
 module.exports = [
-     //"BugBashPro",
+     "BugBashPro",
     "Checklist",
      "ControlsLibrary",
      "OneClick",
