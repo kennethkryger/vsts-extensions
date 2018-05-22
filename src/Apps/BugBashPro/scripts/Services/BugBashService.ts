@@ -1,11 +1,12 @@
-import { ErrorKeys } from "BugBashPro/Constants";
+import { ErrorKeys, UrlActions } from "BugBashPro/Constants";
+import { BugBashDataService } from "BugBashPro/DataServices/BugBashDataService";
 import { IBugBash, ISortState } from "BugBashPro/Interfaces";
 import { BugBash } from "BugBashPro/ViewModels/BugBash";
 import { BaseDataService } from "Common/Services/BaseDataService";
 import { ErrorMessageService, ErrorMessageServiceName } from "Common/Services/ErrorMessageService";
 import { findIndex } from "Common/Utilities/Array";
-import { Services } from "Common/Utilities/Context";
-import * as ExtensionDataManager from "Common/Utilities/ExtensionDataManager";
+import { IAppPageContext, Services } from "Common/Utilities/Context";
+import { navigate } from "Common/Utilities/Navigation";
 import { stringEquals } from "Common/Utilities/String";
 import { IFilterState } from "VSSUI/Utilities/Filter";
 
@@ -18,6 +19,7 @@ export class BugBashService extends BaseDataService<BugBash[], BugBash, string> 
     private _filterState: IFilterState;
     private _sortState: ISortState;
     private _newBugBash: BugBash;
+    private _errorMessageService: ErrorMessageService;
 
     get filterState(): IFilterState {
         return this._filterState;
@@ -32,6 +34,11 @@ export class BugBashService extends BaseDataService<BugBash[], BugBash, string> 
         this._allLoaded = false;
         this._itemsIdMap = {};
         this._newBugBash = new BugBash();
+    }
+
+    public serviceStart(pageContext: IAppPageContext): void {
+        super.serviceStart(pageContext);
+        this._errorMessageService = pageContext.getService<ErrorMessageService>(ErrorMessageServiceName);
     }
 
     public isLoaded(key?: string): boolean {
@@ -55,73 +62,159 @@ export class BugBashService extends BaseDataService<BugBash[], BugBash, string> 
     }
 
     public getKey(): string {
-        return "BugBashStore";
+        return BugBashServiceName;
     }
 
-    protected initializeActionListeners() {
-        BugBashActionsHub.FireStoreChange.addListener(() => {
-            this.emitChanged();
-        });
+    public fireStoreChange() {
+        this._notifyChanged();
+    }
 
-        BugBashActionsHub.ApplyFilter.addListener((filterState: IFilterState) => {
-            this._filterState = filterState;
-            this._filteredItems = this._applyFilterAndSort(this.items);
-            this.emitChanged();
-        });
+    public applyFilter(filterState: IFilterState) {
+        this._filterState = filterState;
+        this._filteredItems = this._applyFilterAndSort(this.items);
+        this.fireStoreChange();
+    }
 
-        BugBashActionsHub.ClearSortAndFilter.addListener(() => {
-            this._filterState = null;
-            this._sortState = null;
-            this._filteredItems = this.items ? [...this.items] : null;
-            this.emitChanged();
-        });
+    public clearSortAndFilter() {
+        this._filterState = null;
+        this._sortState = null;
+        this._filteredItems = this.items ? [...this.items] : null;
+        this.fireStoreChange();
+    }
 
-        BugBashActionsHub.ApplySort.addListener((sortState: ISortState) => {
-            this._sortState = sortState;
-            this._filteredItems = this._applyFilterAndSort(this.items);
-            this.emitChanged();
-        });
+    public applySort(sortState: ISortState) {
+        this._sortState = sortState;
+        this._filteredItems = this._applyFilterAndSort(this.items);
+        this.fireStoreChange();
+    }
 
-        BugBashActionsHub.Clean.addListener(() => {
-            const items = this.items || [];
-            for (const item of items) {
-                item.reset(false);
-            }
+    public clean() {
+        const items = this.items || [];
+        for (const item of items) {
+            item.reset(false);
+        }
 
-            this._newBugBash.reset(false);
+        this._newBugBash.reset(false);
 
-            this._filterState = null;
-            this._sortState = null;
-            this._filteredItems = this.items ? [...this.items] : null;
-            this.emitChanged();
-        });
+        this._filterState = null;
+        this._sortState = null;
+        this._filteredItems = this.items ? [...this.items] : null;
+        this.fireStoreChange();
+    }
 
-        BugBashActionsHub.InitializeAllBugBashes.addListener((bugBashModels: IBugBash[]) => {
+    public initializeAllBugBashes() {
+        if (this.isLoaded()) {
+            this.fireStoreChange();
+        }
+        else {
+            this.refreshAllBugBashes(false);
+        }
+    }
+
+    public async refreshAllBugBashes(clearError: boolean = true) {
+        if (!this.isLoading()) {
+            this.setLoading(true);
+            const bugBashModels = await BugBashDataService.loadBugBashes();
             this._refreshBugBashes(bugBashModels);
             this._allLoaded = true;
-            this.emitChanged();
-        });
+            this.setLoading(false);
 
-        BugBashActionsHub.InitializeBugBash.addListener((bugBashModel: IBugBash) => {
-            this._addOrUpdateBugBash(bugBashModel);
-            this.emitChanged();
-        });
+            if (clearError) {
+                this._errorMessageService.dismissErrorMessage(ErrorKeys.DirectoryPageError);
+            }
+        }
+    }
 
-        BugBashActionsHub.CreateBugBash.addListener((bugBashModel: IBugBash) => {
-            this._newBugBash.reset(false);
-            this._addOrUpdateBugBash(bugBashModel);
-            this.emitChanged();
-        });
+    public initializeBugBash(bugBashId: string) {
+        if (this.isLoaded(bugBashId)) {
+            this.fireStoreChange();
+        }
+        else {
+            this.refreshBugBash(bugBashId, false);
+        }
+    }
 
-        BugBashActionsHub.UpdateBugBash.addListener((bugBashModel: IBugBash) => {
-            this._addOrUpdateBugBash(bugBashModel);
-            this.emitChanged();
-        });
+    public async refreshBugBash(bugBashId: string, removeUnknownBugBash: boolean = true) {
+        if (!this.isLoading(bugBashId)) {
+            let error = false;
+            this.setLoading(true, bugBashId);
+            const bugBashModel = await BugBashDataService.loadBugBash(bugBashId);
 
-        BugBashActionsHub.DeleteBugBash.addListener((bugBashId: string) => {
+            if (bugBashModel && stringEquals(VSS.getWebContext().project.id, bugBashModel.projectId, true)) {
+                this._addOrUpdateBugBash(bugBashModel);
+                this.setLoading(false, bugBashId);
+
+                this._errorMessageService.dismissErrorMessage(ErrorKeys.BugBashError);
+            }
+            else if (bugBashModel && !stringEquals(VSS.getWebContext().project.id, bugBashModel.projectId, true)) {
+                this.setLoading(false, bugBashId);
+                this._errorMessageService.showErrorMessage(`Bug Bash "${bugBashId}" is out of scope of current project.`, ErrorKeys.DirectoryPageError);
+                error = true;
+            }
+            else {
+                if (removeUnknownBugBash) {
+                    this._removeBugBash(bugBashId);
+                }
+
+                this.setLoading(false, bugBashId);
+                this._errorMessageService.showErrorMessage(`Bug Bash "${bugBashId}" does not exist.`, ErrorKeys.DirectoryPageError);
+                error = true;
+            }
+
+            if (error) {
+                navigate({ view: UrlActions.ACTION_ALL }, true);
+            }
+        }
+    }
+
+    public async updateBugBash(bugBashModel: IBugBash) {
+        if (!this.isLoading(bugBashModel.id)) {
+            this.setLoading(true, bugBashModel.id);
+
+            try {
+                const updatedBugBashModel = await BugBashDataService.updateBugBash(bugBashModel);
+                this._addOrUpdateBugBash(updatedBugBashModel);
+                this.setLoading(false, bugBashModel.id);
+
+                this._errorMessageService.dismissErrorMessage(ErrorKeys.BugBashError);
+            }
+            catch (e) {
+                this.setLoading(false, bugBashModel.id);
+                this._errorMessageService.showErrorMessage(e, ErrorKeys.DirectoryPageError);
+            }
+        }
+    }
+
+    public async createBugBash(bugBashModel: IBugBash) {
+        if (!this.isLoading()) {
+            this.setLoading(true);
+
+            try {
+                const createdBugBashModel = await BugBashDataService.createBugBash(bugBashModel);
+
+                this._newBugBash.reset(false);
+                this._addOrUpdateBugBash(createdBugBashModel);
+                this.setLoading(false);
+
+                this._errorMessageService.dismissErrorMessage(ErrorKeys.BugBashError);
+
+                navigate({ view: UrlActions.ACTION_EDIT, id: createdBugBashModel.id }, true);
+            }
+            catch (e) {
+                this.setLoading(false);
+                this._errorMessageService.showErrorMessage(e, ErrorKeys.BugBashError);
+            }
+        }
+    }
+
+    public async deleteBugBash(bugBashId: string) {
+        if (!this.isLoading(bugBashId)) {
+            this.setLoading(true, bugBashId);
+
+            await BugBashDataService.deleteBugBash(bugBashId);
             this._removeBugBash(bugBashId);
-            this.emitChanged();
-        });
+            this.setLoading(false, bugBashId);
+        }
     }
 
     protected convertItemKeyToString(key: string): string {

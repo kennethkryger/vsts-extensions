@@ -114,7 +114,7 @@ export class BugBashDetails extends VssComponent<IBugBashDetailsProps, IBugBashD
 
     private _pasteImage = async (data: string): Promise<string> => {
         try {
-            return await copyImageToGitRepo(data, "Details");
+            return await copyImageToGitRepo(this.context.appContext, data, "Details");
         }
         catch (e) {
             ErrorMessageActions.showErrorMessage(e, ErrorKeys.BugBashDetailsError);

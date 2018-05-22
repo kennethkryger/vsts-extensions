@@ -1,6 +1,6 @@
 import { AppObservableService } from "Common/Utilities/Context";
 
-export abstract class BaseDataService<TCollection, TItem, TKey> extends AppObservableService<void> {
+export abstract class BaseDataService<TCollection, TItem, TKey, TDataType = void> extends AppObservableService<TDataType> {
     protected items: TCollection;
 
     private _isLoading: boolean;

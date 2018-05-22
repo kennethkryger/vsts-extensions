@@ -1,5 +1,8 @@
 import { UrlActions } from "BugBashPro/Constants";
-import { StoresHub } from "BugBashPro/Stores/StoresHub";
+import {
+    BugBashSettingService, BugBashSettingServiceName
+} from "BugBashPro/Services/BugBashSettingService";
+import { IAppPageContext } from "Common/Utilities/Context";
 import { GitPush, ItemContentType, VersionControlChangeType } from "TFS/VersionControl/Contracts";
 import * as GitClient from "TFS/VersionControl/GitRestClient";
 
@@ -14,8 +17,9 @@ export function getBugBashUrl(bugBashId: string, action: UrlActions): string {
     return url;
 }
 
-export async function copyImageToGitRepo(imageData: any, gitFolderSuffix: string): Promise<string> {
-    const settings = StoresHub.bugBashSettingsStore.getAll();
+export async function copyImageToGitRepo(appContext: IAppPageContext, imageData: any, gitFolderSuffix: string): Promise<string> {
+    const settingService = appContext.getService<BugBashSettingService>(BugBashSettingServiceName);
+    const settings = settingService.getAll();
     if (settings && settings.gitMediaRepo) {
         const dataStartIndex = imageData.indexOf(",") + 1;
         const metaPart = imageData.substring(5, dataStartIndex - 1);

@@ -373,7 +373,7 @@ export class BugBashItemEditor extends VssComponent<IBugBashItemEditorProps, IBu
         const gitPath = StoresHub.bugBashStore.getItem(this.props.bugBashId).getFieldValue<string>(BugBashFieldNames.Title, true).replace(" ", "_");
 
         try {
-            return await copyImageToGitRepo(data, gitPath);
+            return await copyImageToGitRepo(this.context.appContext, data, gitPath);
         }
         catch (e) {
             ErrorMessageActions.showErrorMessage(e, ErrorKeys.BugBashItemError);
