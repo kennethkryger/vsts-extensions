@@ -18,6 +18,7 @@ export class VssComponent<TProps extends IVssComponentProps, TState extends IVss
     };
 
     public context: IReactAppContext;
+    private _isMounted: boolean = false;
 
     constructor(props: TProps, context?: IReactAppContext) {
         super(props, context);
@@ -29,6 +30,7 @@ export class VssComponent<TProps extends IVssComponentProps, TState extends IVss
 
     public componentDidMount() {
         super.componentDidMount();
+        this._isMounted = true;
         for (const dataService of this.getObservableDataServices()) {
             dataService.subscribe(this._onDataChanged, "dataChanged");
         }
@@ -36,8 +38,15 @@ export class VssComponent<TProps extends IVssComponentProps, TState extends IVss
 
     public componentWillUnmount() {
         super.componentWillUnmount();
+        this._isMounted = false;
         for (const dataService of this.getObservableDataServices()) {
             dataService.subscribe(this._onDataChanged, "dataChanged");
+        }
+    }
+
+    public setState<K extends keyof TState>(newState: Pick<TState, K>, callback?: () => void) {
+        if (this._isMounted) {
+            super.setState(newState, callback);
         }
     }
 

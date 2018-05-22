@@ -4,8 +4,10 @@ import * as React from "react";
 
 import { InfoLabel } from "Common/Components/InfoLabel";
 import { Loading } from "Common/Components/Loading";
+import {
+    IVssComponentProps, IVssComponentState, VssComponent
+} from "Common/Components/Utilities/VssComponent";
 import { arrayEquals, contains, findIndex, first } from "Common/Utilities/Array";
-import { IReactAppContext } from "Common/Utilities/Context";
 import * as ExtensionDataManager from "Common/Utilities/ExtensionDataManager";
 import { stringEquals } from "Common/Utilities/String";
 import { getFormService } from "Common/Utilities/WorkItemFormHelpers";
@@ -16,12 +18,12 @@ import { TextField } from "OfficeFabric/TextField";
 import { Constants, ISettings } from "RelatedWits/Models";
 import { WorkItemField } from "TFS/WorkItemTracking/Contracts";
 
-export interface ISettingsPanelProps {
+export interface ISettingsPanelProps extends IVssComponentProps {
     settings: ISettings;
     onSave(userPreferenceModel: ISettings): void;
 }
 
-export interface ISettingsPanelState {
+export interface ISettingsPanelState extends IVssComponentState {
     loading: boolean;
     sortField?: WorkItemField;
     queryFields?: WorkItemField[];
@@ -31,16 +33,7 @@ export interface ISettingsPanelState {
     saving?: boolean;
 }
 
-export class SettingsPanel extends React.Component<ISettingsPanelProps, ISettingsPanelState> {
-    constructor(props: ISettingsPanelProps, context?: IReactAppContext) {
-        super(props, context);
-
-        this.state = {
-            loading: true,
-            top: props.settings.top.toString()
-        };
-    }
-
+export class SettingsPanel extends VssComponent<ISettingsPanelProps, ISettingsPanelState> {
     public componentDidMount() {
         this.initialize();
     }
@@ -129,6 +122,13 @@ export class SettingsPanel extends React.Component<ISettingsPanelProps, ISetting
                 </PrimaryButton>
             </div>
         );
+    }
+
+    protected getInitialState(props: ISettingsPanelProps): ISettingsPanelState {
+        return {
+            loading: true,
+            top: props.settings.top.toString()
+        };
     }
 
     private _isInteger(value: string): boolean {

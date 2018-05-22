@@ -31,6 +31,9 @@
             "vss-web-extension-sdk"
         ]
     },
+    "exclude": [
+        "src/Apps/BugBashPro"
+    ],
     "typeAcquisition": {
         "enable": true
     },
